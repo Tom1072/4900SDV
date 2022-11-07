@@ -1,10 +1,3 @@
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <curses.h>
-//#include <unistd.h>
-//#include <sys/neutrino.h>
-
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -63,6 +56,11 @@ int main(int argc, char *argv[]) {
 
 }
 
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <curses.h>
+//#include <unistd.h>
+//#include <sys/neutrino.h>
 
 
 int main1(void) {
