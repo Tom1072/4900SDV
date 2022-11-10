@@ -3,7 +3,8 @@
 
 int main() {
     printf("Hello, World!\n");
-    char result = testComm();
+    char result  = testComm();
+    char result2 = testSimulator();
     printf("Result: %d", result);
 
     return 0;

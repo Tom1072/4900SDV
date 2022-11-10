@@ -60,3 +60,6 @@ build/
 *.idea
 
 
+# PyCharm IDE
+*.idea
+
