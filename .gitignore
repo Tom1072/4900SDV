@@ -53,6 +53,8 @@ dkms.conf
 
 # MacOS
 .DS_Store
+.vscode
+build/
 
 # PyCharm IDE
 *.idea
