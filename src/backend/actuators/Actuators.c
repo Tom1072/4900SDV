@@ -14,7 +14,7 @@
  * Constraint: 0 <= level <= 100
 */
 void engageBrake(int level) {
-  actuatorChanges_t message;
+  // actuatorChanges_t message;
 }
 
 /**
@@ -23,5 +23,5 @@ void engageBrake(int level) {
  * Constraint: 0 <= level <= 100
 */
 void engageThrottle(int level) {
-  actuatorChanges_t message;
+  // actuatorChanges_t message;
 }
