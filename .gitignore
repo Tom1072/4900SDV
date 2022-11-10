@@ -54,3 +54,7 @@ dkms.conf
 # MacOS
 .DS_Store
 
+# PyCharm IDE
+*.idea
+
+
