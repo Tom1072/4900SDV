@@ -6,6 +6,6 @@
 #include <errno.h>
 
 int init(void){
-
+	printf("Test\n");
 	return(EXIT_SUCCESS);
 }

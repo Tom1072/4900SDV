@@ -1,1 +1,2 @@
 char testComm();
+char testSimulator();
