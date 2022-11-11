@@ -12,8 +12,8 @@ int init(void);
 
 typedef union
 {
-	struct _pulse pulse;
-    char rmsg [MAX_STRING_LEN +1];
+  struct _pulse pulse;
+  char rmsg [MAX_STRING_LEN +1];
 } message_t;
 
 void update_distance( unsigned short, Sensors* , OutsideObject* );
