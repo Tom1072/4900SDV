@@ -12,7 +12,6 @@
 */
 void *ManualDriver() {
   printf("I'm Manual Driver\n");
-  // int rcvid;
   // actuatorChanges_t data;
   name_attach_t *attach;
   struct _pulse pulse_msg;
@@ -26,7 +25,6 @@ void *ManualDriver() {
 
     switch(pulse_msg.code) {
 			case _PULSE_CODE_DISCONNECT: // check the pulse code to see if the client is gone/disconnected
-				printf("Client of MANUAL DRIVER is gone\n"); // print (client is gone)
 				ConnectDetach(pulse_msg.scoid);
 				break;
 			default:
@@ -56,7 +54,6 @@ void *ACC() {
 
     switch(pulse_msg.code) {
 			case _PULSE_CODE_DISCONNECT: // check the pulse code to see if the client is gone/disconnected
-				printf("Client of ACC is gone\n"); // print (client is gone)
 				ConnectDetach(pulse_msg.scoid);
 				break;
 			default:
@@ -86,7 +83,6 @@ void *ABS() {
 
     switch(pulse_msg.code) {
 			case _PULSE_CODE_DISCONNECT: // check the pulse code to see if the client is gone/disconnected
-				printf("Client of ABS is gone\n"); // print (client is gone)
 				ConnectDetach(pulse_msg.scoid);
 				break;
 			default:
