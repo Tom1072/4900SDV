@@ -53,23 +53,23 @@ int init(void){
         // else if the pulse is something else print the code and value of the pulse
     	// Here we fill the Environment values and fill the car and obj structs
         printf("Simulator*** Code: %d, Value: %d\n", message.code, message.value.sival_int);
-        car_env.skid = ((Environment *)message.value.sival_ptr)->skid;
-        car_env.distance = ((Environment *)message.value.sival_ptr)->distance;
-        car_env.car_speed = ((Environment *)message.value.sival_ptr)->car_speed;
+        car_env.skid       = ((Environment *)message.value.sival_ptr)->skid;
+        car_env.distance   = ((Environment *)message.value.sival_ptr)->distance;
+        car_env.car_speed  = ((Environment *)message.value.sival_ptr)->car_speed;
         car_env.brakeLevel = ((Environment *)message.value.sival_ptr)->brakeLevel;
-        car_env.obj_speed = ((Environment *)message.value.sival_ptr)->obj_speed;
-        car_env.object = ((Environment *)message.value.sival_ptr)->object;
+        car_env.obj_speed  = ((Environment *)message.value.sival_ptr)->obj_speed;
+        car_env.object     = ((Environment *)message.value.sival_ptr)->object;
 
         // Update the values of the car and object
-        car.skid = car_env.skid;
-        car.distance = car_env.distance;
-        car.brakeLevel = car_env.brakeLevel;
-        car.speed = car_env.car_speed;
+        car.skid        = car_env.skid;
+        car.distance    = car_env.distance;
+        car.brakeLevel  = car_env.brakeLevel;
+        car.speed       = car_env.car_speed;
 
-        other_car.distance = car_env.distance;
-        other_car.initSpeed = car_env.obj_speed;
-        other_car.object = car_env.object;
-        other_car.initSpeed = car_env.obj_speed;
+        other_car.distance   = car_env.distance;
+        other_car.initSpeed  = car_env.obj_speed;
+        other_car.object     = car_env.object;
+        other_car.initSpeed  = car_env.obj_speed;
       }
 	}
 
@@ -85,7 +85,7 @@ int init(void){
 void update_distance( unsigned short value, Sensors* sensors, OutsideObject* obj)
 {
   sensors->distance = value;
-  obj->distance = value;
+  obj->distance     = value;
 }
 void update_speed( unsigned short value, Sensors* sensors)
 {
