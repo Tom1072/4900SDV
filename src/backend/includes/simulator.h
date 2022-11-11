@@ -1,6 +1,6 @@
 
 #ifndef SRC_BACKEND_INCLUDES_SIMULATOR_H_
-#define SRC_BACKEND_INCLUDES_SIMULATOR_H_
+
 
 #define MAX_STRING_LEN    512
 #define ATTACH_POINT "simulator"
@@ -16,19 +16,19 @@ typedef union
     char rmsg [MAX_STRING_LEN +1];
 } message_t;
 
-void updateDistance( unsigned short, Sensors* , OutsideObject* );
-void updateSpeed( unsigned short, Sensors* );
-void updateSkid( unsigned short, Sensors* );
-void updateBrakeLevel( unsigned short, Sensors* );
-void setObject( OutsideObject* );
-void removeObject( OutsideObject* );
+void update_distance( unsigned short, Sensors* , OutsideObject* );
+void update_speed( unsigned short, Sensors* );
+void update_skid( unsigned short, Sensors* );
+void update_brakeLevel( unsigned short, Sensors* );
+void set_object( OutsideObject* );
+void remove_object( OutsideObject* );
 
 // Getters for sending to display
-unsigned short getSpeed( Sensors* );
-unsigned short getDistance( Sensors* );
-unsigned short getSkid( Sensors* );
-unsigned short getBrakeLevel( Sensors* );
-char getObject( OutsideObject* );
+unsigned short get_speed( Sensors* );
+unsigned short get_distance( Sensors* );
+unsigned short get_skid( Sensors* );
+unsigned short get_brakeLevel( Sensors* );
+char get_object( OutsideObject* );
 
 
 

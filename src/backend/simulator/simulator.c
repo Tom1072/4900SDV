@@ -82,28 +82,28 @@ int init(void){
 }
 
 
-void updateDistance( unsigned short value, Sensors* sensors, OutsideObject* obj)
+void update_distance( unsigned short value, Sensors* sensors, OutsideObject* obj)
 {
   sensors->distance = value;
   obj->distance = value;
 }
-void updateSpeed( unsigned short value, Sensors* sensors)
+void update_speed( unsigned short value, Sensors* sensors)
 {
   sensors->speed = value;
 }
-void updateSkid( unsigned short level, Sensors* sensors)
+void update_skid( unsigned short level, Sensors* sensors)
 {
 	sensors->skid = level;
 }
-void updateBrakeLevel( unsigned short level, Sensors* sensors)
+void update_brakeLevel( unsigned short level, Sensors* sensors)
 {
   sensors->brakeLevel = level;
 }
-void setObject( OutsideObject* object)
+void set_object( OutsideObject* object)
 {
 	object->object = TRUE;
 }
-void removeObject( OutsideObject* object)
+void remove_object( OutsideObject* object)
 {
   object->object = FALSE;
 }
