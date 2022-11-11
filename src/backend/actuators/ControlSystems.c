@@ -13,12 +13,12 @@
 void *ManualDriver() {
   printf("I'm Manual Driver\n");
   // int rcvid;
-  actuatorChanges_t data;
+  // actuatorChanges_t data;
   name_attach_t *attach;
   struct _pulse pulse_msg;
 
-  if ((attach = name_attach(NULL, MANUAL_NAME, 0) == NULL)) 
-    return EXIT_FAILURE;
+  if ((attach = name_attach(NULL, MANUAL_NAME, 0)) == NULL)
+    return (void *)EXIT_FAILURE;
 
   while(1) {
     // rcvid =
@@ -31,7 +31,6 @@ void *ManualDriver() {
 				break;
 			default:
 				printf("MANUAL DRIVER GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
-        return NULL;
     }
   }
 
@@ -42,10 +41,14 @@ void *ManualDriver() {
  * Handler of the ACC thread.
 */
 void *ACC() {
+  printf("I'm ACC\n");
+  // int rcvid;
+  // actuatorChanges_t data;
+  name_attach_t *attach;
   struct _pulse pulse_msg;
 
-  if ((attach = name_attach(NULL, ACC_NAME, 0) == NULL)) 
-    return EXIT_FAILURE;
+  if ((attach = name_attach(NULL, ACC_NAME, 0)) == NULL) 
+    return (void *)EXIT_FAILURE;
 
   while(1) {
     // rcvid =
@@ -58,7 +61,6 @@ void *ACC() {
 				break;
 			default:
 				printf("ACC GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
-        return NULL;
     }
   }
 
@@ -71,12 +73,12 @@ void *ACC() {
 void *ABS() {
   printf("I'm ABS\n");
   // int rcvid;
-  actuatorChanges_t data;
+  // actuatorChanges_t data;
   name_attach_t *attach;
   struct _pulse pulse_msg;
 
-  if ((attach = name_attach(NULL, ABS_NAME, 0) == NULL)) 
-    return EXIT_FAILURE;
+  if ((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
+    return (void *)EXIT_FAILURE;
 
   while(1) {
     // rcvid =
@@ -89,7 +91,6 @@ void *ABS() {
 				break;
 			default:
 				printf("ABS GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
-        return NULL;
     }
   }
 

@@ -1,5 +1,5 @@
 #include <pthread.h>
-#include "../includes/tests.h"
+#include "../includes/utils.h"
 
 void create_thread(pthread_t *thread_ptr, pthread_attr_t *attr_ptr, int priority, void *(*handler)()) {
   struct sched_param param;
