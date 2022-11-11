@@ -5,14 +5,14 @@
 
 int main() {
     printf("Hello, World!\n");
+
     char commResult  = testComm();
-    // char simulatorResult = testSimulator();
-    // char viewTestResult = testView();
+    char simulatorResult = testSimulator();
+    char viewTestResult = testView();
 
     assert(commResult == TRUE);
-    // assert(simulatorResult == TRUE);
-    // assert(viewTestResult == TRUE);
+    assert(simulatorResult == TRUE);
+    assert(viewTestResult == TRUE);
 
     return 0;
 }
-
