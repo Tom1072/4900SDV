@@ -2,7 +2,6 @@
 #pragma once
 
 
-#define MAX_STRING_LEN    512
 #define ATTACH_POINT "simulator"
 
 #include <sys/iomsg.h>
@@ -19,7 +18,7 @@ typedef union
 void update_distance( unsigned short, Sensors* , OutsideObject* );
 void update_speed( unsigned short, Sensors* );
 void update_skid( unsigned short, Sensors* );
-void update_brakeLevel( unsigned short, Sensors* );
+void update_brake_level( unsigned short, Sensors* );
 void set_object( OutsideObject* );
 void remove_object( OutsideObject* );
 
@@ -27,7 +26,7 @@ void remove_object( OutsideObject* );
 unsigned short get_speed( Sensors* );
 unsigned short get_distance( Sensors* );
 unsigned short get_skid( Sensors* );
-unsigned short get_brakeLevel( Sensors* );
+unsigned short get_brake_level( Sensors* );
 char get_object( OutsideObject* );
 
 

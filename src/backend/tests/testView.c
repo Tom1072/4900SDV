@@ -17,37 +17,30 @@ char testView()
   Environment env = {10, 11, 12, 13, 14, FALSE};
   initView();
   setEnvironment(&env);
-  sleep(1);
 
   env.skid = 20;
   setEnvironment(&env);
 
-  sleep(1);
   env.distance = 21;
   setEnvironment(&env);
 
-  sleep(1);
-  env.carSpeed = 22;
+  env.car_speed = 22;
   setEnvironment(&env);
 
-  sleep(1);
-  env.brakeLevel = 23;
+  env.brake_level = 23;
   setEnvironment(&env);
 
-  sleep(1);
-  env.objSpeed = 24;
+  env.obj_speed = 24;
   setEnvironment(&env);
 
-  sleep(1);
   env.object = TRUE;
   setEnvironment(&env);
 
-  sleep(1);
   env.skid = 30;
   env.distance = 31;
-  env.carSpeed = 32;
-  env.brakeLevel = 33;
-  env.objSpeed = 34;
+  env.car_speed = 32;
+  env.brake_level = 33;
+  env.obj_speed = 34;
   env.object = FALSE;
   setEnvironment(&env);
 

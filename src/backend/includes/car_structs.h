@@ -7,7 +7,7 @@ typedef struct
   unsigned short skid;
   unsigned short distance;
   unsigned short speed;
-  unsigned short brakeLevel;
+  unsigned short brake_level;
 } Sensors;
 
 typedef struct

@@ -37,9 +37,9 @@ void setEnvironment(Environment* env)
 
     if (prevEnvironment->skid != environment->skid ||
         prevEnvironment->distance != environment->distance ||
-        prevEnvironment->carSpeed != environment->carSpeed ||
-        prevEnvironment->brakeLevel != environment->brakeLevel ||
-        prevEnvironment->objSpeed != environment->objSpeed ||
+        prevEnvironment->car_speed != environment->car_speed ||
+        prevEnvironment->brake_level != environment->brake_level ||
+        prevEnvironment->obj_speed != environment->obj_speed ||
         prevEnvironment->object != environment->object)
     {
         renderView();
@@ -84,31 +84,31 @@ void renderView()
         printf(" - distance: %d\n", environment->distance);
     }
 
-    if (prevEnvironment->carSpeed != environment->carSpeed)
+    if (prevEnvironment->car_speed != environment->car_speed)
     {
-        printf(" - carSpeed: %d -> %d\n", prevEnvironment->carSpeed, environment->carSpeed);
+        printf(" - car_speed: %d -> %d\n", prevEnvironment->car_speed, environment->car_speed);
     }
     else
     {
-        printf(" - carSpeed: %d\n", environment->carSpeed);
+        printf(" - car_speed: %d\n", environment->car_speed);
     }
 
-    if (prevEnvironment->brakeLevel != environment->brakeLevel)
+    if (prevEnvironment->brake_level != environment->brake_level)
     {
-        printf(" - brakeLevel: %d -> %d\n", prevEnvironment->brakeLevel, environment->brakeLevel);
+        printf(" - brake_level: %d -> %d\n", prevEnvironment->brake_level, environment->brake_level);
     }
     else
     {
-        printf(" - brakeLevel: %d\n", environment->brakeLevel);
+        printf(" - brake_level: %d\n", environment->brake_level);
     }
 
-    if (prevEnvironment->objSpeed != environment->objSpeed)
+    if (prevEnvironment->obj_speed != environment->obj_speed)
     {
-        printf(" - objSpeed: %d -> %d\n", prevEnvironment->objSpeed, environment->objSpeed);
+        printf(" - obj_speed: %d -> %d\n", prevEnvironment->obj_speed, environment->obj_speed);
     }
     else
     {
-        printf(" - objSpeed: %d\n", environment->objSpeed);
+        printf(" - obj_speed: %d\n", environment->obj_speed);
     }
     
     if (prevEnvironment->object != environment->object)
