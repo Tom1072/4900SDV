@@ -1,0 +1,1 @@
+void create_thread(pthread_t *thread_ptr, pthread_attr_t *attr_ptr, int priority, void *(*handler)());
