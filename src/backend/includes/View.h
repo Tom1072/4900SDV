@@ -32,9 +32,10 @@ void setEnvironment(Environment* env);
 /**
  * @brief Get the User Input
  *
- * @return char*
+ * @param prompt [in]: The prompt to display
+ * @param message [out]: The output message that user entered
  */
-char *getUserInput();
+void getUserInput(char* prompt, char** message);
 
 /**
  * @brief Update the view

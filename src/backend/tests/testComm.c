@@ -7,23 +7,30 @@
 
 #include "../includes/tests.h"
 #include "../includes/commons.h"
+#include "../includes/CommListener.h"
+#include "../includes/CommDispatcher.h"
 
 #define MAX_STRING_LEN 256
 
 void mockedSimulator();
-void mockedActuator();
 
 char testComm()
 {
+    int dispatcherThread, listenerThread, simulatorThread, actuatorThread;
+
     printf("Testing comm...\n");
-    printf("Creating the QNXInputDispatcher thread...\n");
-    printf("Creating the mockedActuator thread...\n");
+    printf("Creating the CommDispatcher thread...\n");
+    dispatcherThread = pthread_create(NULL, NULL, (void *)startDispatcher, NULL);
 
-    printf("Creating the mockedSimulator thread...\n");
-    // int simulatorThread = pthread_create(NULL, NULL, (void *)mockedSimulator, NULL);
-    printf("Created the UserInputListener thread...\n");
+    printf("Creating the MockedSimulator thread...\n");
+    // simulatorThread = pthread_create(NULL, NULL, (void *)mockedSimulator, NULL);
 
+    printf("Created the CommListener thread...\n");
+    listenerThread = pthread_create(NULL, NULL, (void *)startListener, NULL);
+    
     // pthread_join(simulatorThread, NULL);
+    pthread_join(dispatcherThread, NULL);
+    pthread_join(listenerThread, NULL);
 
     return TRUE;
 }

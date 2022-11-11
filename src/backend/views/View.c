@@ -51,11 +51,12 @@ void setEnvironment(Environment* env)
  * @brief Get the user input from the console
  *
  */
-char *getUserInput()
+void getUserInput(char* prompt, char** message)
 {
+    printf("%s", prompt);
     char *input = (char *)malloc(sizeof(char) * MAX_STRING_LEN);
     fgets(input, MAX_STRING_LEN, stdin);
-    return input;
+    *message = input;
 }
 
 /**
