@@ -41,36 +41,36 @@ int init(void){
 	}
 	else if(rcvid == 0)
 	{
-      switch(message.code)
-      {
-      case _PULSE_CODE_DISCONNECT:
-        printf("Simulator*** Client is gone\n");
-  	    ConnectDetach(message.scoid);
-        break;
+    switch(message.code)
+    {
+    case _PULSE_CODE_DISCONNECT:
+      printf("Simulator*** Client is gone\n");
+      ConnectDetach(message.scoid);
+      break;
 
-        // Here we have to define what codes we will treat as what
-      default:
-        // else if the pulse is something else print the code and value of the pulse
-    	// Here we fill the Environment values and fill the car and obj structs
-        printf("Simulator*** Code: %d, Value: %d\n", message.code, message.value.sival_int);
-        car_env.skid       = ((Environment *)message.value.sival_ptr)->skid;
-        car_env.distance   = ((Environment *)message.value.sival_ptr)->distance;
-        car_env.car_speed  = ((Environment *)message.value.sival_ptr)->car_speed;
-        car_env.brakeLevel = ((Environment *)message.value.sival_ptr)->brakeLevel;
-        car_env.obj_speed  = ((Environment *)message.value.sival_ptr)->obj_speed;
-        car_env.object     = ((Environment *)message.value.sival_ptr)->object;
+      // Here we have to define what codes we will treat as what
+    default:
+      // else if the pulse is something else print the code and value of the pulse
+    // Here we fill the Environment values and fill the car and obj structs
+      printf("Simulator*** Code: %d, Value: %d\n", message.code, message.value.sival_int);
+      car_env.skid       = ((Environment *)message.value.sival_ptr)->skid;
+      car_env.distance   = ((Environment *)message.value.sival_ptr)->distance;
+      car_env.car_speed  = ((Environment *)message.value.sival_ptr)->car_speed;
+      car_env.brakeLevel = ((Environment *)message.value.sival_ptr)->brakeLevel;
+      car_env.obj_speed  = ((Environment *)message.value.sival_ptr)->obj_speed;
+      car_env.object     = ((Environment *)message.value.sival_ptr)->object;
 
-        // Update the values of the car and object
-        car.skid        = car_env.skid;
-        car.distance    = car_env.distance;
-        car.brakeLevel  = car_env.brakeLevel;
-        car.speed       = car_env.car_speed;
+      // Update the values of the car and object
+      car.skid        = car_env.skid;
+      car.distance    = car_env.distance;
+      car.brakeLevel  = car_env.brakeLevel;
+      car.speed       = car_env.car_speed;
 
-        other_car.distance   = car_env.distance;
-        other_car.initSpeed  = car_env.obj_speed;
-        other_car.object     = car_env.object;
-        other_car.initSpeed  = car_env.obj_speed;
-      }
+      other_car.distance   = car_env.distance;
+      other_car.initSpeed  = car_env.obj_speed;
+      other_car.object     = car_env.object;
+      other_car.initSpeed  = car_env.obj_speed;
+    }
 	}
 
   } // End while
