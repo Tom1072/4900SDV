@@ -24,11 +24,11 @@ void *ManualDriver() {
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
 
     switch(pulse_msg.code) {
-			case _PULSE_CODE_DISCONNECT: // check the pulse code to see if the client is gone/disconnected
-				ConnectDetach(pulse_msg.scoid);
-				break;
-			default:
-				printf("MANUAL DRIVER GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
+      case _PULSE_CODE_DISCONNECT: // check the pulse code to see if the client is gone/disconnected
+        ConnectDetach(pulse_msg.scoid);
+        break;
+      default:
+        printf("MANUAL DRIVER GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
     }
   }
 
@@ -53,11 +53,11 @@ void *ACC() {
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
 
     switch(pulse_msg.code) {
-			case _PULSE_CODE_DISCONNECT: // check the pulse code to see if the client is gone/disconnected
-				ConnectDetach(pulse_msg.scoid);
-				break;
-			default:
-				printf("ACC GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
+      case _PULSE_CODE_DISCONNECT: // check the pulse code to see if the client is gone/disconnected
+        ConnectDetach(pulse_msg.scoid);
+        break;
+      default:
+        printf("ACC GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
     }
   }
 
@@ -82,11 +82,11 @@ void *ABS() {
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
 
     switch(pulse_msg.code) {
-			case _PULSE_CODE_DISCONNECT: // check the pulse code to see if the client is gone/disconnected
-				ConnectDetach(pulse_msg.scoid);
-				break;
-			default:
-				printf("ABS GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
+      case _PULSE_CODE_DISCONNECT: // check the pulse code to see if the client is gone/disconnected
+        ConnectDetach(pulse_msg.scoid);
+        break;
+      default:
+        printf("ABS GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
     }
   }
 
