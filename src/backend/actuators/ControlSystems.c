@@ -1,20 +1,20 @@
 /**
  * Handler of the ManualDriver thread.
 */
-void ManualDriver() {
-
+void *ManualDriver() {
+  return NULL;
 }
 
 /**
  * Handler of the ACC thread.
 */
-void ACC() {
-
+void *ACC() {
+  return NULL;
 }
 
 /**
  * Handler of the ABS thread.
 */
-void ABS() {
-
+void *ABS() {
+  return NULL;
 }
