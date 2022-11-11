@@ -34,13 +34,13 @@ int init(void){
   while(1)
   {
     //code to receive message or pulse from client
-	rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
-	if(rcvid == -1)
-	{
-	  perror("MsgReceivePulse()");
-	}
-	else if(rcvid == 0)
-	{
+  rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
+  if(rcvid == -1)
+  {
+    perror("MsgReceivePulse()");
+  }
+  else if(rcvid == 0)
+  {
     switch(message.code)
     {
     case _PULSE_CODE_DISCONNECT:
@@ -71,7 +71,7 @@ int init(void){
       other_car.object     = car_env.object;
       other_car.initSpeed  = car_env.obj_speed;
     }
-	}
+  }
 
   } // End while
   //remove the name from the namespace and destroy the channel
@@ -93,7 +93,7 @@ void update_speed( unsigned short value, Sensors* sensors)
 }
 void update_skid( unsigned short level, Sensors* sensors)
 {
-	sensors->skid = level;
+  sensors->skid = level;
 }
 void update_brakeLevel( unsigned short level, Sensors* sensors)
 {
@@ -101,7 +101,7 @@ void update_brakeLevel( unsigned short level, Sensors* sensors)
 }
 void set_object( OutsideObject* object)
 {
-	object->object = TRUE;
+  object->object = TRUE;
 }
 void remove_object( OutsideObject* object)
 {
