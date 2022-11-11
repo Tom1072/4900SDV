@@ -5,6 +5,7 @@
 #include <sys/dispatch.h>
 #include <errno.h>
 #include "../includes/commons.h"
+#include "../includes/actuators.h"
 
 #define MAX_STRING_LEN    256
 
