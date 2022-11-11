@@ -1,5 +1,5 @@
 
-#ifndef SRC_BACKEND_INCLUDES_CAR_STRUCTS_H_
+#pragma once
 
 
 typedef struct
@@ -18,4 +18,4 @@ typedef struct
 	char           object; // can be either TRUE or FALSE
 } OutsideObject;
 
-#endif /* SRC_BACKEND_INCLUDES_CAR_STRUCTS_H_ */
+

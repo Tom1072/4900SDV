@@ -1,5 +1,5 @@
 
-#ifndef SRC_BACKEND_INCLUDES_SIMULATOR_H_
+#pragma once
 
 
 #define MAX_STRING_LEN    512
@@ -31,5 +31,3 @@ unsigned short get_brakeLevel( Sensors* );
 char get_object( OutsideObject* );
 
 
-
-#endif /* SRC_BACKEND_INCLUDES_SIMULATOR_H_ */
