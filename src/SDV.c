@@ -7,5 +7,6 @@ int main() {
     char result2 = testSimulator();
     printf("Result: %d", result);
 
+
     return 0;
 }
