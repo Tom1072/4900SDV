@@ -56,20 +56,19 @@ int init(void){
       car_env.skid       = ((Environment *)message.value.sival_ptr)->skid;
       car_env.distance   = ((Environment *)message.value.sival_ptr)->distance;
       car_env.car_speed  = ((Environment *)message.value.sival_ptr)->car_speed;
-      car_env.brakeLevel = ((Environment *)message.value.sival_ptr)->brakeLevel;
+      car_env.brakeLevel = ((Environment *)message.value.sival_ptr)->brake_level;
       car_env.obj_speed  = ((Environment *)message.value.sival_ptr)->obj_speed;
       car_env.object     = ((Environment *)message.value.sival_ptr)->object;
 
       // Update the values of the car and object
       car.skid        = car_env.skid;
       car.distance    = car_env.distance;
-      car.brakeLevel  = car_env.brakeLevel;
+      car.brake_level  = car_env.brake_level;
       car.speed       = car_env.car_speed;
 
       other_car.distance   = car_env.distance;
-      other_car.initSpeed  = car_env.obj_speed;
+      other_car.init_speed  = car_env.obj_speed;
       other_car.object     = car_env.object;
-      other_car.initSpeed  = car_env.obj_speed;
     }
   }
 
@@ -95,9 +94,9 @@ void update_skid( unsigned short level, Sensors* sensors)
 {
   sensors->skid = level;
 }
-void update_brakeLevel( unsigned short level, Sensors* sensors)
+void update_brake_level( unsigned short level, Sensors* sensors)
 {
-  sensors->brakeLevel = level;
+  sensors->brake_level = level;
 }
 void set_object( OutsideObject* object)
 {
@@ -109,21 +108,21 @@ void remove_object( OutsideObject* object)
 }
 
 
-unsigned short getSpeed( Sensors* sensors )
+unsigned short get_speed( Sensors* sensors )
 {
   return sensors->speed;
 }
-unsigned short getDistance( Sensors* sensors )
+unsigned short get_distance( Sensors* sensors )
 {
   return sensors->distance;
 }
-unsigned short getSkid( Sensors* sensors )
+unsigned short get_skid( Sensors* sensors )
 {
   return sensors->skid;
 }
-unsigned short getBrakeLevel( Sensors* sensors )
+unsigned short get_brake_level( Sensors* sensors )
 {
-  return sensors->brakeLevel;
+  return sensors->brake_level;
 }
 char getObject( OutsideObject* object )
 {
