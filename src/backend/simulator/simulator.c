@@ -59,8 +59,8 @@ int init(void){
       break;
     case BRAKE_ACTUATOR:
       brake = message.value.sival_int;
-	  update_brake_level(brake, &car);
-	  break;
+	    update_brake_level(brake, &car);
+	    break;
 
     default:
     // Here we fill the Environment values and fill the car and obj structs
@@ -76,28 +76,26 @@ int init(void){
       other_car.init_speed  = car_env.obj_speed;
 
       free(env);
-
     }
     printf("Car speed = %u\nCar brake level = %u\n", car.speed, car.brake_level);
     printf("Env vars: car speed = %u, brakes = %u, skid = %u, dist = %u, obj = %d\n",
-  		  car.speed, car.brake_level, car.skid, car.distance, other_car.object);
+  		      car.speed, car.brake_level, car.skid, car.distance, other_car.object);
   }
 //  break; // Debug statement
   } // End while
 
   //remove the name from the namespace and destroy the channel
   name_detach(attach, 0);
-
   return(EXIT_SUCCESS);
 }
 void init_env(Sensors* sens, OutsideObject* obj, Environment* env)
 {
-    env->skid        = sens->skid                   = 0;
-    env->distance    = sens->distance               = 0;
-    env->car_speed   = sens->speed                  = 0;
-    env->brake_level = sens->brake_level            = 0;
-    env->obj_speed   = obj->init_speed = obj->speed = 0;
-    env->object      = obj->object              = FALSE;
+  env->skid        = sens->skid                   = 0;
+  env->distance    = sens->distance               = 0;
+  env->car_speed   = sens->speed                  = 0;
+  env->brake_level = sens->brake_level            = 0;
+  env->obj_speed   = obj->init_speed = obj->speed = 0;
+  env->object      = obj->object              = FALSE;
 }
 
 void update_distance( unsigned short value, Sensors* sensors, OutsideObject* obj)
