@@ -6,30 +6,30 @@
 #include "../includes/View.h"
 #include "../includes/commons.h"
 
-char testView()
+char test_view()
 {
 
   Environment env = {10, 11, 12, 13, 14, FALSE};
-  initView();
-  setEnvironment(&env);
+  init_view();
+  set_environment(&env);
 
   env.skid = 20;
-  setEnvironment(&env);
+  set_environment(&env);
 
   env.distance = 21;
-  setEnvironment(&env);
+  set_environment(&env);
 
   env.car_speed = 22;
-  setEnvironment(&env);
+  set_environment(&env);
 
   env.brake_level = 23;
-  setEnvironment(&env);
+  set_environment(&env);
 
   env.obj_speed = 24;
-  setEnvironment(&env);
+  set_environment(&env);
 
   env.object = TRUE;
-  setEnvironment(&env);
+  set_environment(&env);
 
   env.skid = 30;
   env.distance = 31;
@@ -37,9 +37,9 @@ char testView()
   env.brake_level = 33;
   env.obj_speed = 34;
   env.object = FALSE;
-  setEnvironment(&env);
+  set_environment(&env);
 
-  destroyView();
+  destroy_view();
 
   return TRUE;
 }

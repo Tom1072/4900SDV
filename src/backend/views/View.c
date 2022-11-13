@@ -7,23 +7,23 @@
 #include "../includes/commons.h"
 
 
-Environment* prevEnvironment = NULL;
+Environment* prev_environment = NULL;
 Environment* environment = NULL;
 
-void initView() {
-    prevEnvironment = (Environment*) malloc(sizeof(Environment));
+void init_view() {
+    prev_environment = (Environment*) malloc(sizeof(Environment));
     environment = (Environment*) malloc(sizeof(Environment));
 }
 
-void destroyView() {
-    free(prevEnvironment);
+void destroy_view() {
+    free(prev_environment);
     free(environment);
-    prevEnvironment = NULL;
+    prev_environment = NULL;
     environment = NULL;
 }
 
 
-void setEnvironment(Environment* env)
+void set_environment(Environment* env)
 {
     if (env == NULL)
     {
@@ -31,18 +31,18 @@ void setEnvironment(Environment* env)
         return;
     }
     
-    memcpy(prevEnvironment, environment, sizeof(Environment));
+    memcpy(prev_environment, environment, sizeof(Environment));
     memcpy(environment, env, sizeof(Environment));
 
 
-    if (prevEnvironment->skid != environment->skid ||
-        prevEnvironment->distance != environment->distance ||
-        prevEnvironment->car_speed != environment->car_speed ||
-        prevEnvironment->brake_level != environment->brake_level ||
-        prevEnvironment->obj_speed != environment->obj_speed ||
-        prevEnvironment->object != environment->object)
+    if (prev_environment->skid != environment->skid ||
+        prev_environment->distance != environment->distance ||
+        prev_environment->car_speed != environment->car_speed ||
+        prev_environment->brake_level != environment->brake_level ||
+        prev_environment->obj_speed != environment->obj_speed ||
+        prev_environment->object != environment->object)
     {
-        renderView();
+        render_view();
     }
 }
 
@@ -50,57 +50,57 @@ void setEnvironment(Environment* env)
  * @brief Update the view
  *
  */
-void renderView()
+void render_view()
 {
     printf("VIEW: Environment:\n");
-    if (prevEnvironment->skid != environment->skid)
+    if (prev_environment->skid != environment->skid)
     {
-        printf(" - skid: %d -> %d\n", prevEnvironment->skid, environment->skid);
+        printf(" - skid: %d -> %d\n", prev_environment->skid, environment->skid);
     }
     else
     {
         printf(" - skid: %d\n", environment->skid);
     }
 
-    if (prevEnvironment->distance != environment->distance)
+    if (prev_environment->distance != environment->distance)
     {
-        printf(" - distance: %d -> %d\n", prevEnvironment->distance, environment->distance);
+        printf(" - distance: %d -> %d\n", prev_environment->distance, environment->distance);
     }
     else
     {
         printf(" - distance: %d\n", environment->distance);
     }
 
-    if (prevEnvironment->car_speed != environment->car_speed)
+    if (prev_environment->car_speed != environment->car_speed)
     {
-        printf(" - car_speed: %d -> %d\n", prevEnvironment->car_speed, environment->car_speed);
+        printf(" - car_speed: %d -> %d\n", prev_environment->car_speed, environment->car_speed);
     }
     else
     {
         printf(" - car_speed: %d\n", environment->car_speed);
     }
 
-    if (prevEnvironment->brake_level != environment->brake_level)
+    if (prev_environment->brake_level != environment->brake_level)
     {
-        printf(" - brake_level: %d -> %d\n", prevEnvironment->brake_level, environment->brake_level);
+        printf(" - brake_level: %d -> %d\n", prev_environment->brake_level, environment->brake_level);
     }
     else
     {
         printf(" - brake_level: %d\n", environment->brake_level);
     }
 
-    if (prevEnvironment->obj_speed != environment->obj_speed)
+    if (prev_environment->obj_speed != environment->obj_speed)
     {
-        printf(" - obj_speed: %d -> %d\n", prevEnvironment->obj_speed, environment->obj_speed);
+        printf(" - obj_speed: %d -> %d\n", prev_environment->obj_speed, environment->obj_speed);
     }
     else
     {
         printf(" - obj_speed: %d\n", environment->obj_speed);
     }
     
-    if (prevEnvironment->object != environment->object)
+    if (prev_environment->object != environment->object)
     {
-        printf(" - object: %s -> %s\n", prevEnvironment->object ? "TRUE" : "FALSE", environment->object ? "TRUE" : "FALSE");
+        printf(" - object: %s -> %s\n", prev_environment->object ? "TRUE" : "FALSE", environment->object ? "TRUE" : "FALSE");
     }
     else
     {

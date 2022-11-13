@@ -8,14 +8,14 @@
  * This function must be called before any other view functions
  * 
  */
-void initView();
+void init_view();
 
 /**
  * @brief Destroy the view, free the memory
  * This function must be called after the view is no longer needed
  * 
  */
-void destroyView();
+void destroy_view();
 
 /**
  * @brief Set the Environment object
@@ -24,7 +24,7 @@ void destroyView();
  * 
  * @param env 
  */
-void setEnvironment(Environment* env);
+void set_environment(Environment* env);
 
 
 // Private APIs
@@ -33,4 +33,4 @@ void setEnvironment(Environment* env);
  * @brief Update the view
  *
  */
-void renderView();
+void render_view();
