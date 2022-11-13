@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/dispatch.h>
@@ -14,16 +15,20 @@
 int init(void){
 
   // Define variables
-  //message_t               message;
+
   struct _pulse           message;
   name_attach_t 		  *attach;
   int                     rcvid;
   Sensors                 car;
   OutsideObject           other_car;
   Environment             car_env;
+  unsigned short          brake, gas;
+
+  // initialize the sensor information to 0
+  init_env(&car, &other_car, &car_env);
 
   // Create Channel
-  if((attach = name_attach(NULL, ATTACH_POINT, 0)) == NULL)
+  if((attach = name_attach(NULL, SIMULATOR_NAME, 0)) == NULL)
   {
     //if there was an error creating the channel
     perror("name_attach():");
@@ -35,6 +40,7 @@ int init(void){
   {
     //code to receive message or pulse from client
   rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
+  printf("MsgReceivePulse: rcvid: %d\n", rcvid);
   if(rcvid == -1)
   {
     perror("MsgReceivePulse()");
@@ -47,39 +53,52 @@ int init(void){
       printf("Simulator*** Client is gone\n");
       ConnectDetach(message.scoid);
       break;
+    case THROTTLE_ACTUATOR:
+      gas = message.value.sival_int;
+      update_speed(gas, &car);
+      break;
+    case BRAKE_ACTUATOR:
+      brake = message.value.sival_int;
+	  update_brake_level(brake, &car);
+	  break;
 
-      // Here we have to define what codes we will treat as what
     default:
-      // else if the pulse is something else print the code and value of the pulse
     // Here we fill the Environment values and fill the car and obj structs
-      printf("Simulator*** Code: %d, Value: %d\n", message.code, message.value.sival_int);
-      car_env.skid       = ((Environment *)message.value.sival_ptr)->skid;
-      car_env.distance   = ((Environment *)message.value.sival_ptr)->distance;
-      car_env.car_speed  = ((Environment *)message.value.sival_ptr)->car_speed;
-      car_env.brakeLevel = ((Environment *)message.value.sival_ptr)->brake_level;
-      car_env.obj_speed  = ((Environment *)message.value.sival_ptr)->obj_speed;
-      car_env.object     = ((Environment *)message.value.sival_ptr)->object;
-
-      // Update the values of the car and object
-      car.skid        = car_env.skid;
-      car.distance    = car_env.distance;
-      car.brake_level  = car_env.brake_level;
-      car.speed       = car_env.car_speed;
-
-      other_car.distance   = car_env.distance;
+    	; // <-- This needs to be here
+      Environment* env;
+      env = (Environment *)message.value.sival_ptr;
+      car_env.skid        = car.skid                          =  env->skid;
+      car_env.car_speed   = car.speed                         = env->car_speed;
+      car_env.brake_level = car.brake_level                   = env->brake_level;
+      car_env.object      = other_car.object                  = env->object;
+      car_env.distance    = car.distance = other_car.distance = env->distance;
+      car_env.obj_speed   = env->obj_speed;
       other_car.init_speed  = car_env.obj_speed;
-      other_car.object     = car_env.object;
-    }
-  }
 
+      free(env);
+
+    }
+    printf("Car speed = %u\nCar brake level = %u\n", car.speed, car.brake_level);
+    printf("Env vars: car speed = %u, brakes = %u, skid = %u, dist = %u, obj = %d\n",
+  		  car.speed, car.brake_level, car.skid, car.distance, other_car.object);
+  }
+//  break; // Debug statement
   } // End while
+
   //remove the name from the namespace and destroy the channel
   name_detach(attach, 0);
-  printf("Test\n");
 
   return(EXIT_SUCCESS);
 }
-
+void init_env(Sensors* sens, OutsideObject* obj, Environment* env)
+{
+    env->skid        = sens->skid                   = 0;
+    env->distance    = sens->distance               = 0;
+    env->car_speed   = sens->speed                  = 0;
+    env->brake_level = sens->brake_level            = 0;
+    env->obj_speed   = obj->init_speed = obj->speed = 0;
+    env->object      = obj->object              = FALSE;
+}
 
 void update_distance( unsigned short value, Sensors* sensors, OutsideObject* obj)
 {
@@ -88,7 +107,7 @@ void update_distance( unsigned short value, Sensors* sensors, OutsideObject* obj
 }
 void update_speed( unsigned short value, Sensors* sensors)
 {
-  sensors->speed = value;
+  sensors->speed += value;
 }
 void update_skid( unsigned short level, Sensors* sensors)
 {
@@ -96,7 +115,7 @@ void update_skid( unsigned short level, Sensors* sensors)
 }
 void update_brake_level( unsigned short level, Sensors* sensors)
 {
-  sensors->brake_level = level;
+  sensors->brake_level += level;
 }
 void set_object( OutsideObject* object)
 {
@@ -124,7 +143,7 @@ unsigned short get_brake_level( Sensors* sensors )
 {
   return sensors->brake_level;
 }
-char getObject( OutsideObject* object )
+char get_object( OutsideObject* object )
 {
   return object->object;
 }

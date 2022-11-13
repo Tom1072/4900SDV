@@ -63,3 +63,6 @@ build/
 # PyCharm IDE
 *.idea
 
+# Debug QNX
+*.core
+
