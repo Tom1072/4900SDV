@@ -8,11 +8,6 @@
 
 char testView()
 {
-  // char *input = NULL;
-  // getUserInput("Enter something: ", &input);
-  // assert(input != NULL);
-  // printf("Input: %s", input);
-  // free(input);
 
   Environment env = {10, 11, 12, 13, 14, FALSE};
   initView();

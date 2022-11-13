@@ -30,14 +30,6 @@ void setEnvironment(Environment* env);
 // Private APIs
 
 /**
- * @brief Get the User Input
- *
- * @param prompt [in]: The prompt to display
- * @param message [out]: The output message that user entered
- */
-void getUserInput(char* prompt, char** message);
-
-/**
  * @brief Update the view
  *
  */

@@ -4,17 +4,26 @@
 
 #define TRUE 1
 #define FALSE 0
+#define OK 0
+#define NOK -1
 #define MANUAL_NAME "manual_driver_attach_name"
 #define ABS_NAME "ABS_attach_name"
 #define ACC_NAME "ACC_attach_name"
+#define SIMULATOR_NAME "simulator"
 #define BRAKE_ACTUATOR 1
 #define THROTTLE_ACTUATOR 2
 #define MAX_STRING_LEN    256
 
+#define CHECK_STATUS(status) \
+    if (status != OK) \
+    { \
+        return FALSE; \
+    } \
+
 typedef enum
 {
-    COMM = 0,
-    ACTUATOR,
+    COMM = 0, // Msg from the communication module
+    ACTUATOR, // Msg from the actuator module
 } PulseCode;
 
 typedef struct

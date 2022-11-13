@@ -16,98 +16,129 @@ void mockedSimulator();
 
 char testComm()
 {
-    int dispatcherThread, listenerThread, simulatorThread, actuatorThread;
+  // pthread_t dispatcherThread;
+  pthread_t listenerThread;
+  pthread_t simulatorThread;
+  int status;
 
-    printf("Testing comm...\n");
-    printf("Creating the CommDispatcher thread...\n");
-    dispatcherThread = pthread_create(NULL, NULL, (void *)startDispatcher, NULL);
+  printf("Testing comm...\n");
+  printf("Testing parse_message()...\n");
 
-    printf("Creating the MockedSimulator thread...\n");
-    // simulatorThread = pthread_create(NULL, NULL, (void *)mockedSimulator, NULL);
+  // printf("Creating the CommDispatcher thread...\n");
+  // status = pthread_create(&dispatcherThread, NULL, (void *)startDispatcher, NULL);
+  // CHECK_STATUS(status);
 
-    printf("Created the CommListener thread...\n");
-    listenerThread = pthread_create(NULL, NULL, (void *)startListener, NULL);
-    
-    // pthread_join(simulatorThread, NULL);
-    pthread_join(dispatcherThread, NULL);
-    pthread_join(listenerThread, NULL);
+  printf("Creating the MockedSimulator thread...\n");
+  status = pthread_create(&simulatorThread, NULL, (void *)mockedSimulator, NULL);
+  CHECK_STATUS(status);
 
-    return TRUE;
+  printf("Created the CommListener thread...\n");
+  status = pthread_create(&listenerThread, NULL, (void *)startListener, NULL);
+  CHECK_STATUS(status);
+
+  // pthread_join(simulatorThread, NULL);
+  // status = pthread_join(dispatcherThread, NULL);
+  status = pthread_join(listenerThread, NULL);
+  status = pthread_join(simulatorThread, NULL);
+  printf("Comm test finished.\n");
+
+  return TRUE;
 }
 
 void mockedSimulator()
 {
-    typedef union
+  // Declare variables
+  int rcid;
+  struct _pulse pulse;
+
+  // create a channel
+  printf("MockedSimulator: Creating a simulator channel...\n");
+  name_attach_t *attach = NULL;
+  attach = name_attach(NULL, SIMULATOR_NAME, 0);
+
+  if (attach == NULL)
+  {
+    perror("ChannelCreate()");
+  }
+
+  // the server should keep receiving, processing and replying to messages
+  while (TRUE)
+  {
+    // code to receive msg or pulse from client
+    printf("MockedSimulator: Waiting for a message...\n");
+    rcid = MsgReceive(attach->chid, &pulse, sizeof(pulse), NULL);
+
+    if (rcid == -1)
     {
-        struct _pulse pulse;
-        char rmsg[MAX_STRING_LEN + 1];
-    } myMessage_t;
-
-    // Declare variables
-    int rcid, status;
-    myMessage_t message;
-
-    // create a channel
-    printf("MockedSimulator: Creating a simulator channel...\n");
-    name_attach_t *attach = NULL;
-    attach = name_attach(NULL, "simulator", 0);
-
-    if (attach == NULL)
-    {
-        perror("ChannelCreate()");
+      perror("MsgReceive()");
     }
 
-    // the server should keep receiving, processing and replying to messages
-    for (int i=0; i<10; i++)
+    // print the returned value of MsgReceive
+    printf("MockedSimulator: MsgReceive() rcid = %d\n", rcid);
+
+    // check if it was a pulse or a message
+    if (rcid == 0)
     {
-        // code to receive msg or pulse from client
-        printf("MockedSimulator: Waiting for a message...\n");
-        rcid = MsgReceive(attach->chid, &message, sizeof(message), NULL);
+      // It is a pulse
+      printf("MockedSimulator: Pulse received\n");
+      if (pulse.code == _PULSE_CODE_DISCONNECT)
+      {
+        printf("MockedSimulator: Comm is gone\n");
+        ConnectDetach(pulse.scoid);
+        break;
+      }
+      else if (pulse.code == COMM)
+      {
+        // else if the pulse is something else print the code and value of the pulse
+        printf("MockedSimulator: Received pulse from Comm module\n");
+        CommListenerMessage *commMessage = (CommListenerMessage *)pulse.value.sival_ptr;
+        CommandData data = commMessage->data;
+        CommandType command = commMessage->command;
 
-        if (rcid == -1)
+        switch (command)
         {
-            perror("MsgReceive()");
+        case SPAWN_CAR:
+          printf("MockedSimulator: Received a SPAWN_CAR command\n");
+          printf("MockedSimulator:   - command=%d\n", command);
+          printf("MockedSimulator:   - data.spawnCarData.distance=%d\n", data.spawnCarData.distance);
+          printf("MockedSimulator:   - data.spawnCarData.obj_speed=%d\n", data.spawnCarData.obj_speed);
+          break;
+        case DESPAWN_CAR:
+          printf("MockedSimulator: Received a DESPAWN_CAR command\n");
+          printf("MockedSimulator:   - command=%d\n", command);
+          break;
+        case THROTTLE:
+          printf("MockedSimulator: Received a THROTTLE command\n");
+          printf("MockedSimulator:   - command=%d\n", command);
+          printf("MockedSimulator:   - data.throttleLevel=%d\n", data.throttleLevel);
+          break;
+        case BRAKE:
+          printf("MockedSimulator: Received a BRAKE command\n");
+          printf("MockedSimulator:   - command=%d\n", command);
+          printf("MockedSimulator:   - data.brakeLevel=%d\n", data.brakeLevel);
+          break;
+        case SKID:
+          printf("MockedSimulator: Received a SKID command\n");
+          printf("MockedSimulator:   - command=%d\n", command);
+          printf("MockedSimulator:   - data.skidOn=%s\n", data.skidOn ? "TRUE" : "FALSE");
+          break;
+        default:
+          printf("MockedSimulator: Received an unknown command\n");
+          break;
         }
-
-        // print the returned value of MsgReceive
-        printf("MockedSimulator: MsgReceive() rcid = %d\n", rcid);
-
-        // check if it was a pulse or a message
-        if (rcid == 0)
-        {
-            // It is a pulse
-            printf("MockedSimulator: Pulse received\n");
-            if (message.pulse.code == _PULSE_CODE_DISCONNECT)
-            {
-                // check the pulse code to see if the client is gone/disconnected and print (client is gone)
-                printf("MockedSimulator: client is gone\n");
-
-                // detach the client
-                ConnectDetach(message.pulse.scoid);
-            }
-            else
-            {
-                // else if the pulse is something else print the code and value of the pulse
-                printf("MockedSimulator: pulse code = %d, pulse value = %d\n", message.pulse.code, message.pulse.value.sival_int);
-            }
-        }
-        else
-        {
-            // It should never be a message
-            printf("MockedSimulator: Message received\n");
-            printf("MockedSimulator: message = %s\n", message.rmsg);
-            // reply to client with the checksum
-            status = MsgReply(rcid, 0, &message.rmsg, sizeof(message.rmsg));
-
-            if (status == -1)
-            {
-                perror("MsgReply()");
-            }
-            // print the return value of MsgReply
-            printf("MockedSimulator: MsgReply() status = %d\n", status);
-        }
-
+        free(commMessage);
+      }
+      else
+      {
+        printf("MockedSimulator: Received unknown pulse with code %d\n", pulse.code);
+      }
     }
-    // remove the name from the namespace and destroy the channel
-    name_detach(attach, 0);
+    else
+    {
+      // It should never be a message
+      printf("MockedSimulator: Message received...\n");
+    }
+  }
+  // remove the name from the namespace and destroy the channel
+  name_detach(attach, 0);
 }

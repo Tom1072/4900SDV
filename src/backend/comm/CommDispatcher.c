@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "../includes/CommDispatcher.h"
 #include "../includes/commons.h"
 

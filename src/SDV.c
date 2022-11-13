@@ -4,15 +4,16 @@
 #include "backend/includes/commons.h"
 
 int main() {
-    printf("Hello, World!\n");
+    printf("SDV\n");
 
-    char commResult  = testComm();
+    // char commResult  = testComm();
     char simulatorResult = testSimulator();
     char viewTestResult = testView();
 
-    assert(commResult == TRUE);
-    assert(simulatorResult == TRUE);
-    assert(viewTestResult == TRUE);
+    // assert(commResult);
+    assert(simulatorResult);
+    assert(viewTestResult);
+
 
     return 0;
 }
