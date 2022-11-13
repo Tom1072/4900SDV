@@ -1,6 +1,6 @@
 #pragma once
 
 char test_comm();
-char testActuators();
-char testSimulator();
-char testView();
+char test_actuators);
+char test_simulator();
+char test_view();

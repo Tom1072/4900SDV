@@ -4,7 +4,7 @@
 #include "../includes/simulator.h"
 #include "../includes/car_structs.h"
 
-char testSimulator() {
+char test_simulator() {
     printf("Testing simulator...\n");
     init();
     return TRUE;
