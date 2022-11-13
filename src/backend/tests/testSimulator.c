@@ -18,7 +18,7 @@ void *test_sim();
 void *test_acc();
 void *test_abs();
 
-char testSimulator() {
+char test_simulator() {
   printf("Testing simulator...\n");
   pthread_t test_comm_thread, test_sim_thread, test_acc_thread, test_abs_thread;
   pthread_attr_t test_comm_attr, test_sim_attr, test_acc_attr, test_abs_attr;
