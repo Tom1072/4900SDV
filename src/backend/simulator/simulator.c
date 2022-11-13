@@ -7,10 +7,12 @@
 #include <sys/dispatch.h>
 #include <errno.h>
 #include <sys/iomsg.h>
+#include <limits.h>
+
 #include "../includes/commons.h"
 #include "../includes/simulator.h"
 #include "../includes/car_structs.h"
-
+#include "../includes/CommListener.h"
 
 int init(void){
 
@@ -62,26 +64,55 @@ int init(void){
 	    update_brake_level(brake, &car);
 	    break;
 
-    default:
-    // Here we fill the Environment values and fill the car and obj structs
-      printf("Simulator*** Code: %d, Value: %d\n", message.code, message.value.sival_int);
-      car_env.skid       = ((Environment *)message.value.sival_ptr)->skid;
-      car_env.distance   = ((Environment *)message.value.sival_ptr)->distance;
-      car_env.car_speed  = ((Environment *)message.value.sival_ptr)->car_speed;
-      car_env.brakeLevel = ((Environment *)message.value.sival_ptr)->brakeLevel;
-      car_env.obj_speed  = ((Environment *)message.value.sival_ptr)->obj_speed;
-      car_env.object     = ((Environment *)message.value.sival_ptr)->object;
+    case COMM:
+    {
+      // Here we fill the Environment values and fill the car and obj structs
+      // else if the pulse is something else print the code and value of the pulse
+      CommListenerMessage *comm_message = (CommListenerMessage *)message.value.sival_ptr;
+      CommandData data = comm_message->data;
+      CommandType command = comm_message->command;
 
-      // Update the values of the car and object
-      car.skid        = car_env.skid;
-      car.distance    = car_env.distance;
-      car.brakeLevel  = car_env.brakeLevel;
-      car.speed       = car_env.car_speed;
+      switch (command)
+      {
+        case SPAWN_CAR:
+          car_env.object = TRUE;
+          car_env.obj_speed = data.spawn_car_data.obj_speed;
+          car_env.distance = data.spawn_car_data.distance;
 
-      other_car.distance   = car_env.distance;
-      other_car.initSpeed  = car_env.obj_speed;
-      other_car.object     = car_env.object;
-      other_car.initSpeed  = car_env.obj_speed;
+          car.distance = data.spawn_car_data.distance;
+
+          other_car.object = TRUE;
+          other_car.distance = data.spawn_car_data.distance;
+          other_car.speed = data.spawn_car_data.obj_speed;
+          other_car.init_speed = data.spawn_car_data.obj_speed;
+          break;
+        case DESPAWN_CAR:
+          car_env.object = FALSE;
+          car_env.obj_speed = 0;
+          car_env.distance = 0;
+
+          car.distance = USHRT_MAX;
+
+          other_car.object = FALSE;
+          other_car.distance = USHRT_MAX;
+          other_car.speed = 0;
+          other_car.init_speed = 0;
+          break;
+        case THROTTLE:
+          car.throttle_level = data.throttle_level;
+          break;
+        case BRAKE:
+          car.brake_level = data.brake_level;
+          break;
+        case SKID:
+          car_env.skid = data.skid_on;
+          break;
+        default:
+          printf("Simulator*** Unknown command\n");
+      }
+      free(comm_message);
+    }
+
     }
     printf("Car speed = %u\nCar brake level = %u\n", car.speed, car.brake_level);
     printf("Env vars: car speed = %u, brakes = %u, skid = %u, dist = %u, obj = %d\n",
@@ -117,9 +148,9 @@ void update_skid( unsigned short level, Sensors* sensors)
 {
   sensors->skid = level;
 }
-void update_brakeLevel( unsigned short level, Sensors* sensors)
+void update_brake_level( unsigned short level, Sensors* sensors)
 {
-  sensors->brakeLevel = level;
+  sensors->brake_level = level;
 }
 void set_object( OutsideObject* object)
 {
@@ -143,9 +174,9 @@ unsigned short get_skid( Sensors* sensors )
 {
   return sensors->skid;
 }
-unsigned short getBrakeLevel( Sensors* sensors )
+unsigned short get_brake_level( Sensors* sensors )
 {
-  return sensors->brakeLevel;
+  return sensors->brake_level;
 }
 char get_object( OutsideObject* object )
 {

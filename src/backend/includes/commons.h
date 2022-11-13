@@ -8,9 +8,6 @@
 #define OK 0
 #define NOK -1
 
-
-#define BRAKE_ACTUATOR 1
-#define THROTTLE_ACTUATOR 2
 #define MAX_STRING_LEN    512
 
 // Names of the channels
@@ -28,7 +25,8 @@
 typedef enum
 {
     COMM = 0, // Msg from the communication module
-    ACTUATOR, // Msg from the actuator module
+    BRAKE_ACTUATOR,
+    THROTTLE_ACTUATOR
 } PulseCode;
 
 typedef struct

@@ -14,7 +14,7 @@ class ViewDispatcher:
   def __enter__(self):
     return self
 
-  def __exit__(self):
+  def __exit__(self, exc_type, exc_val, exc_tb):
     self.sock.close()
 
   def send_message(self, message):
@@ -30,6 +30,8 @@ class ViewDispatcher:
       self.send_message(message)
       data, addr = self.receive_message()
       print(f"Received response: \'{data}\' from {addr}\n")
+      if (message == "stop"):
+        break
 
 
 if __name__ == "__main__":
