@@ -1,8 +1,4 @@
-
 #pragma once
-
-
-#define MAX_STRING_LEN    512
 
 #include <sys/iomsg.h>
 #include "../includes/car_structs.h"

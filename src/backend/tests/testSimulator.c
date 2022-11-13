@@ -12,51 +12,57 @@
 #include "../includes/simulator.h"
 #include "../includes/car_structs.h"
 #include "../includes/utils.h"
+#include "../includes/CommListener.h"
 
-void *test_comm();
+void *mocked_comm();
 void *test_sim();
-void *test_acc();
-void *test_abs();
+void *mocked_acc();
+void *mocked_abs();
 
 char test_simulator() {
   printf("Testing simulator...\n");
-  pthread_t test_comm_thread, test_sim_thread, test_acc_thread, test_abs_thread;
-  pthread_attr_t test_comm_attr, test_sim_attr, test_acc_attr, test_abs_attr;
+  pthread_t mocked_comm_thread, test_sim_thread, mocked_acc_thread, mocked_abs_thread;
+  pthread_attr_t mocked_comm_attr, test_sim_attr, mocked_acc_attr, mocked_abs_attr;
 
   create_thread(&test_sim_thread, &test_sim_attr, 1, test_sim);
-  create_thread(&test_comm_thread, &test_comm_attr, 2, test_comm);
-  create_thread(&test_acc_thread, &test_acc_attr, 2, test_acc);
-  create_thread(&test_abs_thread, &test_abs_attr, 2, test_abs);
+  create_thread(&mocked_comm_thread, &mocked_comm_attr, 2, mocked_comm);
+  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, mocked_acc);
+  create_thread(&mocked_abs_thread, &mocked_abs_attr, 2, mocked_abs);
 
   pthread_join(test_sim_thread, NULL);
-  pthread_join(test_comm_thread, NULL);
-  pthread_join(test_acc_thread, NULL);
-  pthread_join(test_abs_thread, NULL);
+  pthread_join(mocked_comm_thread, NULL);
+  pthread_join(mocked_acc_thread, NULL);
+  pthread_join(mocked_abs_thread, NULL);
   return TRUE;
 }
 
-void *test_comm()
+void *mocked_comm()
 {
 
   int sim_coid;
   sleep(1);
   printf("Testing communication...\n");
-  Environment* env = (Environment*) malloc(sizeof(Environment));;
-  env->skid        = 15;
-  env->distance    = 200;
-  env->car_speed   = 100;
-  env->brake_level = 0;
-  env->obj_speed   = 100;
-  env->object      = FALSE;
+  // Environment* env = (Environment*) malloc(sizeof(Environment));;
+  // env->skid        = 15;
+  // env->distance    = 200;
+  // env->car_speed   = 100;
+  // env->brake_level = 0;
+  // env->obj_speed   = 100;
+  // env->object      = FALSE;
+  CommListenerMessage* msg = (CommListenerMessage*) malloc(sizeof(CommListenerMessage));
+
+  msg->command = SPAWN_CAR;
+  msg->data.spawn_car_data.distance = 10;
+  msg->data.spawn_car_data.obj_speed = 20;
 
   sim_coid = name_open(SIMULATOR_NAME, 0);
-  MsgSendPulsePtr(sim_coid, -1, 100, (void *)env);
+  MsgSendPulsePtr(sim_coid, -1, 100, (void *)msg);
 
   name_close(sim_coid);
   return NULL;
 }
 
-void *test_acc()
+void *mocked_acc()
 {
   int sim_coid;
   printf("Testing acc replies...\n");
@@ -70,7 +76,7 @@ void *test_acc()
   name_close(sim_coid);
   return NULL;
 }
-void *test_abs()
+void *mocked_abs()
 {
   int sim_coid;
   printf("Testing abs replies...\n");
