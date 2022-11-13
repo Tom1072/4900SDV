@@ -1,17 +1,33 @@
 #pragma once
+
 #include <sys/dispatch.h>
 
+// Constants
 #define TRUE 1
 #define FALSE 0
+#define OK 0
+#define NOK -1
 
+#define MAX_STRING_LEN    512
+
+// Names of the channels
 #define MANUAL_NAME "manual_driver_attach_name"
 #define ABS_NAME "ABS_attach_name"
 #define ACC_NAME "ACC_attach_name"
 #define SIMULATOR_NAME "simulator_attach_name"
 
-#define BRAKE_ACTUATOR 1
-#define THROTTLE_ACTUATOR 2
+#define CHECK_STATUS(status) \
+    if (status != OK) \
+    { \
+        return FALSE; \
+    } \
 
+typedef enum
+{
+    COMM = 0, // Msg from the communication module
+    BRAKE_ACTUATOR,
+    THROTTLE_ACTUATOR
+} PulseCode;
 
 typedef struct
 {
@@ -28,4 +44,3 @@ typedef union {
   int type; // BRAKE_ACTUATOR or THROTTLE_ACTUATOR
   int level; // 0-100
 } actuatorChanges_t;
-

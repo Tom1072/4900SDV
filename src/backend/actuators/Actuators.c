@@ -7,8 +7,6 @@
 #include "../includes/commons.h"
 #include "../includes/actuators.h"
 
-#define MAX_STRING_LEN    256
-
 /**
  * Engage the brake level.
  * This sends pulse to Simulator.
