@@ -30,20 +30,40 @@ char testActuators()
 
 void *test_simulator()
 {
-  int manual_coid, ACC_coid, ABS_coid;
-
-  manual_coid = name_open(MANUAL_NAME, 0);
-  ACC_coid = name_open(ABS_NAME, 0);
-  ABS_coid = name_open(ACC_NAME, 0);
-
+  printf("Testing sending messages:\n");
   sleep(2);
   printf("Sending manual pulse\n");
-  MsgSendPulse(manual_coid, -1, 0, 1);
+  send_pulse_msg(MANUAL_NAME, "Hello MANUAL DRIVER!", 0);
   sleep(2);
   printf("Sending ABS pulse\n");
-  MsgSendPulse(ABS_coid, -1, 0, 2);
+  send_pulse_msg(ACC_NAME, "Hello ACC!", 0);
   sleep(2);
   printf("Sending ACC pulse\n");
-  MsgSendPulse(ACC_coid, -1, 0, 3);
+  send_pulse_msg(ABS_NAME, "Hello ABS!", 0);
+
+  // int manual_coid, ACC_coid, ABS_coid;
+
+  // manual_coid = name_open(MANUAL_NAME, 0);
+  // ACC_coid = name_open(ABS_NAME, 0);
+  // ABS_coid = name_open(ACC_NAME, 0);
+  // char *manual_buffer = "Hello Manual Driver!";
+  // char *ACC_buffer = "Hello ACC!";
+  // char *ABS_buffer = "Hello ABS!";
+
+  // char *manual_msg = malloc(sizeof(manual_buffer));
+  // char *ACC_msg = malloc(sizeof(ACC_buffer));
+  // char *ABS_msg = malloc(sizeof(ABS_buffer));
+
+  // strcpy(manual_msg, manual_buffer)
+
+  // sleep(2);
+  // printf("Sending manual pulse\n");
+  // MsgSendPulsePtr(manual_coid, -1, 0, 2);
+  // sleep(2);
+  // printf("Sending ABS pulse\n");
+  // MsgSendPulsePtr(ABS_coid, -1, 0, 2);
+  // sleep(2);
+  // printf("Sending ACC pulse\n");
+  // MsgSendPulsePtr(ACC_coid, -1, 0, 3);
   return NULL;
 }

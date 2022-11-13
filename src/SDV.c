@@ -5,7 +5,7 @@ int main() {
     printf("Hello, World!\n");
     // char result  = testComm();
     // char result2 = testSimulator();
-    // char result3 = testActuators();
+    char result3 = testActuators();
     // printf("Result: %d", result);
 
 

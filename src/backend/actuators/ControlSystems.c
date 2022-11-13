@@ -28,7 +28,10 @@ void *ManualDriver() {
         ConnectDetach(pulse_msg.scoid);
         break;
       default:
-        printf("MANUAL DRIVER GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
+        // printf("MANUAL DRIVER GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
+        printf("MANUAL DRIVER GOT pulse code: %p\n", pulse_msg.value.sival_ptr);
+        printf("  %s; value: %d\n", pulse_msg.code, (char *)pulse_msg.value.sival_ptr);
+        free(pulse_msg.value.sival_ptr);
     }
   }
 
@@ -57,7 +60,9 @@ void *ACC() {
         ConnectDetach(pulse_msg.scoid);
         break;
       default:
-        printf("ACC GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
+        printf("ACC GOT pulse code:\n");
+        printf("  %s; value: %d\n", pulse_msg.code, (char *)pulse_msg.value.sival_ptr);
+        free(pulse_msg.value.sival_ptr);
     }
   }
 
@@ -86,7 +91,9 @@ void *ABS() {
         ConnectDetach(pulse_msg.scoid);
         break;
       default:
-        printf("ABS GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
+        printf("ABS GOT pulse code:\n");
+        printf("  %s; value: %d\n", pulse_msg.code, (char *)pulse_msg.value.sival_ptr);
+        free(pulse_msg.value.sival_ptr);
     }
   }
 
