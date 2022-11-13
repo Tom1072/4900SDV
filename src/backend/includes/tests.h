@@ -1,6 +1,6 @@
 #pragma once
 
-char testComm();
+char test_comm();
 char testActuators();
 char testSimulator();
 char testView();

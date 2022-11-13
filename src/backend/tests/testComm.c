@@ -12,13 +12,13 @@
 
 #define MAX_STRING_LEN 256
 
-void mockedSimulator();
+void mocked_simulator();
 
-char testComm()
+char test_comm()
 {
   // pthread_t dispatcherThread;
-  pthread_t listenerThread;
-  pthread_t simulatorThread;
+  pthread_t listener_thread;
+  pthread_t simulator_thread;
   int status;
 
   printf("Testing comm...\n");
@@ -29,23 +29,23 @@ char testComm()
   // CHECK_STATUS(status);
 
   printf("Creating the MockedSimulator thread...\n");
-  status = pthread_create(&simulatorThread, NULL, (void *)mockedSimulator, NULL);
+  status = pthread_create(&simulator_thread, NULL, (void *)mocked_simulator, NULL);
   CHECK_STATUS(status);
 
   printf("Created the CommListener thread...\n");
-  status = pthread_create(&listenerThread, NULL, (void *)startListener, NULL);
+  status = pthread_create(&listener_thread, NULL, (void *)start_listener, NULL);
   CHECK_STATUS(status);
 
   // pthread_join(simulatorThread, NULL);
   // status = pthread_join(dispatcherThread, NULL);
-  status = pthread_join(listenerThread, NULL);
-  status = pthread_join(simulatorThread, NULL);
+  status = pthread_join(listener_thread, NULL);
+  status = pthread_join(simulator_thread, NULL);
   printf("Comm test finished.\n");
 
   return TRUE;
 }
 
-void mockedSimulator()
+void mocked_simulator()
 {
   // Declare variables
   int rcid;
@@ -91,17 +91,17 @@ void mockedSimulator()
       {
         // else if the pulse is something else print the code and value of the pulse
         printf("MockedSimulator: Received pulse from Comm module\n");
-        CommListenerMessage *commMessage = (CommListenerMessage *)pulse.value.sival_ptr;
-        CommandData data = commMessage->data;
-        CommandType command = commMessage->command;
+        CommListenerMessage *comm_message = (CommListenerMessage *)pulse.value.sival_ptr;
+        CommandData data = comm_message->data;
+        CommandType command = comm_message->command;
 
         switch (command)
         {
         case SPAWN_CAR:
           printf("MockedSimulator: Received a SPAWN_CAR command\n");
           printf("MockedSimulator:   - command=%d\n", command);
-          printf("MockedSimulator:   - data.spawnCarData.distance=%d\n", data.spawnCarData.distance);
-          printf("MockedSimulator:   - data.spawnCarData.obj_speed=%d\n", data.spawnCarData.obj_speed);
+          printf("MockedSimulator:   - data.spawn_car_data.distance=%d\n", data.spawn_car_data.distance);
+          printf("MockedSimulator:   - data.spawn_car_data.obj_speed=%d\n", data.spawn_car_data.obj_speed);
           break;
         case DESPAWN_CAR:
           printf("MockedSimulator: Received a DESPAWN_CAR command\n");
@@ -110,23 +110,23 @@ void mockedSimulator()
         case THROTTLE:
           printf("MockedSimulator: Received a THROTTLE command\n");
           printf("MockedSimulator:   - command=%d\n", command);
-          printf("MockedSimulator:   - data.throttleLevel=%d\n", data.throttleLevel);
+          printf("MockedSimulator:   - data.throttle_level=%d\n", data.throttle_level);
           break;
         case BRAKE:
           printf("MockedSimulator: Received a BRAKE command\n");
           printf("MockedSimulator:   - command=%d\n", command);
-          printf("MockedSimulator:   - data.brakeLevel=%d\n", data.brakeLevel);
+          printf("MockedSimulator:   - data.brake_level=%d\n", data.brake_level);
           break;
         case SKID:
           printf("MockedSimulator: Received a SKID command\n");
           printf("MockedSimulator:   - command=%d\n", command);
-          printf("MockedSimulator:   - data.skidOn=%s\n", data.skidOn ? "TRUE" : "FALSE");
+          printf("MockedSimulator:   - data.skid_on=%s\n", data.skid_on ? "TRUE" : "FALSE");
           break;
         default:
           printf("MockedSimulator: Received an unknown command\n");
           break;
         }
-        free(commMessage);
+        free(comm_message);
       }
       else
       {

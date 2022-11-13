@@ -3,17 +3,17 @@
 #include "backend/includes/tests.h"
 #include "backend/includes/commons.h"
 
-int main() {
-    printf("SDV\n");
+int main()
+{
+  printf("SDV\n");
 
-    // char commResult  = testComm();
-    char simulatorResult = testSimulator();
-    char viewTestResult = testView();
+  // char comm_result  = test_comm();
+  // char simulator_result = testSimulator();
+  char view_result = testView();
 
-    // assert(commResult);
-    assert(simulatorResult);
-    assert(viewTestResult);
+  // assert(comm_result);
+  // assert(simulator_result);
+  assert(view_result);
 
-
-    return 0;
+  return 0;
 }

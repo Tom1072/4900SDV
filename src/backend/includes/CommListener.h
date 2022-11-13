@@ -23,10 +23,10 @@ typedef struct
 
 typedef union
 {
-  SpawnCarData spawnCarData; // used for SPAWN_CAR command
-  int throttleLevel;         // 0-100, used for GAS command
-  int brakeLevel;            // 0-100, used for BRAKE command
-  char skidOn;               // TRUE or FALSE
+  SpawnCarData spawn_car_data; // used for SPAWN_CAR command
+  int throttle_level;          // 0-100, used for GAS command
+  int brake_level;             // 0-100, used for BRAKE command
+  char skid_on;                // TRUE or FALSE
 } CommandData;
 
 typedef struct
@@ -41,11 +41,11 @@ typedef struct
  * @brief Starts the listener server
  *
  */
-void startListener();
+void start_listener();
 
 // Private API
-void parseMessage(char *message, CommListenerMessage **parsedMessage);
+void parse_message(char *message, CommListenerMessage **parsed_message);
 
-char checkAtoiResult(int result, char *token);
+char check_atoi(int result, char *token);
 
-char inRange(int value, int min, int max);
+char in_range(int value, int min, int max);

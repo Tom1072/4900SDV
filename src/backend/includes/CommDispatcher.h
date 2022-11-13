@@ -5,6 +5,6 @@
  * @brief Starts the dispatcher server
  * 
  */
-void startDispatcher();
+void start_dispatcher();
 
 // Private API

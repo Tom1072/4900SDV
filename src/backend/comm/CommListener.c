@@ -14,51 +14,51 @@
 #include "../includes/commons.h"
 #include "../includes/View.h"
 
-void startListener()
+void start_listener()
 {
-  int serverSocket, coid;
-  struct sockaddr_in serverAddr, clientAddr;
-  int status, bytesReceived;
-  socklen_t addrSize;
+  int server_socket, coid;
+  struct sockaddr_in server_addr, client_addr;
+  int status, bytes_received;
+  socklen_t addr_size;
   fd_set readfds, writefds;
   char buffer[MAX_STRING_LEN];
   char *response = "OK";
 
   // Create the server socket
-  serverSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-  if (serverSocket < 0)
+  server_socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+  if (server_socket < 0)
   {
-    perror("COMM ERROR: startListener: Unable to create socket.\n");
+    perror("COMM ERROR: start_listener: Unable to create socket.\n");
     pthread_exit(NULL);
   }
 
   // Setup the server address
-  memset(&serverAddr, 0, sizeof(serverAddr)); // zeros the struct serverAddr.sin_family = AF_INET;
-  serverAddr.sin_family = AF_INET;
-  serverAddr.sin_addr.s_addr = inet_addr(SERVER_ADRESS);
-  serverAddr.sin_port = htons(SERVER_PORT);
+  memset(&server_addr, 0, sizeof(server_addr)); // zeros the struct serverAddr.sin_family = AF_INET;
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = inet_addr(SERVER_ADRESS);
+  server_addr.sin_port = htons(SERVER_PORT);
 
   // Bind the server socket
   printf("Binding to port %d\n", SERVER_PORT);
-  status = bind(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
+  status = bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (status < 0)
   {
-    perror("COMM ERROR: startListener: Bind failed");
+    perror("COMM ERROR: start_listener: Bind failed");
     pthread_exit(NULL);
   }
 
-	//establish a connection to the simulator's channel
-	coid = name_open(SIMULATOR_NAME, _NTO_CHF_DISCONNECT);
+  // establish a connection to the simulator's channel
+  coid = name_open(SIMULATOR_NAME, _NTO_CHF_DISCONNECT);
 
   // Wait for clients now
   while (TRUE)
   {
     FD_ZERO(&readfds);
-    FD_SET(serverSocket, &readfds);
+    FD_SET(server_socket, &readfds);
     FD_ZERO(&writefds);
-    FD_SET(serverSocket, &writefds);
+    FD_SET(server_socket, &writefds);
 
-    printf("COMM: startListener: Waiting for message...\n");
+    printf("COMM: start_listener: Waiting for message...\n");
     status = select(FD_SETSIZE, &readfds, &writefds, NULL, NULL);
     if (status == 0)
     { // Timeout occurred, no client ready
@@ -71,12 +71,12 @@ void startListener()
     }
     else
     {
-      addrSize = sizeof(clientAddr);
-      bytesReceived = recvfrom(serverSocket, buffer, sizeof(buffer),
-                               0, (struct sockaddr *)&clientAddr, &addrSize);
-      if (bytesReceived > 0)
+      addr_size = sizeof(client_addr);
+      bytes_received = recvfrom(server_socket, buffer, sizeof(buffer),
+                                0, (struct sockaddr *)&client_addr, &addr_size);
+      if (bytes_received > 0)
       {
-        buffer[bytesReceived] = '\0';
+        buffer[bytes_received] = '\0';
         printf("COMM: Received client request: %s\n", buffer);
       }
       // If the client said to stop, then I'll stop myself
@@ -87,19 +87,19 @@ void startListener()
         response = "OK: Closing CommListener server.";
 
         printf("COMM: Sending \"%s\" to client\n", response);
-        sendto(serverSocket, response, strlen(response), 0,
-               (struct sockaddr *)&clientAddr, addrSize);
+        sendto(server_socket, response, strlen(response), 0,
+               (struct sockaddr *)&client_addr, addr_size);
         break;
       }
       else
       {
         CommListenerMessage *msg = NULL;
-        parseMessage(buffer, &msg);
+        parse_message(buffer, &msg);
         if (msg != NULL)
         {
           printf("COMM: Command parsed\n");
           response = "OK: Command parsed.";
-          status = MsgSendPulsePtr(coid, 0, COMM, (void*) msg);
+          status = MsgSendPulsePtr(coid, 0, COMM, (void *)msg);
         }
         else
         {
@@ -108,8 +108,8 @@ void startListener()
         }
 
         printf("COMM: Sending \"%s\" to client\n", response);
-        sendto(serverSocket, response, strlen(response), 0,
-               (struct sockaddr *)&clientAddr, addrSize);
+        sendto(server_socket, response, strlen(response), 0,
+               (struct sockaddr *)&client_addr, addr_size);
       }
     }
   }
@@ -117,63 +117,63 @@ void startListener()
   pthread_exit(NULL);
 }
 
-void parseMessage(char *message, CommListenerMessage **parsedMessage)
+void parse_message(char *message, CommListenerMessage **parsed_message)
 {
-  if (message == NULL || parsedMessage == NULL)
+  if (message == NULL || parsed_message == NULL)
   {
-    printf("COMM: parseMessage: Invalid arguments\n");
+    printf("COMM: parse_message: Invalid arguments\n");
     return;
   }
   // Split string by spaces
   char *token = strtok(message, " ");
   if (token != NULL)
   {
-    printf("COMM: parseMessage: %s\n", token);
+    printf("COMM: parse_message: %s\n", token);
     if (strcmp(token, "spawn") == 0)
     {
       token = strtok(NULL, " ");
       if (token != NULL)
       {
         int distance = atoi(token);
-        char atoiResult = checkAtoiResult(distance, token);
+        char atoi_result = check_atoi(distance, token);
         token = strtok(NULL, " ");
-        if (token != NULL && atoiResult && inRange(distance, 0, 100))
+        if (token != NULL && atoi_result && in_range(distance, 0, 100))
         {
           int obj_speed = atoi(token);
 
-          if (checkAtoiResult(obj_speed, token) && inRange(obj_speed, 0, 100) )
+          if (check_atoi(obj_speed, token) && in_range(obj_speed, 0, 100))
           {
-            *parsedMessage = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
-            memset(*parsedMessage, 0, sizeof(CommListenerMessage));
+            *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
+            memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
-            (*parsedMessage)->command = SPAWN_CAR;
-            (*parsedMessage)->data.spawnCarData.distance = distance;
-            (*parsedMessage)->data.spawnCarData.obj_speed = obj_speed;
+            (*parsed_message)->command = SPAWN_CAR;
+            (*parsed_message)->data.spawn_car_data.distance = distance;
+            (*parsed_message)->data.spawn_car_data.obj_speed = obj_speed;
           }
         }
       }
     }
     else if (strcmp(token, "despawn") == 0)
     {
-      *parsedMessage = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
-      memset(*parsedMessage, 0, sizeof(CommListenerMessage));
+      *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
+      memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
-      (*parsedMessage)->command = DESPAWN_CAR;
+      (*parsed_message)->command = DESPAWN_CAR;
     }
     else if (strcmp(token, "gas") == 0)
     {
       token = strtok(NULL, " ");
       if (token != NULL)
       {
-        int throttleLevel = atoi(token);
+        int throttle_level = atoi(token);
 
-        if (checkAtoiResult(throttleLevel, token) && inRange(throttleLevel, 0, 100))
+        if (check_atoi(throttle_level, token) && in_range(throttle_level, 0, 100))
         {
-          *parsedMessage = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
-          memset(*parsedMessage, 0, sizeof(CommListenerMessage));
+          *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
+          memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
-          (*parsedMessage)->command = THROTTLE;
-          (*parsedMessage)->data.throttleLevel = throttleLevel;
+          (*parsed_message)->command = THROTTLE;
+          (*parsed_message)->data.throttle_level = throttle_level;
         }
       }
     }
@@ -182,13 +182,13 @@ void parseMessage(char *message, CommListenerMessage **parsedMessage)
       token = strtok(NULL, " ");
       if (token != NULL)
       {
-        int brakeLevel = atoi(token);
+        int brake_level = atoi(token);
 
-        *parsedMessage = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
-        memset(*parsedMessage, 0, sizeof(CommListenerMessage));
+        *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
+        memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
-        (*parsedMessage)->command = BRAKE;
-        (*parsedMessage)->data.brakeLevel = brakeLevel;
+        (*parsed_message)->command = BRAKE;
+        (*parsed_message)->data.brake_level = brake_level;
       }
     }
     else if (strcmp(token, "skid") == 0)
@@ -198,37 +198,37 @@ void parseMessage(char *message, CommListenerMessage **parsedMessage)
       {
         if (strcmp(token, "on") == 0)
         {
-          *parsedMessage = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
-          memset(*parsedMessage, 0, sizeof(CommListenerMessage));
+          *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
+          memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
-          (*parsedMessage)->command = SKID;
-          (*parsedMessage)->data.skidOn = TRUE;
+          (*parsed_message)->command = SKID;
+          (*parsed_message)->data.skid_on = TRUE;
         }
         else if (strcmp(token, "off") == 0)
         {
-          *parsedMessage = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
-          memset(*parsedMessage, 0, sizeof(CommListenerMessage));
+          *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
+          memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
-          (*parsedMessage)->command = SKID;
-          (*parsedMessage)->data.skidOn = FALSE;
+          (*parsed_message)->command = SKID;
+          (*parsed_message)->data.skid_on = FALSE;
         }
       }
     }
     else
     {
       // Invalid command
-      *parsedMessage = NULL;
+      *parsed_message = NULL;
     }
   }
 }
 
-char checkAtoiResult(int result, char *token)
+char check_atoi(int result, char *token)
 {
   // Because atoi returns 0 if it cannot convert the string to an integer
   return (result == 0 && strcmp(token, "0")) == 0 || result != 0;
 }
 
-char inRange(int value, int min, int max)
+char in_range(int value, int min, int max)
 {
   return value >= min && value <= max;
 }
