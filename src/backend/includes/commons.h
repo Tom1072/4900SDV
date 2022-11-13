@@ -11,13 +11,13 @@
 
 #define BRAKE_ACTUATOR 1
 #define THROTTLE_ACTUATOR 2
-#define MAX_STRING_LEN    256
+#define MAX_STRING_LEN    512
 
 // Names of the channels
 #define MANUAL_NAME "manual_driver_attach_name"
 #define ABS_NAME "ABS_attach_name"
 #define ACC_NAME "ACC_attach_name"
-#define SIMULATOR_NAME "simulator"
+#define SIMULATOR_NAME "simulator_attach_name"
 
 #define CHECK_STATUS(status) \
     if (status != OK) \

@@ -1,11 +1,9 @@
 
 #pragma once
 
-
-#define ATTACH_POINT "simulator"
-
 #include <sys/iomsg.h>
 #include "../includes/car_structs.h"
+#include "../includes/commons.h"
 
 int init(void);
 
@@ -15,6 +13,7 @@ typedef union
   char rmsg [MAX_STRING_LEN +1];
 } message_t;
 
+void init_env(Sensors* , OutsideObject*, Environment* );
 void update_distance( unsigned short, Sensors* , OutsideObject* );
 void update_speed( unsigned short, Sensors* );
 void update_skid( unsigned short, Sensors* );

@@ -13,7 +13,7 @@ typedef struct
 typedef struct
 {
   unsigned short distance;
-  unsigned short initSpeed;
+  unsigned short init_speed;
   unsigned short speed;
   char           object; // can be either TRUE or FALSE
 } OutsideObject;
