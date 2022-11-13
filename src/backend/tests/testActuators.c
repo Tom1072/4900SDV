@@ -6,9 +6,9 @@
 #include "../includes/utils.h"
 #include "../includes/actuators.h"
 
-void *test_simulator();
+void *mocked_simulator_actuator_test();
 
-char testActuators()
+char test_actuators()
 {
   printf("Testing actuators...\n");
   pthread_t ABS_thread, ACC_thread, manual_driver_thread;
@@ -20,7 +20,7 @@ char testActuators()
   create_thread(&manual_driver_thread, &manual_driver_attr, 2, ManualDriver);
   create_thread(&ACC_thread, &ACC_attr, 1, ACC);
   create_thread(&ABS_thread, &ABS_attr, 3, ABS);
-  create_thread(&test_sim_thread, &test_sim_attr, 4, test_simulator);
+  create_thread(&test_sim_thread, &test_sim_attr, 4, mocked_simulator_actuator_test);
 
   pthread_join(manual_driver_thread, NULL);
   pthread_join(ACC_thread, NULL);
@@ -28,7 +28,7 @@ char testActuators()
   return TRUE;
 }
 
-void *test_simulator()
+void *mocked_simulator_actuator_test()
 {
   int manual_coid, ACC_coid, ABS_coid;
 

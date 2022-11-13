@@ -1,13 +1,19 @@
 #include <stdio.h>
+#include <assert.h>
 #include "backend/includes/tests.h"
+#include "backend/includes/commons.h"
 
-int main() {
-    printf("Hello, World!\n");
-    // char result  = testComm();
-     char result2 = testSimulator();
-//     char result3 = testActuators();
-     printf("Result: %d", result2);
+int main()
+{
+  printf("SDV\n");
 
+  // char comm_result  = test_comm();
+  // char simulator_result = test_simulator();
+  // char view_result = test_view();
 
-    return 0;
+  // assert(comm_result);
+  // assert(simulator_result);
+  // assert(view_result);
+
+  return 0;
 }

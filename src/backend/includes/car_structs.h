@@ -8,6 +8,7 @@ typedef struct
   unsigned short distance;
   unsigned short speed;
   unsigned short brake_level;
+  unsigned short throttle_level;
 } Sensors;
 
 typedef struct
