@@ -26,6 +26,7 @@
 typedef enum
 {
     COMM = 0, // Msg from the communication module
+    SIMULATOR,
     BRAKE_ACTUATOR,
     THROTTLE_ACTUATOR,
 	SIMULATOR,
