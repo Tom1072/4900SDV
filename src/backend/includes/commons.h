@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sys/dispatch.h>
+#include <pthread.h>
 
 // Constants
 #define TRUE 1
@@ -27,10 +28,9 @@ typedef enum
 {
     COMM = 0, // Msg from the communication module
     SIMULATOR,
-    BRAKE_ACTUATOR,
-    THROTTLE_ACTUATOR,
-	SIMULATOR,
-	MANUAL_DRIVER
+    MANUAL_DRIVER,
+    ACC,
+    ABS,
 } PulseCode;
 
 typedef struct
@@ -41,6 +41,7 @@ typedef struct
   unsigned short brake_level;   // current brake position
   unsigned short obj_speed;    // object in front speed
   char           object;       // can be either TRUE or FALSE if not set
+  pthread_mutex_t mutex;       // to lick the data for distance simulation
 } Environment;
 
 typedef union {

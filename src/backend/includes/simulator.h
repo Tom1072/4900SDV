@@ -12,14 +12,17 @@ typedef union
   char rmsg [MAX_STRING_LEN +1];
 } message_t;
 
-void init_env(Sensors* , OutsideObject*, Environment* );
-void copy_updates(Environment*, Environment*);
+void init_env( Sensors* , OutsideObject*, Environment* );
+void copy_updates( Environment*, Environment* );
 void update_distance( unsigned short, Sensors* , OutsideObject* );
 void update_speed( unsigned short, Sensors* );
 void update_skid( unsigned short, Sensors* );
 void update_brake_level( unsigned short, Sensors* );
 void set_object( OutsideObject* );
 void remove_object( OutsideObject* );
+
+// Distance between object and car
+void *simulate_distance( void * env);//Environment* );
 
 // Getters for sending to display
 unsigned short get_speed( Sensors* );

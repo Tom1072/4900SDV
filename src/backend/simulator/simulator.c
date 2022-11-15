@@ -26,9 +26,14 @@ int init(void){
   OutsideObject           other_car;
   Environment             car_env;
   unsigned short          brake, gas;
+  pthread_t               distance_simulator;
 
   // initialize the sensor information to 0
   init_env(&car, &other_car, &car_env);
+  pthread_mutex_init(&car_env.mutex, NULL);
+
+  // Create a thread for distance simulation
+  pthread_create(&distance_simulator, NULL, simulate_distance, &car_env);
 
   // Create Channel
   if((attach = name_attach(NULL, SIMULATOR_NAME, 0)) == NULL)
@@ -64,7 +69,7 @@ int init(void){
       printf("Simulator*** Client is gone\n");
       ConnectDetach(message.scoid);
       break;
-    case THROTTLE_ACTUATOR:
+    case ACC:
       gas = message.value.sival_int;
       update_speed(gas, &car);
       // Update the display Environment after each message
@@ -75,7 +80,7 @@ int init(void){
       reply_display = MsgSendPulsePtr(coid_acc, 2, SIMULATOR, (void *)new_env_t);
 
       break;
-    case BRAKE_ACTUATOR:
+    case ABS:
       brake = message.value.sival_int;
 	  update_brake_level(brake, &car);
 	  // Update the display Environment after each message
@@ -158,6 +163,10 @@ int init(void){
 //  break; // Debug statement
   } // End while
 
+  // Destroy mutex
+  pthread_join(distance_simulator, NULL);
+  pthread_mutex_destroy(&car_env.mutex);
+
   //remove the name from the namespace and destroy the channel
   name_close(coid_acc);
   name_close(coid_abs);
@@ -166,6 +175,8 @@ int init(void){
   name_detach(attach, 0);
   return(EXIT_SUCCESS);
 }
+
+
 void init_env(Sensors* sens, OutsideObject* obj, Environment* env)
 {
   env->skid        = sens->skid                   = 0;
@@ -211,7 +222,32 @@ void remove_object( OutsideObject* object)
 {
   object->object = FALSE;
 }
-
+void *simulate_distance(void *data)
+{
+  Environment *env = (Environment*) data;
+  int t = 100; // ms
+  float d_obj, d_car, dist;
+  dist = d_obj = d_car = 0;
+  sleep(1);
+  // If object is set/spawned change distance between teh car and object
+  while(1)
+  {
+	  pthread_mutex_lock(&env->mutex);
+	  if((env->object == TRUE))
+	  {
+		d_obj = ((float)(env->obj_speed))*t/3600;
+		d_car = ((float)(env->car_speed))*t/3600;
+		dist  = (int)(env->distance) + (d_obj - d_car);
+		//lock the dist var and update
+		env->distance = (int)dist;
+	  }
+	  pthread_mutex_unlock(&env->mutex);
+	  // Sleep 100 ms
+	  usleep( t*1000 );
+  }
+  printf("No car in front OR you have crashed\n");
+  return NULL;
+}
 
 unsigned short get_speed( Sensors* sensors )
 {

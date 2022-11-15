@@ -18,21 +18,28 @@ void *mocked_comm();
 void *test_sim();
 void *mocked_acc();
 void *mocked_abs();
+void *distance_test();
 
 char test_simulator() {
   printf("Testing simulator...\n");
-  pthread_t mocked_comm_thread, test_sim_thread, mocked_acc_thread, mocked_abs_thread;
-  pthread_attr_t mocked_comm_attr, test_sim_attr, mocked_acc_attr, mocked_abs_attr;
+  pthread_t      mocked_comm_thread, test_sim_thread,
+  	  	  	     mocked_acc_thread, mocked_abs_thread,
+			     mocked_dist_thread;
+  pthread_attr_t mocked_comm_attr, test_sim_attr,
+  	  	  	  	 mocked_acc_attr, mocked_abs_attr,
+				 mocked_dist_attr;
 
-  create_thread(&test_sim_thread, &test_sim_attr, 1, test_sim);
-  create_thread(&mocked_comm_thread, &mocked_comm_attr, 2, mocked_comm);
-  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, mocked_acc);
-  create_thread(&mocked_abs_thread, &mocked_abs_attr, 2, mocked_abs);
+//  create_thread(&test_sim_thread, &test_sim_attr, 1, test_sim);
+//  create_thread(&mocked_comm_thread, &mocked_comm_attr, 2, mocked_comm);
+//  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, mocked_acc);
+//  create_thread(&mocked_abs_thread, &mocked_abs_attr, 2, mocked_abs);
+  create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, distance_test);
 
-  pthread_join(test_sim_thread, NULL);
-  pthread_join(mocked_comm_thread, NULL);
-  pthread_join(mocked_acc_thread, NULL);
-  pthread_join(mocked_abs_thread, NULL);
+//  pthread_join(test_sim_thread, NULL);
+//  pthread_join(mocked_comm_thread, NULL);
+//  pthread_join(mocked_acc_thread, NULL);
+//  pthread_join(mocked_abs_thread, NULL);
+  pthread_join(mocked_dist_thread, NULL);
   return TRUE;
 }
 
@@ -159,5 +166,104 @@ void *mocked_abs()
 void *test_sim()
 {
   init();
+  return NULL;
+}
+
+void *distance_test()
+{
+  Environment    env;
+  Sensors        sen;
+  OutsideObject obj;
+  init_env( &sen, &obj, &env );
+  pthread_t               distance_simulator;
+  pthread_mutex_init(&env.mutex, NULL);
+  // Create a thread for distance simulation
+  pthread_create(&distance_simulator, NULL, simulate_distance, (void *)&env);
+
+  // -----------------------------------------------------------
+  // Test Approaching car -------------------------------------
+
+  env.obj_speed = 60;
+  env.car_speed = 70;
+  env.object    = TRUE;
+  env.distance  = 100;
+  printf("Distance in meters initial: %d, obj = %d\n", env.distance, env.object);
+  while(env.distance > -1)
+  {
+	  printf("Distance in meters: %d\n", env.distance);
+	  usleep(100000);
+	  if(env.distance == 0){
+		  env.object = FALSE;
+		  break;
+	  }
+
+  }
+
+  printf("Thread stopped calculating the distance\n");
+
+  // -----------------------------------------------------------
+  // Test disappearing car in front-----------------------------
+
+  int i = 0;
+  env.obj_speed = 60;
+  env.car_speed = 70;
+  env.object    = TRUE;
+  env.distance  = 100;
+
+  while(env.distance > -1)
+  {
+	  printf("Distance in meters: %d\n", env.distance);
+	  usleep(100000);
+	  if(i > 30){
+		  env.object = FALSE;
+		  break;
+	  }i++;
+  }
+  printf("Thread stopped calculating the distance\n");
+
+  // -----------------------------------------------------------
+  // Test car in front same speed  -----------------------------
+
+  i = 0;
+  env.obj_speed = 70;
+  env.car_speed = 70;
+  env.object    = TRUE;
+  env.distance  = 100;
+
+  while(env.distance > -1)
+  {
+	  printf("Distance in meters: %d\n", env.distance);
+	  usleep(100000);
+	  if(i > 30){
+		  env.object = FALSE;
+		  break;
+	  }i++;
+  }
+  printf("Thread stopped calculating the distance\n");
+
+  // -----------------------------------------------------------
+   // Test car in front accelerate -----------------------------
+
+//   int i = 0;
+//   env.obj_speed = 80;
+//   env.car_speed = 60;
+//   env.object    = TRUE;
+//   env.distance  = 100;
+//
+//   while(env.distance > -1)
+//   {
+// 	  printf("Distance in meters: %d\n", env.distance);
+// 	  usleep(100000);
+// 	  if(i > 40){
+// 		  env.object = FALSE;
+// 		  break;
+// 	  }i++;
+//   }
+//   printf("Thread stopped calculating the distance\n");
+
+
+  // Destroy mutex
+  pthread_join(distance_simulator, NULL);
+  pthread_mutex_destroy(&env.mutex);
   return NULL;
 }
