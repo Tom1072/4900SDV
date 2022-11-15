@@ -1,3 +1,5 @@
+#pragma once
+
 void *ManualDriver();
 void *ACC();
 void *ABS();
@@ -7,23 +9,24 @@ void *ABS();
 #define ABS_CODE 2
 
 #define ACC_SLOW_THRESHOLD 4 // meters
-#define ACC_SLOW_THRESHOLD 2 // meters
+#define ACC_STOP_THRESHOLD 2 // meters
 
 
 /**
  * Payload that can be used for incoming and outgoing communication between Actuators and Simulator
 */
 typedef struct {
-  int brake_level;
-  int gas_level;
-  int distance;
-  int desired_speed;
-  int current_speed;
-  bool skidding;
+  unsigned short brake_level;
+  unsigned short gas_level;
+  unsigned short distance;
+  unsigned short desired_speed;
+  unsigned short current_speed;
+  unsigned short skidding; // only 0 or 1
   // int acceleration; // I just put this here in case it's needed later
-} ActuatorPayload;
+} ActuatorInputPayload;
 
 typedef struct {
-  int type; // BRAKE_ACTUATOR or THROTTLE_ACTUATOR
-  int level; // 0-100
-} Speed;
+  unsigned short brake_level;
+  unsigned short gas_level;
+  unsigned short speed;
+} ActuatorOutputPayload;

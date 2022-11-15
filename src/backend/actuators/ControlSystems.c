@@ -11,10 +11,9 @@
  * Handler of the ManualDriver thread.
 */
 void *ManualDriver() {
-  printf("I'm Manual Driver\n");
-  // actuatorChanges_t data;
   name_attach_t *attach;
   struct _pulse pulse_msg;
+  ActuatorInputPayload *payload;
 
   if ((attach = name_attach(NULL, MANUAL_NAME, 0)) == NULL)
     return (void *)EXIT_FAILURE;
@@ -28,9 +27,10 @@ void *ManualDriver() {
         ConnectDetach(pulse_msg.scoid);
         break;
       default:
-        // printf("MANUAL DRIVER GOT pulse code: %d; value: %d\n", pulse_msg.code, pulse_msg.value.sival_int);
-        printf("MANUAL DRIVER GOT pulse code: %p\n", pulse_msg.value.sival_ptr);
-        printf("  %s; value: %d\n", pulse_msg.code, (char *)pulse_msg.value.sival_ptr);
+        payload = (ActuatorInputPayload *)pulse_msg.value.sival_ptr;
+        printf("MANUAL DRIVER GOT pulse code:\n");
+        printf("  Brake level: %d\n", payload->brake_level);
+        printf("  Gas level: %d\n", payload->gas_level);
         free(pulse_msg.value.sival_ptr);
     }
   }
@@ -42,11 +42,10 @@ void *ManualDriver() {
  * Handler of the ACC thread.
 */
 void *ACC() {
-  printf("I'm ACC\n");
   // int rcvid;
-  // actuatorChanges_t data;
   name_attach_t *attach;
   struct _pulse pulse_msg;
+  ActuatorInputPayload *payload;
 
   if ((attach = name_attach(NULL, ACC_NAME, 0)) == NULL) 
     return (void *)EXIT_FAILURE;
@@ -60,8 +59,11 @@ void *ACC() {
         ConnectDetach(pulse_msg.scoid);
         break;
       default:
+        payload = (ActuatorInputPayload *)pulse_msg.value.sival_ptr;
         printf("ACC GOT pulse code:\n");
-        printf("  %s; value: %d\n", pulse_msg.code, (char *)pulse_msg.value.sival_ptr);
+        printf("  Distance: %d\n", payload->distance);
+        printf("  Desired speed: %d\n", payload->desired_speed);
+        printf("  Current speed: %d\n", payload->current_speed);
         free(pulse_msg.value.sival_ptr);
     }
   }
@@ -73,11 +75,10 @@ void *ACC() {
  * Handler of the ABS thread.
  */
 void *ABS() {
-  printf("I'm ABS\n");
   // int rcvid;
-  // actuatorChanges_t data;
   name_attach_t *attach;
   struct _pulse pulse_msg;
+  ActuatorInputPayload *payload;
 
   if ((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
     return (void *)EXIT_FAILURE;
@@ -91,8 +92,10 @@ void *ABS() {
         ConnectDetach(pulse_msg.scoid);
         break;
       default:
-        printf("ABS GOT pulse code:\n");
-        printf("  %s; value: %d\n", pulse_msg.code, (char *)pulse_msg.value.sival_ptr);
+        payload = (ActuatorInputPayload *)pulse_msg.value.sival_ptr;
+        printf("ACC GOT pulse code:\n");
+        printf("  Brake level: %d\n", payload->brake_level);
+        printf("  Is skidding: %d\n", payload->skidding);
         free(pulse_msg.value.sival_ptr);
     }
   }
