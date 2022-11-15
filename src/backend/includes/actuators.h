@@ -4,13 +4,22 @@ void *ManualDriver();
 void *ACC();
 void *ABS();
 
-#define MANUAL_DRIVER_CODE 0
-#define ACC_CODE 1
-#define ABS_CODE 2
 
 #define ACC_SLOW_THRESHOLD 4 // meters
 #define ACC_STOP_THRESHOLD 2 // meters
 
+typedef enum {
+  MANUAL_DRIVER_CODE = 0,
+  ACC_CODE,
+  ABS_CODE,
+} ControllerCode;
+
+typedef enum {
+  NOT_ACQUIRED = 0,
+  MANUAL_DRIVER_STATE,
+  ACC_STATE,
+  ABS_STATE,
+} ControllerState;
 
 /**
  * Payload that can be used for incoming and outgoing communication between Actuators and Simulator
