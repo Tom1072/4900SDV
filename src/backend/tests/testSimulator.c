@@ -39,26 +39,54 @@ char test_simulator() {
 void *mocked_comm()
 {
 
-  int sim_coid;
-  sleep(1);
   printf("Testing communication...\n");
-  // Environment* env = (Environment*) malloc(sizeof(Environment));;
-  // env->skid        = 15;
-  // env->distance    = 200;
-  // env->car_speed   = 100;
-  // env->brake_level = 0;
-  // env->obj_speed   = 100;
-  // env->object      = FALSE;
-  CommListenerMessage* msg = (CommListenerMessage*) malloc(sizeof(CommListenerMessage));
+  int sim_coid;
+  name_attach_t 		  *attach;
+  struct _pulse           message;
+  int                     coid_sim;
+  int                     rcvid;
+  // Create Channel
+  if((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
+  {
+    //if there was an error creating the channel
+    perror("ACC name_attach():");
+    exit(EXIT_FAILURE);
+  }
+  sleep(1);
 
+  CommListenerMessage* msg = (CommListenerMessage*) malloc(sizeof(CommListenerMessage));
   msg->command = SPAWN_CAR;
-  msg->data.spawn_car_data.distance = 10;
+  msg->data.spawn_car_data.distance = 60;
   msg->data.spawn_car_data.obj_speed = 20;
 
   sim_coid = name_open(SIMULATOR_NAME, 0);
-  MsgSendPulsePtr(sim_coid, -1, 100, (void *)msg);
+  int reply_comm = MsgSendPulsePtr(sim_coid, -1, COMM, (void *)msg);
+  printf("comm reply: %d\n", reply_comm);
+
+//---------------------------------------------------------------
+  //------------- Server side ------------------------------------
+  rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
+    switch(message.code)
+    {
+    case _PULSE_CODE_DISCONNECT:
+      printf("***DISPLAY Client is gone\n");
+      ConnectDetach(message.scoid);
+      break;
+    case SIMULATOR:
+      printf("***DISPLAY: message code = %d\n",message.code);
+  	  Environment *data = (Environment *)message.value.sival_ptr;
+  	  printf("***DISPLAY: speed = %d, distance = %d, brake_level = %d, skid = %d\n",
+  			  data->car_speed, data->distance, data->brake_level, data->skid);
+  	  free(data);
+  	  break;
+    default:
+  	  printf("DISPLAY: code value=%d\n", message.code);
+    }
+// --------------------------------------------
+
 
   name_close(sim_coid);
+  name_detach(attach, 0);
   return NULL;
 }
 
@@ -66,26 +94,64 @@ void *mocked_acc()
 {
   int sim_coid;
   printf("Testing acc replies...\n");
-  sleep(2);
+  name_attach_t 		  *attach;
+  struct _pulse           message;
+  int                     coid_acc;
+  int                     rcvid;
+  int                     reply_throttle;
+  // Create Channel
+//  if((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
+//  {
+//    //if there was an error creating the channel
+//    perror("ACC name_attach():");
+//    exit(EXIT_FAILURE);
+//  }
+
+  sleep(1);
+
   sim_coid = name_open(SIMULATOR_NAME, 0);
-  int reply_throttle = MsgSendPulse(sim_coid, -1, THROTTLE_ACTUATOR, 4);
-  printf("acc reply: %d\n", reply_throttle);
-  reply_throttle = MsgSendPulse(sim_coid, -1, THROTTLE_ACTUATOR, -3);
+
+  reply_throttle = MsgSendPulse(sim_coid, -1, THROTTLE_ACTUATOR, 4);
   printf("acc reply: %d\n", reply_throttle);
 
+  /*
+  rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
+  switch(message.code)
+  {
+  case _PULSE_CODE_DISCONNECT:
+    printf("Simulator*** Client is gone\n");
+    ConnectDetach(message.scoid);
+    break;
+  case SIMULATOR:
+	  Sensors *data = (Sensors *)message.value.sival_ptr;
+	  if( (data->throttle_level > 1) && (data->distance > 50) ){
+		  reply_throttle = MsgSendPulse(sim_coid, -1, THROTTLE_ACTUATOR, 4);
+		  printf("acc reply: %d\n", reply_throttle);
+	  } else {
+		  reply_throttle = MsgSendPulse(sim_coid, -1, THROTTLE_ACTUATOR, -3);
+		  printf("acc reply: %d\n", reply_throttle);
+	  } free(data);
+	  break;
+  default:
+	  printf("ACC: code value=%d\n", message.code);
+  }*/
+  printf("ACC: Message code received: %d\n", message.value.sival_ptr);
+
   name_close(sim_coid);
+//  name_detach(attach, 0);
+
   return NULL;
 }
 void *mocked_abs()
 {
   int sim_coid;
   printf("Testing abs replies...\n");
-  sleep(2);
+  sleep(1);
   sim_coid = name_open(SIMULATOR_NAME, 0);
-  int reply_brakes = MsgSendPulse(sim_coid, -1, BRAKE_ACTUATOR, 25);
-  printf("abs reply: %d\n", reply_brakes);
-  reply_brakes = MsgSendPulse(sim_coid, -1, BRAKE_ACTUATOR, -20);
-  printf("abs reply: %d\n", reply_brakes);
+//  int reply_brakes = MsgSendPulse(sim_coid, -1, BRAKE_ACTUATOR, 25);
+//  printf("abs reply: %d\n", reply_brakes);
+//  reply_brakes = MsgSendPulse(sim_coid, -1, BRAKE_ACTUATOR, -20);
+//  printf("abs reply: %d\n", reply_brakes);
 
   name_close(sim_coid);
   return NULL;

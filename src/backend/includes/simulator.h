@@ -13,6 +13,7 @@ typedef union
 } message_t;
 
 void init_env(Sensors* , OutsideObject*, Environment* );
+void copy_updates(Environment*, Environment*);
 void update_distance( unsigned short, Sensors* , OutsideObject* );
 void update_speed( unsigned short, Sensors* );
 void update_skid( unsigned short, Sensors* );

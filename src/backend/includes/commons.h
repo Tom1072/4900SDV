@@ -15,6 +15,7 @@
 #define ABS_NAME "ABS_attach_name"
 #define ACC_NAME "ACC_attach_name"
 #define SIMULATOR_NAME "simulator_attach_name"
+#define COMM_NAME "comm_attach_name"
 
 #define CHECK_STATUS(status) \
     if (status != OK) \
@@ -26,7 +27,9 @@ typedef enum
 {
     COMM = 0, // Msg from the communication module
     BRAKE_ACTUATOR,
-    THROTTLE_ACTUATOR
+    THROTTLE_ACTUATOR,
+	SIMULATOR,
+	MANUAL_DRIVER
 } PulseCode;
 
 typedef struct

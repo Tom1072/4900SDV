@@ -20,7 +20,8 @@ int init(void){
 
   struct _pulse           message;
   name_attach_t 		  *attach;
-  int                     rcvid;
+  int                     coid_acc, coid_abs, coid_driver, coid_comm;
+  int                     rcvid, reply_display;
   Sensors                 car;
   OutsideObject           other_car;
   Environment             car_env;
@@ -37,6 +38,13 @@ int init(void){
     exit(EXIT_FAILURE);
   }
 
+  // Create a channel to use as client for sending pulses
+  sleep(1); // to allow them to attach to simulator
+  coid_acc = name_open(ACC_NAME, 0);
+  coid_abs = name_open(ABS_NAME, 0);
+  coid_driver = name_open(MANUAL_NAME, 0);
+  coid_comm = name_open(COMM_NAME, 0);
+
   //the server should keep receiving, processing and replying to messages
   while(1)
   {
@@ -49,6 +57,7 @@ int init(void){
   }
   else if(rcvid == 0)
   {
+    printf("***Simulator: message.code=%d\n", message.code);
     switch(message.code)
     {
     case _PULSE_CODE_DISCONNECT:
@@ -58,12 +67,35 @@ int init(void){
     case THROTTLE_ACTUATOR:
       gas = message.value.sival_int;
       update_speed(gas, &car);
+      // Update the display Environment after each message
+      Environment* new_env_t = (Environment*) malloc(sizeof(Environment));
+      // fill the data
+      copy_updates(&car_env, new_env_t);
+      //Send the updates to display
+      reply_display = MsgSendPulsePtr(coid_acc, 2, SIMULATOR, (void *)new_env_t);
+
       break;
     case BRAKE_ACTUATOR:
       brake = message.value.sival_int;
-	    update_brake_level(brake, &car);
-	    break;
-
+	  update_brake_level(brake, &car);
+	  // Update the display Environment after each message
+	  // Update the display Environment after each message
+	  Environment* new_env_b = (Environment*) malloc(sizeof(Environment));
+	  // fill the data
+	  copy_updates(&car_env, new_env_b);
+	  //Send the updates to display
+	  reply_display = MsgSendPulsePtr(coid_acc, 2, SIMULATOR, (void *)new_env_b);
+	  break;
+    case MANUAL_DRIVER:
+       gas = message.value.sival_int;
+       update_speed(gas, &car);
+       // Update the display Environment after each message
+       Environment* new_env_d = (Environment*) malloc(sizeof(Environment));
+       // fill the data
+       copy_updates(&car_env, new_env_d);
+       //Send the updates to display
+       reply_display = MsgSendPulsePtr(coid_acc, 2, SIMULATOR, (void *)new_env_d);
+       break;
     case COMM:
     {
       // Here we fill the Environment values and fill the car and obj structs
@@ -85,6 +117,7 @@ int init(void){
           other_car.distance = data.spawn_car_data.distance;
           other_car.speed = data.spawn_car_data.obj_speed;
           other_car.init_speed = data.spawn_car_data.obj_speed;
+
           break;
         case DESPAWN_CAR:
           car_env.object = FALSE;
@@ -111,17 +144,25 @@ int init(void){
           printf("Simulator*** Unknown command\n");
       }
       free(comm_message);
-    }
+      break;
+    } default:
+    	printf("***Simulator: code = %d. Unknown type\n", message.code);
 
     }
     printf("Car speed = %u\nCar brake level = %u\n", car.speed, car.brake_level);
     printf("Env vars: car speed = %u, brakes = %u, skid = %u, dist = %u, obj = %d\n",
   		      car.speed, car.brake_level, car.skid, car.distance, other_car.object);
+
+
   }
 //  break; // Debug statement
   } // End while
 
   //remove the name from the namespace and destroy the channel
+  name_close(coid_acc);
+  name_close(coid_abs);
+  name_close(coid_driver);
+  name_close(coid_comm);
   name_detach(attach, 0);
   return(EXIT_SUCCESS);
 }
@@ -135,6 +176,16 @@ void init_env(Sensors* sens, OutsideObject* obj, Environment* env)
   env->object      = obj->object              = FALSE;
 }
 
+void copy_updates(Environment* old_env, Environment* new_env)
+{
+	new_env->skid        = old_env->skid;
+	new_env->distance    = old_env->distance;
+	new_env->car_speed   = old_env->car_speed;
+	new_env->brake_level = old_env->brake_level;
+	new_env->obj_speed   = old_env->obj_speed;
+	new_env->object      = old_env->object;
+}
+
 void update_distance( unsigned short value, Sensors* sensors, OutsideObject* obj)
 {
   sensors->distance = value;
@@ -142,7 +193,7 @@ void update_distance( unsigned short value, Sensors* sensors, OutsideObject* obj
 }
 void update_speed( unsigned short value, Sensors* sensors)
 {
-  sensors->speed += value;
+  sensors->speed = value;
 }
 void update_skid( unsigned short level, Sensors* sensors)
 {

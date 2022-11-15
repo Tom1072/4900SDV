@@ -14,6 +14,24 @@ typedef struct
 typedef struct
 {
   unsigned short distance;
+  unsigned short brake_level;
+  unsigned short throttle_level;
+} acc_message_t;
+
+typedef struct
+{
+  unsigned short skid;
+} abs_message_t;
+
+typedef struct
+{
+  unsigned short brake_level;
+  unsigned short throttle_level;
+} man_message_t;
+
+typedef struct
+{
+  unsigned short distance;
   unsigned short init_speed;
   unsigned short speed;
   char           object; // can be either TRUE or FALSE
