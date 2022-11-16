@@ -10,9 +10,9 @@ void *ABS();
 
 typedef enum {
   NOT_ACQUIRED = 0,
-  MANUAL_DRIVER_STATE,
-  ACC_STATE,
-  ABS_STATE,
+  MANUAL_DRIVER_STATE = 2,
+  ACC_STATE = 1,
+  ABS_STATE = 3,
 } ControllerState;
 
 // TODO: Separate these

@@ -10,9 +10,9 @@
 
 #define MAX_STRING_LEN    512
 
-#define MANUAL_PULSE_PRIO 2
-#define ACC_PULSE_PRIO 1
-#define ABS_PULSE_PRIO 3
+#define MANUAL_PRIO 2
+#define ACC_PRIO 1
+#define ABS_PRIO 3
 
 // Names of the channels
 #define MANUAL_NAME "manual_driver_attach_name"
