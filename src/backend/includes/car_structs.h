@@ -16,18 +16,25 @@ typedef struct
   unsigned short distance;
   unsigned short brake_level;
   unsigned short throttle_level;
-} acc_message_t;
+} AccMessageInput;
 
 typedef struct
 {
   unsigned short skid;
-} abs_message_t;
+} AbsMessageInput;
 
 typedef struct
 {
   unsigned short brake_level;
   unsigned short throttle_level;
-} man_message_t;
+} ManMessageInput;
+
+
+typedef struct {
+  unsigned short brake_level;
+  unsigned short gas_level;
+  unsigned short speed;
+} ActuatorOutputPayload;
 
 typedef struct
 {

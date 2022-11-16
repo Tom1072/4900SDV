@@ -12,7 +12,8 @@ typedef enum
   DESPAWN_CAR,
   THROTTLE,
   BRAKE,
-  SKID
+  SKID,
+  ACC_SPEED
 } CommandType;
 
 typedef struct
@@ -21,12 +22,20 @@ typedef struct
   int obj_speed;
 } SpawnCarData;
 
+typedef struct
+{
+  int brake_level;
+  char skid_on;
+} BrakeData;
+
 typedef union
 {
   SpawnCarData spawn_car_data; // used for SPAWN_CAR command
   int throttle_level;          // 0-100, used for GAS command
   int brake_level;             // 0-100, used for BRAKE command
   char skid_on;                // TRUE or FALSE
+  int acc_speed;               // Used for ACC speed command
+  BrakeData brake_data;        // Used for BRAKE command
 } CommandData;
 
 typedef struct

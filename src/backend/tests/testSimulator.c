@@ -118,7 +118,7 @@ void *mocked_acc()
 
   sim_coid = name_open(SIMULATOR_NAME, 0);
 
-  reply_throttle = MsgSendPulse(sim_coid, -1, THROTTLE_ACTUATOR, 4);
+  reply_throttle = MsgSendPulse(sim_coid, -1, ACC_CODE, 4);
   printf("acc reply: %d\n", reply_throttle);
 
   /*
@@ -132,10 +132,10 @@ void *mocked_acc()
   case SIMULATOR:
 	  Sensors *data = (Sensors *)message.value.sival_ptr;
 	  if( (data->throttle_level > 1) && (data->distance > 50) ){
-		  reply_throttle = MsgSendPulse(sim_coid, -1, THROTTLE_ACTUATOR, 4);
+		  reply_throttle = MsgSendPulse(sim_coid, -1, ACC_CODE, 4);
 		  printf("acc reply: %d\n", reply_throttle);
 	  } else {
-		  reply_throttle = MsgSendPulse(sim_coid, -1, THROTTLE_ACTUATOR, -3);
+		  reply_throttle = MsgSendPulse(sim_coid, -1, ACC_CODE, -3);
 		  printf("acc reply: %d\n", reply_throttle);
 	  } free(data);
 	  break;
@@ -155,9 +155,9 @@ void *mocked_abs()
   printf("Testing abs replies...\n");
   sleep(1);
   sim_coid = name_open(SIMULATOR_NAME, 0);
-//  int reply_brakes = MsgSendPulse(sim_coid, -1, BRAKE_ACTUATOR, 25);
+//  int reply_brakes = MsgSendPulse(sim_coid, -1, ABS_CODE, 25);
 //  printf("abs reply: %d\n", reply_brakes);
-//  reply_brakes = MsgSendPulse(sim_coid, -1, BRAKE_ACTUATOR, -20);
+//  reply_brakes = MsgSendPulse(sim_coid, -1, ABS_CODE, -20);
 //  printf("abs reply: %d\n", reply_brakes);
 
   name_close(sim_coid);

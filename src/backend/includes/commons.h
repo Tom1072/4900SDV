@@ -29,8 +29,8 @@ typedef enum
     COMM = 0, // Msg from the communication module
     SIMULATOR,
     MANUAL_DRIVER,
-    ACC,
-    ABS,
+    ACC_CODE,
+    ABS_CODE,
 } PulseCode;
 
 typedef struct
@@ -40,6 +40,7 @@ typedef struct
   unsigned short car_speed;    // car current speed
   unsigned short brake_level;   // current brake position
   unsigned short obj_speed;    // object in front speed
+  unsigned short set_speed;    // ACC set speed
   char           object;       // can be either TRUE or FALSE if not set
   pthread_mutex_t mutex;       // to lick the data for distance simulation
 } Environment;

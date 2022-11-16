@@ -69,7 +69,7 @@ int init(void){
       printf("Simulator*** Client is gone\n");
       ConnectDetach(message.scoid);
       break;
-    case ACC:
+    case ACC_CODE:
       gas = message.value.sival_int;
       update_speed(gas, &car);
       // Update the display Environment after each message
@@ -80,7 +80,7 @@ int init(void){
       reply_display = MsgSendPulsePtr(coid_acc, 2, SIMULATOR, (void *)new_env_t);
 
       break;
-    case ABS:
+    case ABS_CODE:
       brake = message.value.sival_int;
 	  update_brake_level(brake, &car);
 	  // Update the display Environment after each message
@@ -138,12 +138,24 @@ int init(void){
           break;
         case THROTTLE:
           car.throttle_level = data.throttle_level;
+          // Manual send pulse
+          // Set speed value
           break;
         case BRAKE:
-          car.brake_level = data.brake_level;
+          car.brake_level = data.brake_data.brake_level;
+          car_env.skid  = data.brake_data.skid_on;
+          // Manual send pulse  - brake
+          // ABS - skid
           break;
         case SKID:
           car_env.skid = data.skid_on;
+//          car.brake_level = data.brake_level;
+          // ABS
+          // I decide when to stop the skid
+          break;
+        case ACC_SPEED:
+          car_env.set_speed = data.acc_speed;
+          // ABS
           break;
         default:
           printf("Simulator*** Unknown command\n");
@@ -184,6 +196,7 @@ void init_env(Sensors* sens, OutsideObject* obj, Environment* env)
   env->car_speed   = sens->speed                  = 0;
   env->brake_level = sens->brake_level            = 0;
   env->obj_speed   = obj->init_speed = obj->speed = 0;
+  env->set_speed                                  = 0;
   env->object      = obj->object              = FALSE;
 }
 
@@ -194,6 +207,7 @@ void copy_updates(Environment* old_env, Environment* new_env)
 	new_env->car_speed   = old_env->car_speed;
 	new_env->brake_level = old_env->brake_level;
 	new_env->obj_speed   = old_env->obj_speed;
+	new_env->set_speed   = old_env->set_speed;
 	new_env->object      = old_env->object;
 }
 
