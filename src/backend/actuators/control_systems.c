@@ -241,15 +241,17 @@ void *acc_processor(void *args)
     if (data->distance > ACC_SLOW_THRESHOLD)
     {
       // Current speed is already >= desired speed, nothing needed to be done
-      if (data->current_speed >= data->desired_speed)
+      if (data->current_speed == data->desired_speed)
       {
         printf("Current speed == desired speed & no object in front.\nNothing to be done.");
-        continue;
       }
-
-      // Otherwise, engage throttle
-      printf("ACC: engaging GAS and calculating new speed\n");
+      else
+      {
+        // Otherwise, engage throttle or slow down if current > desired speed
+        printf("ACC: engaging GAS and calculating new speed\n");
+      }
     }
+    // TODO Physics: handle thresholds dynamically based on distance and rate of dist decrease
     // If distance in the middle of the two thresholds, slowing down by disengage throttle
     else if (data->distance <= ACC_SLOW_THRESHOLD && data->distance > ACC_STOP_THRESHOLD)
     {
