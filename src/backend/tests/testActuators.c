@@ -19,10 +19,15 @@ char test_actuators()
   pthread_t test_sim_thread;
   pthread_attr_t test_sim_attr;
 
-  create_thread(&manual_driver_thread, &manual_driver_attr, 2, NULL, ManualDriver);
-  create_thread(&ACC_thread, &ACC_attr, 1, NULL, ACC);
-  create_thread(&ABS_thread, &ABS_attr, 3, NULL, ABS);
-  create_thread(&test_sim_thread, &test_sim_attr, 4, NULL, mocked_simulator_actuator_test);
+  create_thread(&manual_driver_thread, &manual_driver_attr, 100, NULL, ManualDriver);
+  create_thread(&ACC_thread, &ACC_attr, 100, NULL, ACC);
+  create_thread(&ABS_thread, &ABS_attr, 100, NULL, ABS);
+  create_thread(&test_sim_thread, &test_sim_attr, 80, NULL, mocked_simulator_actuator_test);
+
+  // pthread_create(&manual_driver_thread, NULL, ManualDriver, NULL);
+  // pthread_create(&ACC_thread, NULL, ACC, NULL);
+  // pthread_create(&ABS_thread, NULL, ABS, NULL);
+  // pthread_create(&test_sim_thread, NULL, mocked_simulator_actuator_test, NULL);
 
   pthread_join(manual_driver_thread, NULL);
   pthread_join(ACC_thread, NULL);

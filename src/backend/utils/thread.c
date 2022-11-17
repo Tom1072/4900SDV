@@ -4,6 +4,8 @@
 void create_thread(pthread_t *thread_ptr, pthread_attr_t *attr_ptr, int priority, void *args, void *(*handler)()) {
   struct sched_param param;
 
+  memset(&param, 0, sizeof(param));
+
   param.sched_priority = priority;
   pthread_attr_init(attr_ptr);
   pthread_attr_setschedparam(attr_ptr, &param);

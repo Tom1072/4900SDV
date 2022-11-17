@@ -40,17 +40,20 @@ void *ManualDriver()
   pthread_t processor_thread;
   pthread_attr_t processor_attr;
 
-  if ((attach = name_attach(NULL, MANUAL_NAME, 0)) == NULL)
-    return (void *)EXIT_FAILURE;
-
   printf("MAN attached\n");
+  if ((attach = name_attach(NULL, MANUAL_NAME, 0)) == NULL)
+    pthread_exit(NULL);
+    // return (void *)EXIT_FAILURE;
+
   
   processed_input = malloc(sizeof(ManMessageInput));
   create_thread(&processor_thread, &processor_attr, 5, processed_input, man_processor);
 
   while (1)
   {
+    printf("Manual waiting for pulse\n");
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
+    printf("Manual got pulse\n");
 
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
@@ -97,17 +100,20 @@ void *ACC()
   pthread_t processor_thread;
   pthread_attr_t processor_attr;
 
-  if ((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
-    return (void *)EXIT_FAILURE;
-
   printf("ACC attached\n");
+  if ((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
+    pthread_exit(NULL);
+    // return (void *)EXIT_FAILURE;
+
 
   processed_input = malloc(sizeof(AccMessageInput));
   create_thread(&processor_thread, &processor_attr, 4, processed_input, acc_processor);
 
   while (1)
   {
+    printf("ACC waiting for pulse\n");
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
+    printf("ACC got pulse\n");
 
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
@@ -145,17 +151,20 @@ void *ABS()
   pthread_t processor_thread;
   pthread_attr_t processor_attr;
 
-  if ((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
-    return (void *)EXIT_FAILURE;
-
   printf("ABS attached\n");
+  if ((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
+    // return (void *)EXIT_FAILURE;
+    pthread_exit(NULL);
+
 
   processed_input = malloc(sizeof(ManMessageInput));
   create_thread(&processor_thread, &processor_attr, 6, processed_input, abs_processor);
 
   while (1)
   {
+    printf("ABS waiting for pulse\n");
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
+    printf("ABS got pulse\n");
 
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
