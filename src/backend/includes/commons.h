@@ -10,6 +10,10 @@
 
 #define MAX_STRING_LEN    512
 
+#define MANUAL_PRIO 2
+#define ACC_PRIO 1
+#define ABS_PRIO 3
+
 // Names of the channels
 #define MANUAL_NAME "manual_driver_attach_name"
 #define ABS_NAME "ABS_attach_name"
@@ -27,8 +31,11 @@ typedef enum
 {
     COMM = 0, // Msg from the communication module
     SIMULATOR,
+    MANUAL_DRIVER,
+    ACC_CODE,
+    ABS_CODE,
+    THROTTLE_ACTUATOR,
     BRAKE_ACTUATOR,
-    THROTTLE_ACTUATOR
 } PulseCode;
 
 typedef struct
@@ -40,9 +47,3 @@ typedef struct
   unsigned short obj_speed;    // object in front speed
   char           object;       // can be either TRUE or FALSE if not set
 } Environment;
-
-typedef union {
-  struct _pulse pulse;
-  int type; // BRAKE_ACTUATOR or THROTTLE_ACTUATOR
-  int level; // 0-100
-} actuatorChanges_t;
