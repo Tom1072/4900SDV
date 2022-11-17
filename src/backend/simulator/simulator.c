@@ -11,6 +11,7 @@
 #include <time.h>
 #include <semaphore.h>
 
+
 #include "../includes/commons.h"
 #include "../includes/simulator.h"
 #include "../includes/car_structs.h"
@@ -161,7 +162,6 @@ int init(void){
 
 
   }
-//  break; // Debug statement
   } // End while
 
   // Destroy mutex
@@ -269,35 +269,30 @@ void *simulate_skid_stop( void * data)
 {
 	simulatorRequest_t *info = (simulatorRequest_t*) data;
 
-  int t = 1; // s
-  int reply, rand_int;
+  int t = 100; // s
+  int rand_int;
 
   while(1)
   {
-	  printf("");
-	  // generate random number
 	  srand(time(0));
-
 	  if(info->env->skid == 1)
 	  {
-		  rand_int = (int)( 10 * rand() / RAND_MAX);
-		  sleep( rand_int * t);
-		  printf(">>>>>Skid simulator: Sleep for skid to stop for 0.%d s\n", rand_int);
-		  // If skid is set , then randomly sleep
-		  AbsMessageInput *message = (AbsMessageInput *) malloc(sizeof(AbsMessageInput));
-
 		  pthread_mutex_lock(&info->env->mutex);
+		  rand_int = (int)( ( 10 * rand() / RAND_MAX));
+		  AbsMessageInput *message = (AbsMessageInput *) malloc(sizeof(AbsMessageInput));
 		  // Send updates to ABS
 		  info->env->skid = 0;
 		  message->skid = 0;
-		  pthread_mutex_unlock(&info->env->mutex);
-
-		  reply = MsgSendPulsePtr(info->coid, 2, SIMULATOR, (void *) message);
-		  if(reply == -1)
+		  if(MsgSendPulsePtr(info->coid, 2, SIMULATOR, (void *) message) == -1)
 		  {
 			perror(">>>>>Skid simulator: MsgSendPulsePtr():");
 		  }
+		  usleep( rand_int * t * 1000);
+		  pthread_cond_broadcast(&info->env->cond);
+		  pthread_mutex_unlock(&info->env->mutex);
+//		  printf("%d ms\n", rand_int * t);
 	  }
+
 
   }
   return NULL;

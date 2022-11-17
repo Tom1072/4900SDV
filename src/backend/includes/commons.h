@@ -45,6 +45,7 @@ typedef struct
   double         set_speed;    // ACC set speed
   char           object;       // can be either TRUE or FALSE if not set
   pthread_mutex_t mutex;       // to lock the data for distance simulation
+  pthread_cond_t  cond;
 } Environment;
 
 typedef union {

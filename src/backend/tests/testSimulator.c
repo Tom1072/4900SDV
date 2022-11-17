@@ -14,6 +14,7 @@
 #include "../includes/utils.h"
 #include "../includes/CommListener.h"
 
+
 void *mocked_comm();
 void *test_sim();
 void *mocked_acc();
@@ -297,25 +298,38 @@ void *skid_test()
   int policy;
   pthread_getschedparam( simulator, &policy, &param );
   pthread_setschedprio( skid_simulator , param.sched_priority + 2 );
-
-  printf("Priority of the simulator = %d ; priority of skid_stop = %d\n", param.sched_priority, param.sched_priority + 2);
+  printf("Priority of the simulator = %d ; priority of skid_stop = %d\n",
+		  param.sched_priority, param.sched_priority + 2);
   pthread_create(&skid_simulator, NULL, simulate_skid_stop, (void *)&abs_request);
-
-  env.skid = 0;
 
   printf("Car skid before is %u\n", env.skid);
 
   env.skid = 1;
-
-
   printf("Car skid is set to %u by user\n", env.skid);
-
-  usleep(10);
   printf("Car skid should be 0 = %u\n", env.skid);
+
+  pthread_mutex_lock(&env.mutex);
+  while (env.skid != 0)
+  {
+	pthread_cond_wait(&env.cond, &env.mutex);
+  }
   env.skid = 1;
-  usleep(10);
+  pthread_cond_broadcast(&env.cond);
+  pthread_mutex_unlock(&env.mutex);
+
   printf("Car skid  set to %u by user\n", env.skid);
-//  sleep(1);
+  printf("Car skid should be 0 = %u\n", env.skid);
+
+  pthread_mutex_lock(&env.mutex);
+  while (env.skid != 0)
+  {
+	pthread_cond_wait(&env.cond, &env.mutex);
+  }
+  env.skid = 1;
+  pthread_cond_broadcast(&env.cond);
+  pthread_mutex_unlock(&env.mutex);
+
+  printf("Car skid  set to %u by user\n", env.skid);
   printf("Car skid should be 0 = %u\n", env.skid);
 
   name_close(coid_abs);
@@ -341,6 +355,7 @@ void *mocked_abs_server()
   }
     while(1)
     {
+    	printf("Waiting for message...\n");
 	  rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
 		switch(message.code)
 		{
