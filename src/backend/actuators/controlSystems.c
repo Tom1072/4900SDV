@@ -38,22 +38,18 @@ void *ManualDriver()
   struct _pulse pulse_msg;
   ManMessageInput *input, *processed_input;
   pthread_t processor_thread;
-  pthread_attr_t processor_attr;
 
-  printf("MAN attached\n");
+  printf("Manual Driver attached\n");
   if ((attach = name_attach(NULL, MANUAL_NAME, 0)) == NULL)
     pthread_exit(NULL);
-    // return (void *)EXIT_FAILURE;
 
-  
   processed_input = malloc(sizeof(ManMessageInput));
-  create_thread(&processor_thread, &processor_attr, 5, processed_input, man_processor);
+  pthread_create(&processor_thread, NULL, man_processor, processed_input);
 
   while (1)
   {
-    printf("Manual waiting for pulse\n");
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
-    printf("Manual got pulse\n");
+    printf("Manual got input\n");
 
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
@@ -61,27 +57,28 @@ void *ManualDriver()
       continue;
     }
 
+    pthread_mutex_lock(&mutex);
     input = (ManMessageInput *)pulse_msg.value.sival_ptr;
 
-    pthread_mutex_lock(&mutex);
     if (!(input->brake_level > 0 && input->throttle_level > 0))
     {
+      copy_man_input_payload(input, processed_input);
+
       if (input->brake_level == 0 && input->throttle_level == 0) // both are 0 -> no manual input
         man_processing = FALSE;
       else // only one is engaging
         man_processing = TRUE;
-        
-        // if (has_higher_prio(MANUAL_DRIVER_STATE))
-        //   state = MANUAL_DRIVER_STATE; // change to Manual state
+
+      // if (has_higher_prio(MANUAL_DRIVER_STATE))
+      //   state = MANUAL_DRIVER_STATE; // change to Manual state
 
       brake_level = input->brake_level;
-      copy_man_input_payload(input, processed_input);
-      set_state(); // IMPORTANT
+      set_state(); // IMPORTANT: set determine the next state machine to run
     }
 
     pthread_cond_broadcast(&cond);
     pthread_mutex_unlock(&mutex);
-    // free(input);
+    free(input);
   }
 
   free(processed_input);
@@ -93,27 +90,22 @@ void *ManualDriver()
  */
 void *ACC()
 {
-  // int rcvid;
   name_attach_t *attach;
   struct _pulse pulse_msg;
   AccMessageInput *input, *processed_input;
   pthread_t processor_thread;
-  pthread_attr_t processor_attr;
 
   printf("ACC attached\n");
   if ((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
     pthread_exit(NULL);
-    // return (void *)EXIT_FAILURE;
-
 
   processed_input = malloc(sizeof(AccMessageInput));
-  create_thread(&processor_thread, &processor_attr, 4, processed_input, acc_processor);
+  pthread_create(&processor_thread, NULL, acc_processor, processed_input);
 
   while (1)
   {
-    printf("ACC waiting for pulse\n");
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
-    printf("ACC got pulse\n");
+    printf("ACC got input\n");
 
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
@@ -121,17 +113,17 @@ void *ACC()
       continue;
     }
 
-    input = (AccMessageInput *)pulse_msg.value.sival_ptr;
-
     pthread_mutex_lock(&mutex);
+    input = (AccMessageInput *)pulse_msg.value.sival_ptr;
+    copy_acc_input_payload(input, processed_input);
+
     // TODO: Add ON/OFF status for ACC
     acc_processing = TRUE;
-    copy_acc_input_payload(input, processed_input);
-    set_state(); // IMPORTANT
+    set_state(); // IMPORTANT: set determine the next state machine to run
 
     pthread_cond_broadcast(&cond);
     pthread_mutex_unlock(&mutex);
-    // free(input);
+    free(input);
   }
 
   free(processed_input);
@@ -143,28 +135,24 @@ void *ACC()
  */
 void *ABS()
 {
-  // int rcvid;
   name_attach_t *attach;
   struct _pulse pulse_msg;
   AbsMessageInput *input, *processed_input;
   char skidding = FALSE;
   pthread_t processor_thread;
-  pthread_attr_t processor_attr;
 
   printf("ABS attached\n");
   if ((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
-    // return (void *)EXIT_FAILURE;
     pthread_exit(NULL);
 
-
+  // Create the processor thread to handle sending pulse
   processed_input = malloc(sizeof(ManMessageInput));
-  create_thread(&processor_thread, &processor_attr, 6, processed_input, abs_processor);
+  pthread_create(&processor_thread, NULL, abs_processor, processed_input);
 
   while (1)
   {
-    printf("ABS waiting for pulse\n");
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
-    printf("ABS got pulse\n");
+    printf("ABS got input\n");
 
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
@@ -172,13 +160,13 @@ void *ABS()
       continue;
     }
 
+    pthread_mutex_lock(&mutex);
     input = (AbsMessageInput *)pulse_msg.value.sival_ptr;
     copy_abs_input_payload(input, processed_input);
 
     printf("Skidding: %d, input skidding: %d\n", skidding, input->skid);
     if (!skidding && input->skid)
     {
-      pthread_mutex_lock(&mutex);
       skidding = TRUE;
       abs_processing = TRUE;
     }
@@ -186,11 +174,12 @@ void *ABS()
     {
       skidding = FALSE;
       abs_processing = FALSE;
-      pthread_mutex_unlock(&mutex);
     }
 
-    set_state(); // IMPORTANT
-    // free(input);
+    set_state(); // IMPORTANT: set determine the next state machine to run
+    pthread_cond_broadcast(&cond);
+    pthread_mutex_unlock(&mutex);
+    free(input);
   }
 
   free(processed_input);
@@ -202,15 +191,22 @@ void *man_processor(void *args)
   ManMessageInput *data = args;
   while (1)
   {
+    pthread_mutex_lock(&mutex);
+
     while (state != MANUAL_DRIVER_STATE)
       pthread_cond_wait(&cond, &mutex);
 
-    if (data->brake_level == 0) {
+    if (data->brake_level == 0)
+    {
       printf("MAN: gas level %d\n", data->throttle_level);
-    } else {
+    }
+    else
+    {
       printf("MAN: brake level %d\n", data->brake_level);
     }
+
     usleep(200 * 1000);
+    pthread_mutex_unlock(&mutex);
   }
   return NULL;
 }
@@ -218,33 +214,38 @@ void *man_processor(void *args)
 void *acc_processor(void *args)
 {
   AccMessageInput *data = args;
-  unsigned short brake_engaged = brake_level;
-  unsigned short distance = data->distance;
-  unsigned short current_speed = data->current_speed;
-  unsigned short desired_speed = data->desired_speed;
+  // unsigned short brake_engaged = brake_level;
+  // unsigned short distance = data->distance;
+  // unsigned short current_speed = data->current_speed;
+  // unsigned short desired_speed = data->desired_speed;
 
   while (1)
   {
+    pthread_mutex_lock(&mutex);
+
     while (state != ACC_STATE)
       pthread_cond_wait(&cond, &mutex);
-    
-    printf("123\n");
 
-    brake_engaged = !brake_engaged;
-    // printf("ABS: brake set to %d\n", brake_engaged);
-    if (distance > ACC_SLOW_THRESHOLD) {
-      if (current_speed >= desired_speed) {
-        printf("MAN: gas %d, brake %d\n", data->throttle_level, data->brake_level);
+    if (data->distance > ACC_SLOW_THRESHOLD)
+    {
+      if (data->current_speed >= data->desired_speed)
+      {
+        printf("Current speed == desired speed & no object in front.\nNothing to be done.");
         continue;
       }
 
       printf("ACC: engaging GAS and calculating new speed\n");
-    } else if (distance <= ACC_SLOW_THRESHOLD && distance > ACC_STOP_THRESHOLD) {
+    }
+    else if (data->distance <= ACC_SLOW_THRESHOLD && data->distance > ACC_STOP_THRESHOLD)
+    {
       printf("ACC: STOP engaging GAS and calculating REDUCED speed\n");
-    } else {
+    }
+    else
+    {
       printf("ACC: engaging brake to STOP\n");
     }
     usleep(200 * 1000);
+    pthread_mutex_unlock(&mutex);
   }
   return NULL;
 }
@@ -256,12 +257,15 @@ void *abs_processor(void *args)
 
   while (1)
   {
+    pthread_mutex_lock(&mutex);
+
     while (state != ABS_STATE)
       pthread_cond_wait(&cond, &mutex);
 
     brake_engaged = !brake_engaged;
     printf("ABS: brake set to %d\n", brake_engaged);
     usleep(200 * 1000);
+    pthread_mutex_unlock(&mutex);
   }
   return NULL;
 }
@@ -290,6 +294,8 @@ void copy_acc_input_payload(AccMessageInput *input, AccMessageInput *copied)
   copied->brake_level = input->brake_level;
   copied->throttle_level = input->throttle_level;
   copied->distance = input->distance;
+  copied->desired_speed = input->desired_speed;
+  copied->current_speed = input->current_speed;
 }
 
 void copy_abs_input_payload(AbsMessageInput *input, AbsMessageInput *copied)
