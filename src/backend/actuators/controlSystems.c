@@ -43,8 +43,10 @@ void *ManualDriver()
   if ((attach = name_attach(NULL, MANUAL_NAME, 0)) == NULL)
     return (void *)EXIT_FAILURE;
 
+  printf("MAN attached\n");
+  
   processed_input = malloc(sizeof(ManMessageInput));
-  create_thread(&processor_thread, &processor_attr, MANUAL_PRIO, processed_input, man_processor);
+  create_thread(&processor_thread, &processor_attr, 5, processed_input, man_processor);
 
   while (1)
   {
@@ -56,7 +58,7 @@ void *ManualDriver()
       continue;
     }
 
-    input = (ActuatorInputPayload *)pulse_msg.value.sival_ptr;
+    input = (ManMessageInput *)pulse_msg.value.sival_ptr;
 
     pthread_mutex_lock(&mutex);
     if (!(input->brake_level > 0 && input->throttle_level > 0))
@@ -95,11 +97,13 @@ void *ACC()
   pthread_t processor_thread;
   pthread_attr_t processor_attr;
 
-  if ((attach = name_attach(NULL, MANUAL_NAME, 0)) == NULL)
+  if ((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
     return (void *)EXIT_FAILURE;
 
+  printf("ACC attached\n");
+
   processed_input = malloc(sizeof(AccMessageInput));
-  create_thread(&processor_thread, &processor_attr, ACC_PRIO, processed_input, man_processor);
+  create_thread(&processor_thread, &processor_attr, 4, processed_input, acc_processor);
 
   while (1)
   {
@@ -114,12 +118,10 @@ void *ACC()
     input = (AccMessageInput *)pulse_msg.value.sival_ptr;
 
     pthread_mutex_lock(&mutex);
-    if (input->current_speed == input->desired_speed && input->distance > ACC_SLOW_THRESHOLD)
-    {
-      // brake_level = input->brake_level;
-      // copy_acc_input_payload(input, processed_input);
-      // set_state(); // IMPORTANT
-    }
+    // TODO: Add ON/OFF status for ACC
+    acc_processing = TRUE;
+    copy_acc_input_payload(input, processed_input);
+    set_state(); // IMPORTANT
 
     pthread_cond_broadcast(&cond);
     pthread_mutex_unlock(&mutex);
@@ -146,8 +148,10 @@ void *ABS()
   if ((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
     return (void *)EXIT_FAILURE;
 
+  printf("ABS attached\n");
+
   processed_input = malloc(sizeof(ManMessageInput));
-  create_thread(&processor_thread, &processor_attr, ABS_PRIO, processed_input, abs_processor);
+  create_thread(&processor_thread, &processor_attr, 6, processed_input, abs_processor);
 
   while (1)
   {
@@ -202,14 +206,43 @@ void *man_processor(void *args)
   return NULL;
 }
 
-void *acc_processor()
+void *acc_processor(void *args)
 {
+  AccMessageInput *data = args;
+  unsigned short brake_engaged = brake_level;
+  unsigned short distance = data->distance;
+  unsigned short current_speed = data->current_speed;
+  unsigned short desired_speed = data->desired_speed;
+
+  while (1)
+  {
+    while (state != ACC_STATE)
+      pthread_cond_wait(&cond, &mutex);
+    
+    printf("123\n");
+
+    brake_engaged = !brake_engaged;
+    // printf("ABS: brake set to %d\n", brake_engaged);
+    if (distance > ACC_SLOW_THRESHOLD) {
+      if (current_speed >= desired_speed) {
+        printf("MAN: gas %d, brake %d\n", data->throttle_level, data->brake_level);
+        continue;
+      }
+
+      printf("ACC: engaging GAS and calculating new speed\n");
+    } else if (distance <= ACC_SLOW_THRESHOLD && distance > ACC_STOP_THRESHOLD) {
+      printf("ACC: STOP engaging GAS and calculating REDUCED speed\n");
+    } else {
+      printf("ACC: engaging brake to STOP\n");
+    }
+    usleep(200 * 1000);
+  }
   return NULL;
 }
 
 void *abs_processor(void *args)
 {
-  AbsMessageInput *data = args;
+  // AbsMessageInput *data = args;
   int brake_engaged = brake_level;
 
   while (1)

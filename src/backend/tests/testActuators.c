@@ -27,15 +27,16 @@ char test_actuators()
   pthread_join(manual_driver_thread, NULL);
   pthread_join(ACC_thread, NULL);
   pthread_join(ABS_thread, NULL);
+  pthread_join(test_sim_thread, NULL);
   return TRUE;
 }
 
 void *mocked_simulator_actuator_test()
 {
+  printf("mock sim created\n");
   int man_coid, acc_coid, abs_coid;
 
   sleep(1);
-  printf("Attaching names:\n");
   man_coid = name_open(MANUAL_NAME, 0);
   acc_coid = name_open(ACC_NAME, 0);
   abs_coid = name_open(ABS_NAME, 0);
@@ -45,46 +46,57 @@ void *mocked_simulator_actuator_test()
   /** ABS preemption test */
   ManMessageInput* man_input;
   AbsMessageInput* abs_input;
+  AccMessageInput* acc_input;
 
-  // User step on the brake
-  man_input = (ManMessageInput*) malloc(sizeof(ManMessageInput));
-  man_input->brake_level = 1;
-  printf("Sending pulse to ManualDriver: brake_level = 1\n");
-  MsgSendPulsePtr(man_coid, MANUAL_PRIO, SIMULATOR, (void *)man_input);
+  // Enable ACC
+  // acc_input = (AccMessageInput*) malloc(sizeof(AccMessageInput));
+  // printf("Sending pulse to enable ACC\n");
+  // MsgSendPulsePtr(acc_coid, ACC_PRIO, SIMULATOR, (void *)acc_input);
 
-  sleep(2);
-  man_input = (ManMessageInput*) malloc(sizeof(ManMessageInput));
-  man_input->throttle_level = 1;
-  man_input->brake_level = 0;
-  printf("Sending pulse to ManualDriver: brake_level = 1\n");
-  MsgSendPulsePtr(man_coid, MANUAL_PRIO, SIMULATOR, (void *)man_input);
+  // sleep(2);
 
-  sleep(2);
-  man_input = (ManMessageInput*) malloc(sizeof(ManMessageInput));
-  man_input->throttle_level = 0;
-  man_input->brake_level = 1;
-  printf("Sending pulse to ManualDriver: brake_level = 1\n");
-  MsgSendPulsePtr(man_coid, MANUAL_PRIO, SIMULATOR, (void *)man_input);
+  // Enable ACC: case Current speed < desired & no object ahead
+  acc_input = (AccMessageInput*) malloc(sizeof(AccMessageInput));
+  acc_input->distance = 1000;
+  acc_input->desired_speed = 100;
+  acc_input->desired_speed = 60;
+  printf("Sending pulse to enable ACC\n");
+  MsgSendPulsePtr(acc_coid, ACC_PRIO, SIMULATOR, (void *)acc_input);
 
-  sleep(2);
-  // Skid happens
-  abs_input = (AbsMessageInput*) malloc(sizeof(AbsMessageInput));
-  abs_input->skid = TRUE;
-  printf("Sending pulse to ABS: skid=TRUE\n");
-  MsgSendPulsePtr(abs_coid, ABS_PRIO, SIMULATOR, (void *)abs_input);
-
-  sleep(2);
-  // skid off
-  abs_input = (AbsMessageInput*) malloc(sizeof(AbsMessageInput));
-  abs_input->skid = FALSE;
-  printf("Sending pulse to ABS: skid=TRUE\n");
-  MsgSendPulsePtr(abs_coid, ABS_PRIO, SIMULATOR, (void *)abs_input);
+  // // User step on the brake
+  // sleep(2);
+  // man_input = (ManMessageInput*) malloc(sizeof(ManMessageInput));
+  // man_input->brake_level = 1;
+  // printf("Sending pulse to ManualDriver: brake_level = 1\n");
+  // MsgSendPulsePtr(man_coid, MANUAL_PRIO, SIMULATOR, (void *)man_input);
 
   // sleep(2);
   // man_input = (ManMessageInput*) malloc(sizeof(ManMessageInput));
+  // man_input->throttle_level = 1;
   // man_input->brake_level = 0;
   // printf("Sending pulse to ManualDriver: brake_level = 1\n");
   // MsgSendPulsePtr(man_coid, MANUAL_PRIO, SIMULATOR, (void *)man_input);
+
+  // sleep(2);
+  // man_input = (ManMessageInput*) malloc(sizeof(ManMessageInput));
+  // man_input->throttle_level = 0;
+  // man_input->brake_level = 1;
+  // printf("Sending pulse to ManualDriver: brake_level = 1\n");
+  // MsgSendPulsePtr(man_coid, MANUAL_PRIO, SIMULATOR, (void *)man_input);
+
+  // // Skid happens
+  // sleep(2);
+  // abs_input = (AbsMessageInput*) malloc(sizeof(AbsMessageInput));
+  // abs_input->skid = TRUE;
+  // printf("Sending pulse to ABS: skid=TRUE\n");
+  // MsgSendPulsePtr(abs_coid, ABS_PRIO, SIMULATOR, (void *)abs_input);
+
+  // // skid off
+  // sleep(2);
+  // abs_input = (AbsMessageInput*) malloc(sizeof(AbsMessageInput));
+  // abs_input->skid = FALSE;
+  // printf("Sending pulse to ABS: skid=TRUE\n");
+  // MsgSendPulsePtr(abs_coid, ABS_PRIO, SIMULATOR, (void *)abs_input);
 
   return NULL;
 }
