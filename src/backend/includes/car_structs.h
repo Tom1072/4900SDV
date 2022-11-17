@@ -5,17 +5,19 @@
 typedef struct
 {
   unsigned short skid;
-  unsigned short distance;
-  unsigned short speed;
+  double distance;
+  double speed;
   unsigned short brake_level;
   unsigned short throttle_level;
 } Sensors;
 
 typedef struct
 {
-  unsigned short distance;
   unsigned short brake_level;
   unsigned short throttle_level;
+  double current_speed;
+  double desired_speed;
+  double distance;
 } AccMessageInput;
 
 typedef struct
@@ -29,19 +31,18 @@ typedef struct
   unsigned short throttle_level;
 } ManMessageInput;
 
-
 typedef struct {
   unsigned short brake_level;
   unsigned short gas_level;
-  unsigned short speed;
+  double         speed;
 } ActuatorOutputPayload;
 
 typedef struct
 {
-  unsigned short distance;
-  unsigned short init_speed;
-  unsigned short speed;
-  char           object; // can be either TRUE or FALSE
+  double distance;
+  double init_speed;
+  double speed;
+  char   object; // can be either TRUE or FALSE
 } OutsideObject;
 
 

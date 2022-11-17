@@ -12,11 +12,11 @@
 #define MAX_STRING_LEN    512
 
 // Names of the channels
-#define MANUAL_NAME "manual_driver_attach_name"
-#define ABS_NAME "ABS_attach_name"
-#define ACC_NAME "ACC_attach_name"
-#define SIMULATOR_NAME "simulator_attach_name"
-#define COMM_NAME "comm_attach_name"
+#define MANUAL_NAME     "manual_driver_attach_name"
+#define ABS_NAME        "ABS_attach_name"
+#define ACC_NAME        "ACC_attach_name"
+#define SIMULATOR_NAME  "simulator_attach_name"
+#define COMM_NAME       "comm_attach_name"
 
 #define CHECK_STATUS(status) \
     if (status != OK) \
@@ -31,22 +31,30 @@ typedef enum
     MANUAL_DRIVER,
     ACC_CODE,
     ABS_CODE,
+	ACTUATORS
 } PulseCode;
 
 typedef struct
 {
-  unsigned short skid;         // level of skid
-  unsigned short distance;     // distance from car to object
-  unsigned short car_speed;    // car current speed
-  unsigned short brake_level;   // current brake position
-  unsigned short obj_speed;    // object in front speed
-  unsigned short set_speed;    // ACC set speed
+  volatile unsigned short skid;         // level of skid
+  unsigned short brake_level;  // current brake position
+  unsigned short throttle_level;
+  volatile double         distance;     // distance from car to object
+  double         car_speed;    // car current speed
+  double         obj_speed;    // object in front speed
+  double         set_speed;    // ACC set speed
   char           object;       // can be either TRUE or FALSE if not set
-  pthread_mutex_t mutex;       // to lick the data for distance simulation
+  pthread_mutex_t mutex;       // to lock the data for distance simulation
 } Environment;
 
 typedef union {
   struct _pulse pulse;
-  int type; // BRAKE_ACTUATOR or THROTTLE_ACTUATOR
-  int level; // 0-100
+  int    type; // BRAKE_ACTUATOR or THROTTLE_ACTUATOR
+  int    level; // 0-100
 } actuatorChanges_t;
+
+typedef struct
+{
+  Environment *env;
+  int coid;
+} simulatorRequest_t;

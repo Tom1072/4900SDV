@@ -22,7 +22,10 @@ void set_object( OutsideObject* );
 void remove_object( OutsideObject* );
 
 // Distance between object and car
-void *simulate_distance( void * env);//Environment* );
+void *simulate_distance( void * data);
+
+// Simulate skid stop based on random event and speed
+void *simulate_skid_stop( void * data);
 
 // Getters for sending to display
 unsigned short get_speed( Sensors* );

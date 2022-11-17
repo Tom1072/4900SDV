@@ -8,6 +8,8 @@
 #include <errno.h>
 #include <sys/iomsg.h>
 #include <limits.h>
+#include <time.h>
+#include <semaphore.h>
 
 #include "../includes/commons.h"
 #include "../includes/simulator.h"
@@ -25,15 +27,12 @@ int init(void){
   Sensors                 car;
   OutsideObject           other_car;
   Environment             car_env;
-  unsigned short          brake, gas;
-  pthread_t               distance_simulator;
+  pthread_t               distance_simulator, skid_simulator;
+  simulatorRequest_t      abs_request, acc_request;
 
   // initialize the sensor information to 0
   init_env(&car, &other_car, &car_env);
   pthread_mutex_init(&car_env.mutex, NULL);
-
-  // Create a thread for distance simulation
-  pthread_create(&distance_simulator, NULL, simulate_distance, &car_env);
 
   // Create Channel
   if((attach = name_attach(NULL, SIMULATOR_NAME, 0)) == NULL)
@@ -49,8 +48,15 @@ int init(void){
   coid_abs = name_open(ABS_NAME, 0);
   coid_driver = name_open(MANUAL_NAME, 0);
   coid_comm = name_open(COMM_NAME, 0);
+  // Create a thread for distance simulation
+  abs_request.env = acc_request.env = &car_env;
+  abs_request.coid = coid_abs;
+  acc_request.coid = coid_acc;
 
+  pthread_create(&distance_simulator, NULL, &simulate_distance, (void *)&acc_request );
+  pthread_create(&skid_simulator, NULL, &simulate_skid_stop, (void *)&abs_request );
   //the server should keep receiving, processing and replying to messages
+
   while(1)
   {
     //code to receive message or pulse from client
@@ -69,38 +75,28 @@ int init(void){
       printf("Simulator*** Client is gone\n");
       ConnectDetach(message.scoid);
       break;
-    case ACC_CODE:
-      gas = message.value.sival_int;
-      update_speed(gas, &car);
-      // Update the display Environment after each message
-      Environment* new_env_t = (Environment*) malloc(sizeof(Environment));
-      // fill the data
-      copy_updates(&car_env, new_env_t);
-      //Send the updates to display
-      reply_display = MsgSendPulsePtr(coid_acc, 2, SIMULATOR, (void *)new_env_t);
 
-      break;
-    case ABS_CODE:
-      brake = message.value.sival_int;
-	  update_brake_level(brake, &car);
-	  // Update the display Environment after each message
-	  // Update the display Environment after each message
-	  Environment* new_env_b = (Environment*) malloc(sizeof(Environment));
-	  // fill the data
-	  copy_updates(&car_env, new_env_b);
-	  //Send the updates to display
-	  reply_display = MsgSendPulsePtr(coid_acc, 2, SIMULATOR, (void *)new_env_b);
-	  break;
-    case MANUAL_DRIVER:
-       gas = message.value.sival_int;
-       update_speed(gas, &car);
-       // Update the display Environment after each message
-       Environment* new_env_d = (Environment*) malloc(sizeof(Environment));
-       // fill the data
-       copy_updates(&car_env, new_env_d);
-       //Send the updates to display
-       reply_display = MsgSendPulsePtr(coid_acc, 2, SIMULATOR, (void *)new_env_d);
-       break;
+    case ACTUATORS:
+    {
+		// Receive the output from any of them
+		ActuatorOutputPayload * info = ( ActuatorOutputPayload *) message.value.sival_ptr;
+		car_env.brake_level = info->brake_level;
+		car_env.car_speed  = info->speed;
+		car_env.throttle_level = info->gas_level;
+		free(info);
+		// Update display
+		Environment* new_env_t = (Environment*) malloc(sizeof(Environment));
+		// fill the data
+		copy_updates(&car_env, new_env_t);
+		// Send updates to display
+		reply_display = MsgSendPulsePtr(coid_comm, 2, SIMULATOR, (void *)new_env_t);
+		if(reply_display == -1)
+		{
+		perror("***Simulator: MsgSendPulsePtr");
+		}
+
+		break;
+    }
     case COMM:
     {
       // Here we fill the Environment values and fill the car and obj structs
@@ -112,48 +108,41 @@ int init(void){
       switch (command)
       {
         case SPAWN_CAR:
-          car_env.object = TRUE;
-          car_env.obj_speed = data.spawn_car_data.obj_speed;
-          car_env.distance = data.spawn_car_data.distance;
-
-          car.distance = data.spawn_car_data.distance;
-
-          other_car.object = TRUE;
-          other_car.distance = data.spawn_car_data.distance;
-          other_car.speed = data.spawn_car_data.obj_speed;
+          // New car in front is set
+          car_env.object       = TRUE;
+          car_env.obj_speed    = data.spawn_car_data.obj_speed;
+          car_env.distance     = data.spawn_car_data.distance;
+          car.distance         = data.spawn_car_data.distance;
+          other_car.object     = TRUE;
+          other_car.distance   = data.spawn_car_data.distance;
+          other_car.speed      = data.spawn_car_data.obj_speed;
           other_car.init_speed = data.spawn_car_data.obj_speed;
 
           break;
         case DESPAWN_CAR:
-          car_env.object = FALSE;
+          // Car in front is removed from the view
+          car_env.object    = FALSE;
           car_env.obj_speed = 0;
-          car_env.distance = 0;
-
-          car.distance = USHRT_MAX;
-
-          other_car.object = FALSE;
-          other_car.distance = USHRT_MAX;
-          other_car.speed = 0;
+          car_env.distance  = 0;
+          car.distance      = USHRT_MAX;
+          other_car.object     = FALSE;
+          other_car.distance   = USHRT_MAX;
+          other_car.speed      = 0;
           other_car.init_speed = 0;
           break;
         case THROTTLE:
+          // User presses gas pedal
           car.throttle_level = data.throttle_level;
           // Manual send pulse
           // Set speed value
           break;
         case BRAKE:
-          car.brake_level = data.brake_data.brake_level;
-          car_env.skid  = data.brake_data.skid_on;
-          // Manual send pulse  - brake
-          // ABS - skid
-          break;
-        case SKID:
-          car_env.skid = data.skid_on;
-//          car.brake_level = data.brake_level;
-          // ABS
-          // I decide when to stop the skid
+          // User presses brake pedal
+          car.brake_level = car_env.brake_level = data.brake_data.brake_level; // 1) -to manual
+          car.skid        = car_env.skid        = data.brake_data.skid_on; //  1a) Start simulating skid_stop2 - to ABS (after 1 ms)
           break;
         case ACC_SPEED:
+          // User sets the ACC speed
           car_env.set_speed = data.acc_speed;
           // ABS
           break;
@@ -238,22 +227,36 @@ void remove_object( OutsideObject* object)
 }
 void *simulate_distance(void *data)
 {
-  Environment *env = (Environment*) data;
+  simulatorRequest_t *info = (simulatorRequest_t*) data;
+  Environment *env = (Environment*) info->env;
+
   int t = 100; // ms
-  float d_obj, d_car, dist;
+  double d_obj, d_car, dist;
+  int reply;
   dist = d_obj = d_car = 0;
-  sleep(1);
-  // If object is set/spawned change distance between teh car and object
+  //sleep(1);
+  // If object is set/spawned change distance between the car and object
   while(1)
   {
 	  pthread_mutex_lock(&env->mutex);
-	  if((env->object == TRUE))
+	  if((env->object == TRUE) && (env->distance > 0))
 	  {
-		d_obj = ((float)(env->obj_speed))*t/3600;
-		d_car = ((float)(env->car_speed))*t/3600;
-		dist  = (int)(env->distance) + (d_obj - d_car);
-		//lock the dist var and update
-		env->distance = (int)dist;
+		d_obj = ((double)(env->obj_speed))*t/3600;
+		d_car = ((double)(env->car_speed))*t/3600;
+		dist  = (env->distance) + (d_obj - d_car);
+		env->distance = dist;
+		// Send pulse to ACC
+		AccMessageInput *message = (AccMessageInput *) malloc(sizeof(AbsMessageInput));
+		message->brake_level = env->brake_level;
+		message->throttle_level = env->throttle_level;
+		message->current_speed = env->car_speed;
+		message->desired_speed = env->set_speed;
+		message->distance = dist;
+	    reply = MsgSendPulsePtr(info->coid, 2, SIMULATOR, (void *) message);
+	    if(reply == -1)
+	    {
+	      perror(">>>>>Skid simulator: MsgSendPulsePtr():");
+	    }
 	  }
 	  pthread_mutex_unlock(&env->mutex);
 	  // Sleep 100 ms
@@ -262,7 +265,43 @@ void *simulate_distance(void *data)
   printf("No car in front OR you have crashed\n");
   return NULL;
 }
+void *simulate_skid_stop( void * data)
+{
+	simulatorRequest_t *info = (simulatorRequest_t*) data;
 
+  int t = 1; // s
+  int reply, rand_int;
+
+  while(1)
+  {
+	  printf("");
+	  // generate random number
+	  srand(time(0));
+
+	  if(info->env->skid == 1)
+	  {
+		  rand_int = (int)( 10 * rand() / RAND_MAX);
+		  sleep( rand_int * t);
+		  printf(">>>>>Skid simulator: Sleep for skid to stop for 0.%d s\n", rand_int);
+		  // If skid is set , then randomly sleep
+		  AbsMessageInput *message = (AbsMessageInput *) malloc(sizeof(AbsMessageInput));
+
+		  pthread_mutex_lock(&info->env->mutex);
+		  // Send updates to ABS
+		  info->env->skid = 0;
+		  message->skid = 0;
+		  pthread_mutex_unlock(&info->env->mutex);
+
+		  reply = MsgSendPulsePtr(info->coid, 2, SIMULATOR, (void *) message);
+		  if(reply == -1)
+		  {
+			perror(">>>>>Skid simulator: MsgSendPulsePtr():");
+		  }
+	  }
+
+  }
+  return NULL;
+}
 unsigned short get_speed( Sensors* sensors )
 {
   return sensors->speed;

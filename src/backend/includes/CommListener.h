@@ -18,7 +18,7 @@ typedef enum
 
 typedef struct
 {
-  int distance;
+  double distance;
   int obj_speed;
 } SpawnCarData;
 
