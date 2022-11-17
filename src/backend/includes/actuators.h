@@ -34,6 +34,8 @@ typedef struct
   unsigned short distance;
   unsigned short brake_level;
   unsigned short throttle_level;
+  unsigned short current_speed;
+  unsigned short desired_speed;
 } AccMessageInput;
 
 typedef struct
