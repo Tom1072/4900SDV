@@ -15,7 +15,9 @@ volatile int state = NOT_ACQUIRED;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
-volatile int brake_level = 0;
+volatile unsigned short brake_level = 0;
+volatile unsigned short throttle_level = 0;
+volatile double speed = 0;
 
 /**
  * These 3 is for set_state() function to determine
@@ -25,9 +27,9 @@ volatile char man_processing = FALSE;
 volatile char abs_processing = FALSE;
 volatile char acc_processing = FALSE;
 
-void *man_processor();
-void *acc_processor();
-void *abs_processor();
+void *man_processor(void *args);
+void *acc_processor(void *args);
+void *abs_processor(void *args);
 
 void set_state();
 void copy_man_input_payload(ManMessageInput *input, ManMessageInput *copied);
@@ -77,7 +79,7 @@ void *ManualDriver()
       else
         man_processing = TRUE;
 
-      brake_level = input->brake_level;
+      // brake_level = input->brake_level;
       set_state(); // IMPORTANT: set determine the next state machine to run
     }
 
@@ -123,9 +125,12 @@ void *ACC()
     input = (AccMessageInput *)pulse_msg.value.sival_ptr;
     copy_acc_input_payload(input, processed_input);
 
-    // TODO: Add ON/OFF status for ACC
-    // For now, I set ACC to be always on.
-    acc_processing = TRUE;
+    // If desired_speed == 0, ACC is turned off
+    if (input->desired_speed == 0)
+      acc_processing = FALSE;
+    else
+      acc_processing = TRUE;
+
     set_state(); // IMPORTANT: set determine the next state machine to run
 
     pthread_cond_broadcast(&cond);
@@ -198,26 +203,29 @@ void *ABS()
 */
 void *man_processor(void *args)
 {
+  usleep(100000);
+  int sim_coid = name_open(SIMULATOR_NAME, 0);
   ManMessageInput *data = args;
+
   while (1)
   {
     pthread_mutex_lock(&mutex);
 
     while (state != MANUAL_DRIVER_STATE)
       pthread_cond_wait(&cond, &mutex);
+    
+    // printf("data throttle %d\n", data->throttle_level);
 
     // If brake_level == 0, throttle is engaging
     // and if throttle_level == 0, brake is engaging
-    if (data->brake_level == 0)
-    {
-      printf("MAN: gas level %d\n", data->throttle_level);
-    }
-    else
-    {
-      printf("MAN: brake level %d\n", data->brake_level);
+    if (data->brake_level == 0) {
+      speed = min(MAX_SPEED, speed + ACTUATOR_SPEED_CHANGE);
+    } else {
+      speed = max(0, speed - ACTUATOR_SPEED_CHANGE);
     }
 
-    usleep(200 * 1000);
+    sendUpdates(sim_coid, MANUAL_DRIVER, brake_level, throttle_level, speed);
+    usleep(50 * 1000);
     pthread_mutex_unlock(&mutex);
   }
   return NULL;
@@ -228,6 +236,8 @@ void *man_processor(void *args)
 */
 void *acc_processor(void *args)
 {
+  usleep(100000);
+  int sim_coid = name_open(SIMULATOR_NAME, 0);
   AccMessageInput *data = args;
 
   while (1)
@@ -272,6 +282,8 @@ void *acc_processor(void *args)
 */
 void *abs_processor(void *args)
 {
+  usleep(100000);
+  int sim_coid = name_open(SIMULATOR_NAME, 0);
   // AbsMessageInput *data = args;
   int brake_engaged = brake_level;
 
@@ -284,6 +296,7 @@ void *abs_processor(void *args)
 
     brake_engaged = !brake_engaged; // Pulsing the brake
     printf("ABS: brake set to %d\n", brake_engaged);
+    sendUpdates(sim_coid, ABS_CODE, brake_level, throttle_level, speed);
     usleep(200 * 1000);
     pthread_mutex_unlock(&mutex);
   }
@@ -312,6 +325,9 @@ void copy_man_input_payload(ManMessageInput *input, ManMessageInput *copied)
 {
   copied->brake_level = input->brake_level;
   copied->throttle_level = input->throttle_level;
+
+  brake_level = input->brake_level;
+  throttle_level = input->throttle_level;
 }
 
 /**
@@ -324,6 +340,10 @@ void copy_acc_input_payload(AccMessageInput *input, AccMessageInput *copied)
   copied->distance = input->distance;
   copied->desired_speed = input->desired_speed;
   copied->current_speed = input->current_speed;
+
+  brake_level = input->brake_level;
+  throttle_level = input->brake_level;
+  speed = input->current_speed;
 }
 
 /**

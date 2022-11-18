@@ -3,10 +3,12 @@
 void *ManualDriver();
 void *ACC();
 void *ABS();
-
+void sendUpdates(int sim_coid, int code, unsigned short brake_level, unsigned short throttle_level, double speed);
 
 #define ACC_SLOW_THRESHOLD 4 // meters
 #define ACC_STOP_THRESHOLD 2 // meters
+
+#define ACTUATOR_SPEED_CHANGE 1 // km/s
 
 typedef enum {
   NOT_ACQUIRED = 0,
@@ -21,7 +23,7 @@ typedef enum {
 */
 typedef struct {
   unsigned short brake_level;
-  unsigned short gas_level;
+  unsigned short throttle_level;
   unsigned short distance;
   unsigned short desired_speed;
   unsigned short current_speed;
@@ -52,6 +54,6 @@ typedef struct
 
 typedef struct {
   unsigned short brake_level;
-  unsigned short gas_level;
+  unsigned short throttle_level;
   double speed;
 } ActuatorOutputPayload;

@@ -10,6 +10,7 @@
 #define NOK -1
 
 #define MAX_STRING_LEN    512
+#define MAX_SPEED         100
 
 #define MANUAL_PRIO 2
 #define ACC_PRIO 1

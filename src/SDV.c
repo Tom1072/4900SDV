@@ -9,7 +9,7 @@ int main()
   // char comm_result  = test_comm();
   // char simulator_result = test_simulator();
   // char view_result = test_view();
-  // char actuator_result = test_actuators();
+  char actuator_result = test_actuators();
   
   // assert(comm_result);
   // assert(simulator_result);
