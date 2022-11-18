@@ -274,7 +274,7 @@ void *simulate_distance(void *data)
       {
         perror(">>>>>Skid simulator: MsgSendPulsePtr():");
       }
-    }
+    } // TODO: add the distance updates if no object to be distance_max
     // Sleep 500 ms
     usleep( t * 1000 );
   }

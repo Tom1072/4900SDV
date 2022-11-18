@@ -52,6 +52,6 @@ typedef struct
 
 typedef struct {
   unsigned short brake_level;
-  unsigned short gas_level;
+  unsigned short throttle_level;
   double speed;
 } ActuatorOutputPayload;
