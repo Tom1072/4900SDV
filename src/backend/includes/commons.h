@@ -31,8 +31,8 @@ typedef enum
     MANUAL_DRIVER,
     ACC_CODE,
     ABS_CODE,
-	  THROTTLE_ACTUATOR,
-	  BRAKE_ACTUATOR,
+	THROTTLE_ACTUATOR,
+	BRAKE_ACTUATOR,
 } PulseCode;
 
 typedef struct
