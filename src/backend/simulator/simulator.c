@@ -84,7 +84,7 @@ int init(void){
 	  ActuatorOutputPayload * info = ( ActuatorOutputPayload *) message.value.sival_ptr;
 	  car_env.brake_level = info->brake_level;
 	  car_env.car_speed  = info->speed;
-	  car_env.throttle_level = info->gas_level;
+	  car_env.throttle_level = info->throttle_level;
 	  free(info);
 	  // Update display
 	  Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );
