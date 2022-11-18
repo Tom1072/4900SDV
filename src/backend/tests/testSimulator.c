@@ -25,25 +25,25 @@ void *skid_test();
 
 char test_simulator() {
   printf("Testing simulator...\n");
-  pthread_t      mocked_comm_thread, test_sim_thread,
-  	  	  	     mocked_acc_thread, mocked_abs_thread,
-			           mocked_dist_thread, mocked_skid_thread;
-  pthread_attr_t mocked_comm_attr, test_sim_attr,
-  	  	  	  	 mocked_acc_attr, mocked_abs_attr,
-				         mocked_dist_attr, mocked_skid_attr;
+//  pthread_t      mocked_comm_thread, test_sim_thread,
+//  	  	  	     mocked_acc_thread, mocked_abs_thread,
+//			           mocked_dist_thread, mocked_skid_thread;
+//  pthread_attr_t mocked_comm_attr, test_sim_attr,
+//  	  	  	  	 mocked_acc_attr, mocked_abs_attr,
+//				         mocked_dist_attr, mocked_skid_attr;
 
 //  create_thread(&test_sim_thread, &test_sim_attr, 1, test_sim);
 //  create_thread(&mocked_comm_thread, &mocked_comm_attr, 2, mocked_comm);
-//  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, mocked_acc);
+//  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, mocked_acc); -- DO NOT USE THIS ON ITS OWN
 //  create_thread(&mocked_abs_thread, &mocked_abs_attr, 2, mocked_abs);
-  create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, distance_test);
+//  create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, distance_test);
 //  create_thread(&mocked_skid_thread, &mocked_skid_attr, 2, skid_test);
 
 //  pthread_join(test_sim_thread, NULL);
 //  pthread_join(mocked_comm_thread, NULL);
-//  pthread_join(mocked_acc_thread, NULL);
+//  pthread_join(mocked_acc_thread, NULL); -- DO NOT USE THIS ON ITS OWN
 //  pthread_join(mocked_abs_thread, NULL);
-  pthread_join(mocked_dist_thread, NULL);
+//  pthread_join(mocked_dist_thread, NULL);
 //  pthread_join(mocked_skid_thread, NULL);
 
   return TRUE;
@@ -56,8 +56,8 @@ void *mocked_comm()
   int sim_coid;
   name_attach_t 		  *attach;
   struct _pulse           message;
-  int                     coid_sim;
-  int                     rcvid;
+
+
   // Create Channel
   if((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
   {
@@ -73,12 +73,19 @@ void *mocked_comm()
   msg->data.spawn_car_data.obj_speed = 20;
 
   sim_coid = name_open(SIMULATOR_NAME, 0);
-  int reply_comm = MsgSendPulsePtr(sim_coid, -1, COMM, (void *)msg);
-  printf("comm reply: %d\n", reply_comm);
+
+  if( MsgSendPulsePtr(sim_coid, -1, COMM, (void *)msg) == -1)
+  {
+    perror("TEST: MessageSendPulsePtr()");
+  }
 
 //---------------------------------------------------------------
   //------------- Server side ------------------------------------
-  rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
+
+  if( MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL) == -1)
+  {
+    perror("TEST: MessageSendPulsePtr()");
+  }
     switch(message.code)
     {
     case _PULSE_CODE_DISCONNECT:
@@ -105,13 +112,12 @@ void *mocked_comm()
 
 void *mocked_acc()
 {
-  int sim_coid;
+//  int sim_coid;
   printf("Testing acc replies...\n");
   name_attach_t 		  *attach;
   struct _pulse           message;
-  int                     coid_acc;
-  int                     rcvid;
-  int                     reply;
+
+
 
   //   Create Channel
   if((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
@@ -128,7 +134,10 @@ void *mocked_acc()
 
   while(1)
   {
-	  rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
+	  if( MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL) == -1)
+	  {
+	    perror("TEST: MsgReceivePulse()");
+	  }
 	  switch(message.code)
 	  {
 	  case _PULSE_CODE_DISCONNECT:
@@ -170,6 +179,7 @@ void *mocked_abs()
   name_close(sim_coid);
   return NULL;
 }
+
 void *test_sim()
 {
   init();
@@ -181,6 +191,7 @@ void *distance_test()
   Environment    env;
   Sensors        sen;
   OutsideObject  obj;
+
   int                coid_acc;
   pthread_t          distance_simulator, mocked_acc_thread;
   simulatorRequest_t acc_request;
@@ -209,11 +220,11 @@ void *distance_test()
   printf("TEST: Distance in meters initial: %.2f, obj = %d\n", env.distance, env.object);
   while(env.distance > 0)
   {
-	  usleep(100000);
-	  if(env.distance <= 0){
-		  env.object = FALSE;
-		  break;
-	  }
+    usleep(100000);
+    if(env.distance <= 0){
+	  env.object = FALSE;
+	  break;
+    }
 
   }
 
@@ -231,11 +242,11 @@ void *distance_test()
 
   while(env.distance > -1)
   {
-	  usleep(500000);
-	  if(i > 10){
-		  env.object = FALSE;
-		  break;
-	  }i++;
+    usleep(500000);
+	if(i > 10){
+	  env.object = FALSE;
+	  break;
+	}i++;
   }
   printf("Thread stopped calculating the distance\n");
 
@@ -277,7 +288,6 @@ void *distance_test()
  	  }i++;
    }
    printf("Thread stopped calculating the distance\n");
-
 
   // Destroy mutex
   pthread_join(distance_simulator, NULL);
@@ -353,11 +363,9 @@ void *skid_test()
 void *mocked_abs_server()
 {
   printf("Testing ABS_skid...\n");
-  int sim_coid;
   name_attach_t 		  *attach;
   struct _pulse           message;
-  int                     coid_sim;
-  int                     rcvid;
+
   // Create Channel
   if((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
   {
@@ -368,7 +376,10 @@ void *mocked_abs_server()
     while(1)
     {
     	printf("Waiting for message...\n");
-	  rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
+	  if( MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL) == -1)
+	  {
+	    perror("TEST: MsgReceivePulse()");
+	  }
 		switch(message.code)
 		{
 		case _PULSE_CODE_DISCONNECT:
