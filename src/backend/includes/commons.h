@@ -31,15 +31,17 @@ typedef enum
     MANUAL_DRIVER,
     ACC_CODE,
     ABS_CODE,
+	THROTTLE_ACTUATOR,
+	BRAKE_ACTUATOR,
 	ACTUATORS
 } PulseCode;
 
 typedef struct
 {
   volatile unsigned short skid;         // level of skid
-  unsigned short brake_level;  // current brake position
+  unsigned short    brake_level;        // current brake position
   unsigned short throttle_level;
-  volatile double         distance;     // distance from car to object
+  volatile double distance;     // distance from car to object
   double         car_speed;    // car current speed
   double         obj_speed;    // object in front speed
   double         set_speed;    // ACC set speed
