@@ -98,26 +98,6 @@ int init(void){
 
 	  break;
     }
-    case BRAKE_ACTUATOR:
-    {
-  	  // Receive the output from any of them
-  	  ActuatorOutputPayload * info = ( ActuatorOutputPayload *) message.value.sival_ptr;
-  	  car_env.brake_level = info->brake_level;
-  	  car_env.car_speed  = info->speed;
-  	  car_env.throttle_level = info->gas_level;
-  	  free(info);
-  	  // Update display
-  	  Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );
-        // fill the data
-  	  copy_updates( &car_env, new_env_t );
-  	  // Send updates to display
-  	  if( MsgSendPulsePtr( coid_comm, 2, SIMULATOR, ( void * )new_env_t ) == -1 )
-  	  {
-  	    perror("***Simulator: MsgSendPulsePtr()");
-  	  }
-
-  	  break;
-    }
     case COMM:
     {
       // Here we fill the Environment values and fill the car and obj structs
