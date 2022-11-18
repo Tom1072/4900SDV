@@ -22,7 +22,7 @@ int init(void){
   // Define variables
 
   struct _pulse           message;
-  name_attach_t 		      *attach;
+  name_attach_t 		  *attach;
   int                     coid_acc, coid_abs, coid_driver, coid_comm;
   int                     rcvid;
   Sensors                 car;
@@ -77,7 +77,7 @@ int init(void){
       ConnectDetach( message.scoid );
       break;
 
-    case ACTUATORS:
+    case THROTTLE_ACTUATOR:
     {
 	  // Receive the output from any of them
 	  ActuatorOutputPayload * info = ( ActuatorOutputPayload *) message.value.sival_ptr;
@@ -95,7 +95,27 @@ int init(void){
 	    perror("***Simulator: MsgSendPulsePtr()");
 	  }
 
-	break;
+	  break;
+    }
+    case BRAKE_ACTUATOR:
+    {
+  	  // Receive the output from any of them
+  	  ActuatorOutputPayload * info = ( ActuatorOutputPayload *) message.value.sival_ptr;
+  	  car_env.brake_level = info->brake_level;
+  	  car_env.car_speed  = info->speed;
+  	  car_env.throttle_level = info->gas_level;
+  	  free(info);
+  	  // Update display
+  	  Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );
+        // fill the data
+  	  copy_updates( &car_env, new_env_t );
+  	  // Send updates to display
+  	  if( MsgSendPulsePtr( coid_comm, 2, SIMULATOR, ( void * )new_env_t ) == -1 )
+  	  {
+  	    perror("***Simulator: MsgSendPulsePtr()");
+  	  }
+
+  	  break;
     }
     case COMM:
     {
