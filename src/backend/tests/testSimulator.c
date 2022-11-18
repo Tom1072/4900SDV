@@ -27,24 +27,24 @@ char test_simulator() {
   printf("Testing simulator...\n");
   pthread_t      mocked_comm_thread, test_sim_thread,
   	  	  	     mocked_acc_thread, mocked_abs_thread,
-			     mocked_dist_thread, mocked_skid_thread;
+			           mocked_dist_thread, mocked_skid_thread;
   pthread_attr_t mocked_comm_attr, test_sim_attr,
   	  	  	  	 mocked_acc_attr, mocked_abs_attr,
-				 mocked_dist_attr, mocked_skid_attr;
+				         mocked_dist_attr, mocked_skid_attr;
 
 //  create_thread(&test_sim_thread, &test_sim_attr, 1, test_sim);
 //  create_thread(&mocked_comm_thread, &mocked_comm_attr, 2, mocked_comm);
 //  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, mocked_acc);
 //  create_thread(&mocked_abs_thread, &mocked_abs_attr, 2, mocked_abs);
-//  create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, distance_test);
-  create_thread(&mocked_skid_thread, &mocked_skid_attr, 2, skid_test);
+  create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, distance_test);
+//  create_thread(&mocked_skid_thread, &mocked_skid_attr, 2, skid_test);
 
 //  pthread_join(test_sim_thread, NULL);
 //  pthread_join(mocked_comm_thread, NULL);
 //  pthread_join(mocked_acc_thread, NULL);
 //  pthread_join(mocked_abs_thread, NULL);
-//  pthread_join(mocked_dist_thread, NULL);
-  pthread_join(mocked_skid_thread, NULL);
+  pthread_join(mocked_dist_thread, NULL);
+//  pthread_join(mocked_skid_thread, NULL);
 
   return TRUE;
 }
@@ -111,50 +111,51 @@ void *mocked_acc()
   struct _pulse           message;
   int                     coid_acc;
   int                     rcvid;
-  int                     reply_throttle;
-  // Create Channel
-//  if((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
-//  {
-//    //if there was an error creating the channel
-//    perror("ACC name_attach():");
-//    exit(EXIT_FAILURE);
-//  }
+  int                     reply;
 
-  sleep(1);
-
-  sim_coid = name_open(SIMULATOR_NAME, 0);
-
-  reply_throttle = MsgSendPulse(sim_coid, -1, ACC_CODE, 4);
-  printf("acc reply: %d\n", reply_throttle);
-
-  /*
-  rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
-  switch(message.code)
+  //   Create Channel
+  if((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
   {
-  case _PULSE_CODE_DISCONNECT:
-    printf("Simulator*** Client is gone\n");
-    ConnectDetach(message.scoid);
-    break;
-  case SIMULATOR:
-	  Sensors *data = (Sensors *)message.value.sival_ptr;
-	  if( (data->throttle_level > 1) && (data->distance > 50) ){
-		  reply_throttle = MsgSendPulse(sim_coid, -1, ACC_CODE, 4);
-		  printf("acc reply: %d\n", reply_throttle);
-	  } else {
-		  reply_throttle = MsgSendPulse(sim_coid, -1, ACC_CODE, -3);
-		  printf("acc reply: %d\n", reply_throttle);
-	  } free(data);
-	  break;
-  default:
-	  printf("ACC: code value=%d\n", message.code);
-  }*/
-  printf("ACC: Message code received: %d\n", message.value.sival_ptr);
+    //if there was an error creating the channel
+    perror("ACC name_attach():");
+    exit(EXIT_FAILURE);
+  }
 
-  name_close(sim_coid);
-//  name_detach(attach, 0);
+//  sleep(1);
+
+//  sim_coid = name_open(SIMULATOR_NAME, 0);
+//  reply = MsgSendPulsePtr(sim_coid, -1, ACC_CODE, 4);
+
+  while(1)
+  {
+	  rcvid = MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL);
+	  switch(message.code)
+	  {
+	  case _PULSE_CODE_DISCONNECT:
+	  {
+		printf("Simulator*** Client is gone\n");
+		ConnectDetach(message.scoid);
+		break;
+	  }
+	  case SIMULATOR:
+	  {
+		AccMessageInput *data = (AccMessageInput *)message.value.sival_ptr;
+		printf("****ACC: Data received:  brakes=%u, gas=%u, speed=%.2f, set_speed=%.2f, distance=%.2f\n",
+			  data->brake_level, data->throttle_level, data->current_speed, data->desired_speed, data->distance);
+		free(data);
+		break;
+	  }
+	  default:
+		printf("ACC: code value unknown=%d\n", message.code);
+	  }
+  }
+
+//  name_close(sim_coid);
+  name_detach(attach, 0);
 
   return NULL;
 }
+
 void *mocked_abs()
 {
   int sim_coid;
@@ -179,26 +180,37 @@ void *distance_test()
 {
   Environment    env;
   Sensors        sen;
-  OutsideObject obj;
+  OutsideObject  obj;
+  int                coid_acc;
+  pthread_t          distance_simulator, mocked_acc_thread;
+  simulatorRequest_t acc_request;
+
   init_env( &sen, &obj, &env );
-  pthread_t               distance_simulator;
+
   pthread_mutex_init(&env.mutex, NULL);
+
+  // Create a thread for ACC server simulation
+  pthread_create(&mocked_acc_thread, NULL, mocked_acc, NULL);
+  sleep(1);
+  coid_acc = name_open( ACC_NAME, 0 );
   // Create a thread for distance simulation
-  pthread_create(&distance_simulator, NULL, simulate_distance, (void *)&env);
+  acc_request.env = &env;
+  acc_request.coid = coid_acc;//coid_acc;
+  // Create a thread for distance simulation
+  pthread_create( &distance_simulator, NULL, simulate_distance, (void *)&acc_request );
 
   // -----------------------------------------------------------
   // Test Approaching car -------------------------------------
 
-  env.obj_speed = 1;
-  env.car_speed = 240;
+  env.obj_speed = 50;
+  env.car_speed = 70;
   env.object    = TRUE;
-  env.distance  = 3;
-  printf("Distance in meters initial: %d, obj = %d\n", env.distance, env.object);
-  while(env.distance > -1)
+  env.distance  = 50;
+  printf("TEST: Distance in meters initial: %.2f, obj = %d\n", env.distance, env.object);
+  while(env.distance > 0)
   {
-	  printf("Distance in meters: %lf\n", env.distance);
 	  usleep(100000);
-	  if(env.distance == 0){
+	  if(env.distance <= 0){
 		  env.object = FALSE;
 		  break;
 	  }
@@ -210,6 +222,7 @@ void *distance_test()
   // -----------------------------------------------------------
   // Test disappearing car in front-----------------------------
 
+  sleep(1);
   int i = 0;
   env.obj_speed = 60;
   env.car_speed = 70;
@@ -218,9 +231,8 @@ void *distance_test()
 
   while(env.distance > -1)
   {
-	  printf("Distance in meters: %d\n", env.distance);
-	  usleep(100000);
-	  if(i > 30){
+	  usleep(500000);
+	  if(i > 10){
 		  env.object = FALSE;
 		  break;
 	  }i++;
@@ -230,6 +242,7 @@ void *distance_test()
   // -----------------------------------------------------------
   // Test car in front same speed  -----------------------------
 
+  sleep(1);
   i = 0;
   env.obj_speed = 70;
   env.car_speed = 70;
@@ -238,9 +251,8 @@ void *distance_test()
 
   while(env.distance > -1)
   {
-	  printf("Distance in meters: %d\n", env.distance);
-	  usleep(100000);
-	  if(i > 30){
+	  usleep(500000);
+	  if(i > 10){
 		  env.object = FALSE;
 		  break;
 	  }i++;
@@ -251,16 +263,15 @@ void *distance_test()
    // Test car in front accelerate -----------------------------
 
    i = 0;
-   env.obj_speed = 90;
+   env.obj_speed = 50;
    env.car_speed = 40;
    env.object    = TRUE;
    env.distance  = 100;
 
    while(env.distance > -1)
    {
- 	  printf("Distance in meters: %d\n", env.distance);
- 	  usleep(100000);
- 	  if(i > 40){
+ 	  usleep(500000);
+ 	  if(i > 20){
  		  env.object = FALSE;
  		  break;
  	  }i++;
@@ -277,11 +288,12 @@ void *skid_test()
 {
   Environment    env;
   Sensors        sen;
-  OutsideObject obj;
-  init_env( &sen, &obj, &env );
+  OutsideObject  obj;
   simulatorRequest_t abs_request;
+  pthread_t          skid_simulator, mocked_abs_server_thread;
 
-  pthread_t  skid_simulator, mocked_abs_server_thread;
+  init_env( &sen, &obj, &env );
+
   // Create a thread for ABS server simulation
   pthread_create(&mocked_abs_server_thread, NULL, mocked_abs_server, NULL);
   sleep(1);

@@ -45,10 +45,10 @@ int init(void){
 
   // Create a channel to use as client for sending pulses
   sleep(1); // to allow them to attach to simulator
-  coid_acc = name_open(ACC_NAME, 0);
-  coid_abs = name_open(ABS_NAME, 0);
+  coid_acc    = name_open(ACC_NAME, 0);
+  coid_abs    = name_open(ABS_NAME, 0);
   coid_driver = name_open(MANUAL_NAME, 0);
-  coid_comm = name_open(COMM_NAME, 0);
+  coid_comm   = name_open(COMM_NAME, 0);
   // Create a thread for distance simulation
   abs_request.env = acc_request.env = &car_env;
   abs_request.coid = coid_abs;
@@ -228,9 +228,8 @@ void remove_object( OutsideObject* object)
 void *simulate_distance(void *data)
 {
   simulatorRequest_t *info = (simulatorRequest_t*) data;
-  Environment *env = (Environment*) info->env;
 
-  int t = 100; // ms
+  int t = 500; // ms
   double d_obj, d_car, dist;
   int reply;
   dist = d_obj = d_car = 0;
@@ -238,28 +237,30 @@ void *simulate_distance(void *data)
   // If object is set/spawned change distance between the car and object
   while(1)
   {
-	  pthread_mutex_lock(&env->mutex);
-	  if((env->object == TRUE) && (env->distance > 0))
+
+	  if((info->env->object == TRUE) && (info->env->distance > 0))
 	  {
-		d_obj = ((double)(env->obj_speed))*t/3600;
-		d_car = ((double)(env->car_speed))*t/3600;
-		dist  = (env->distance) + (d_obj - d_car);
-		env->distance = dist;
+		pthread_mutex_lock(&info->env->mutex);
+		d_obj = (info->env->obj_speed) * t / 3600;
+		d_car = (info->env->car_speed) * t / 3600;
+		dist  = (info->env->distance) + (d_obj - d_car);
+		info->env->distance = dist;
+		pthread_mutex_unlock(&info->env->mutex);
+
 		// Send pulse to ACC
-		AccMessageInput *message = (AccMessageInput *) malloc(sizeof(AbsMessageInput));
-		message->brake_level = env->brake_level;
-		message->throttle_level = env->throttle_level;
-		message->current_speed = env->car_speed;
-		message->desired_speed = env->set_speed;
+		AccMessageInput *message = (AccMessageInput *) malloc(sizeof(AccMessageInput));
+		message->brake_level = info->env->brake_level;
+		message->throttle_level = info->env->throttle_level;
+		message->current_speed = info->env->car_speed;
+		message->desired_speed = info->env->set_speed;
 		message->distance = dist;
-	    reply = MsgSendPulsePtr(info->coid, 2, SIMULATOR, (void *) message);
-	    if(reply == -1)
+//		printf("Distance = %.2f\n", info->env->distance);
+	    if(MsgSendPulsePtr(info->coid, 2, SIMULATOR, (void *) message) == -1)
 	    {
 	      perror(">>>>>Skid simulator: MsgSendPulsePtr():");
 	    }
 	  }
-	  pthread_mutex_unlock(&env->mutex);
-	  // Sleep 100 ms
+	  // Sleep 500 ms
 	  usleep( t*1000 );
   }
   printf("No car in front OR you have crashed\n");
