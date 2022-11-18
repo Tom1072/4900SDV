@@ -78,7 +78,7 @@ int init(void){
       ConnectDetach( message.scoid );
       break;
 
-    case THROTTLE_ACTUATOR:
+    case ACTUATORS:
     {
 	  // Receive the output from any of them
 	  ActuatorOutputPayload * info = ( ActuatorOutputPayload *) message.value.sival_ptr;
@@ -157,7 +157,6 @@ int init(void){
         case THROTTLE:
         {
           // User presses gas pedal
-          car.throttle_level = data.throttle_level;
           ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
           manual->brake_level = data.brake_level;
           manual->throttle_level = data.throttle_level;
@@ -172,7 +171,6 @@ int init(void){
         case BRAKE:
         {
           // User presses brake pedal
-          car.brake_level = car_env.brake_level = data.brake_data.brake_level;
           ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
   		    manual->brake_level = data.brake_level;
   		    manual->throttle_level = data.throttle_level;
@@ -196,8 +194,8 @@ int init(void){
       	  {
       	    perror("***Simulator: MsgSendPulsePtr()");
       	  }
-        }
           break;
+        }
         default:
           printf("Simulator*** Unknown command\n");
       }

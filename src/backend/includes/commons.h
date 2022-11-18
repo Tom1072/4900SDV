@@ -37,6 +37,7 @@ typedef enum
     ABS_CODE,
     THROTTLE_ACTUATOR,
     BRAKE_ACTUATOR,
+	ACTUATORS
 } PulseCode;
 
 typedef struct
