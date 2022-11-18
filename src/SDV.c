@@ -3,9 +3,10 @@
 #include "backend/includes/tests.h"
 #include "backend/includes/commons.h"
 
-int main() {
+int main()
+{
   // printf("Hello, World!\n");
-  //   char comm_result  = test_comm();
+  // char comm_result  = test_comm();
   // char simulator_result = test_simulator();
   // char view_result = test_view();
   // char actuator_result = test_actuators();

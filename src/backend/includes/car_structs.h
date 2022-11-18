@@ -5,18 +5,18 @@
 typedef struct
 {
   unsigned short skid;
-  unsigned short distance;
-  unsigned short speed;
+  double distance;
+  double speed;
   unsigned short brake_level;
   unsigned short throttle_level;
 } Sensors;
 
 typedef struct
 {
-  unsigned short distance;
-  unsigned short init_speed;
-  unsigned short speed;
-  char           object; // can be either TRUE or FALSE
+  double distance;
+  double init_speed;
+  double speed;
+  char   object; // can be either TRUE or FALSE
 } OutsideObject;
 
 
