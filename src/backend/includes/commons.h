@@ -10,10 +10,13 @@
 #define NOK -1
 
 #define MAX_STRING_LEN    512
+#define MAX_SPEED         100
 
 #define MANUAL_PRIO 2
 #define ACC_PRIO 1
 #define ABS_PRIO 3
+
+#define TIME_INTERVAL 100 // milliseconds
 
 // Names of the channels
 #define MANUAL_NAME     "manual_driver_attach_name"
@@ -59,3 +62,30 @@ typedef struct
   Environment *env;
   int coid;
 } simulatorRequest_t;
+
+typedef struct
+{
+  unsigned short brake_level;
+  unsigned short throttle_level;
+  double current_speed;
+  double desired_speed;
+  double distance;
+} AccMessageInput;
+
+typedef struct
+{
+  unsigned short skid;
+} AbsMessageInput;
+
+typedef struct
+{
+  unsigned short brake_level;
+  unsigned short throttle_level;
+} ManMessageInput;
+
+
+typedef struct {
+  unsigned short brake_level;
+  unsigned short throttle_level;
+  double speed;
+} ActuatorOutputPayload;
