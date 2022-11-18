@@ -32,6 +32,7 @@ char test_simulator() {
 //  	  	  	  	 mocked_acc_attr, mocked_abs_attr,
 //				         mocked_dist_attr, mocked_skid_attr;
 
+<<<<<<< HEAD
 //  create_thread(&test_sim_thread, &test_sim_attr, 1, test_sim);
 //  create_thread(&mocked_comm_thread, &mocked_comm_attr, 2, mocked_comm);
 //  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, mocked_acc); -- DO NOT USE THIS ON ITS OWN

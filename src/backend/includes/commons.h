@@ -11,6 +11,10 @@
 
 #define MAX_STRING_LEN    512
 
+#define MANUAL_PRIO 2
+#define ACC_PRIO 1
+#define ABS_PRIO 3
+
 // Names of the channels
 #define MANUAL_NAME     "manual_driver_attach_name"
 #define ABS_NAME        "ABS_attach_name"
@@ -31,8 +35,8 @@ typedef enum
     MANUAL_DRIVER,
     ACC_CODE,
     ABS_CODE,
-	THROTTLE_ACTUATOR,
-	BRAKE_ACTUATOR,
+    THROTTLE_ACTUATOR,
+    BRAKE_ACTUATOR,
 } PulseCode;
 
 typedef struct
@@ -45,6 +49,7 @@ typedef struct
   double         obj_speed;    // object in front speed
   double         set_speed;    // ACC set speed
   char           object;       // can be either TRUE or FALSE if not set
+<<<<<<< HEAD
   pthread_mutex_t mutex;       // to lock the data for distance simulation
   pthread_cond_t  cond;
 } Environment;
@@ -60,3 +65,6 @@ typedef struct
   Environment *env;
   int coid;
 } simulatorRequest_t;
+=======
+} Environment;
+>>>>>>> main
