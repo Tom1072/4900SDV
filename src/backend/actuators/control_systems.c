@@ -28,7 +28,9 @@ volatile char man_processing = FALSE;
 volatile char abs_processing = FALSE;
 volatile char acc_processing = FALSE;
 
-
+double calculate_speed(unsigned short brake_level, unsigned short throttle_level) {
+  return 0.0;
+}
 
 /**
  * Get the state with next highest priority which is waiting

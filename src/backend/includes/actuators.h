@@ -16,11 +16,6 @@ typedef enum {
   ABS_STATE = 3,
 } ControllerState;
 
-// TODO: Separate these
-/**
- * Payload that can be used for incoming and outgoing communication between Actuators and Simulator */
-
-
 void *ManualDriver();
 void *ACC();
 void *ABS();
@@ -32,3 +27,4 @@ void copy_abs_input_payload(AbsMessageInput *input, AbsMessageInput *copied);
 void *man_processor(void *args);
 void *acc_processor(void *args);
 void *abs_processor(void *args);
+double calculate_speed(unsigned short brake_level, unsigned short throttle_level);
