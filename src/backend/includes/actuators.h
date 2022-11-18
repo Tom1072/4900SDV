@@ -31,11 +31,11 @@ typedef struct {
 
 typedef struct
 {
-  unsigned short distance;
   unsigned short brake_level;
   unsigned short throttle_level;
-  unsigned short current_speed;
-  unsigned short desired_speed;
+  double current_speed;
+  double desired_speed;
+  double distance;
 } AccMessageInput;
 
 typedef struct

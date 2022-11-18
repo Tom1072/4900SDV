@@ -49,22 +49,12 @@ typedef struct
   double         obj_speed;    // object in front speed
   double         set_speed;    // ACC set speed
   char           object;       // can be either TRUE or FALSE if not set
-<<<<<<< HEAD
   pthread_mutex_t mutex;       // to lock the data for distance simulation
   pthread_cond_t  cond;
 } Environment;
-
-typedef union {
-  struct _pulse pulse;
-  int    type; // BRAKE_ACTUATOR or THROTTLE_ACTUATOR
-  int    level; // 0-100
-} actuatorChanges_t;
 
 typedef struct
 {
   Environment *env;
   int coid;
 } simulatorRequest_t;
-=======
-} Environment;
->>>>>>> main

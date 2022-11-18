@@ -13,32 +13,6 @@ typedef struct
 
 typedef struct
 {
-  unsigned short brake_level;
-  unsigned short throttle_level;
-  double current_speed;
-  double desired_speed;
-  double distance;
-} AccMessageInput;
-
-typedef struct
-{
-  unsigned short skid;
-} AbsMessageInput;
-
-typedef struct
-{
-  unsigned short brake_level;
-  unsigned short throttle_level;
-} ManMessageInput;
-
-typedef struct {
-  unsigned short brake_level;
-  unsigned short gas_level;
-  double         speed;
-} ActuatorOutputPayload;
-
-typedef struct
-{
   double distance;
   double init_speed;
   double speed;

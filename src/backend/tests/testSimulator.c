@@ -13,6 +13,7 @@
 #include "../includes/car_structs.h"
 #include "../includes/utils.h"
 #include "../includes/CommListener.h"
+#include "../includes/actuators.h"
 
 
 void *mocked_comm();
@@ -32,12 +33,12 @@ char test_simulator() {
 //  	  	  	  	 mocked_acc_attr, mocked_abs_attr,
 //				         mocked_dist_attr, mocked_skid_attr;
 
-//  create_thread(&test_sim_thread, &test_sim_attr, 1, test_sim);
-//  create_thread(&mocked_comm_thread, &mocked_comm_attr, 2, mocked_comm);
-//  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, mocked_acc); -- DO NOT USE THIS ON ITS OWN
-//  create_thread(&mocked_abs_thread, &mocked_abs_attr, 2, mocked_abs);
-//  create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, distance_test);
-//  create_thread(&mocked_skid_thread, &mocked_skid_attr, 2, skid_test);
+//  create_thread(&test_sim_thread, &test_sim_attr, 1, NULL, test_sim);
+//  create_thread(&mocked_comm_thread, &mocked_comm_attr, 2, NULL, mocked_comm);
+//  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, NULL, mocked_acc); -- DO NOT USE THIS ON ITS OWN
+//  create_thread(&mocked_abs_thread, &mocked_abs_attr, 2, NULL, mocked_abs);
+//  create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, NULL, distance_test);
+//  create_thread(&mocked_skid_thread, &mocked_skid_attr, 2, NULL, skid_test);
 
 //  pthread_join(test_sim_thread, NULL);
 //  pthread_join(mocked_comm_thread, NULL);

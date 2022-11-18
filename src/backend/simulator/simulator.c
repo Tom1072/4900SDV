@@ -16,6 +16,7 @@
 #include "../includes/simulator.h"
 #include "../includes/car_structs.h"
 #include "../includes/CommListener.h"
+#include "../includes/actuators.h"
 
 int init(void){
 
