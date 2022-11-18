@@ -14,7 +14,7 @@ int main()
   // assert(comm_result);
   // assert(simulator_result);
   // assert(view_result);
-  // assert(actuator_result);
+  assert(actuator_result);
 
   return 0;
 }
