@@ -8,7 +8,6 @@
 #include "../includes/commons.h"
 #include "../includes/utils.h"
 
-
 /**
  * current controller
  */
@@ -28,8 +27,23 @@ volatile char man_processing = FALSE;
 volatile char abs_processing = FALSE;
 volatile char acc_processing = FALSE;
 
-double calculate_speed(unsigned short brake_level, unsigned short throttle_level) {
-  return 0.0;
+/**
+ * Calculate speed based on brake_level or throttle_level
+*/
+double calculate_speed(double speed, unsigned short brake_level, unsigned short throttle_level) {
+  if (brake_level > 0)
+    return max(0, speed - BRAKE_SPEED_CHANGE);
+
+  double speed_maintain_threshold = 0.6 * speed;
+  double speed_change = (throttle_level - speed_maintain_threshold) / 10;
+
+  // smaller: slow down, equals: maintain, larger: speed up
+  if (throttle_level == speed_maintain_threshold)
+    return speed;
+  else if (throttle_level > speed_maintain_threshold)
+    return min(MAX_SPEED, speed + speed_change);
+
+  return max(0, speed + speed_change);
 }
 
 /**
