@@ -20,7 +20,6 @@ volatile extern unsigned short brake_level;
 volatile extern unsigned short throttle_level;
 volatile extern double speed;
 
-volatile extern char man_processing;
 volatile extern char abs_processing;
 volatile extern char acc_processing;
 

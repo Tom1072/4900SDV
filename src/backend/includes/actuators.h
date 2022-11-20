@@ -7,9 +7,6 @@
 #define ACC_SLOW_THRESHOLD 4 // meters
 #define ACC_STOP_THRESHOLD 2 // meters
 
-#define ACTUATOR_SPEED_CHANGE 1 // km/s
-#define BRAKE_SPEED_CHANGE 10 // km/h
-
 typedef enum {
   NOT_ACQUIRED = 0,
   MANUAL_DRIVER_STATE = 2,
@@ -28,4 +25,4 @@ void copy_abs_input_payload(AbsMessageInput *input, AbsMessageInput *copied);
 void *man_processor(void *args);
 void *acc_processor(void *args);
 void *abs_processor(void *args);
-double calculate_speed(double speed, unsigned short brake_level, unsigned short throttle_level);
+double calculate_speed(double speed, int brake_level, int throttle_level);
