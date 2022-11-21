@@ -172,8 +172,8 @@ int init(void){
         {
           // User presses brake pedal
           ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
-  		    manual->brake_level = data.brake_level;
-  		    manual->throttle_level = data.throttle_level;
+  		  manual->brake_level = data.brake_level;
+  		  manual->throttle_level = data.throttle_level;
       	  if( MsgSendPulsePtr( coid_driver, 5, SIMULATOR, (void *)manual ) == -1 )
       	  {
       	    perror("***Simulator: MsgSendPulsePtr()");
@@ -252,27 +252,10 @@ void copy_updates( Environment* old_env, Environment* new_env )
 	new_env->object      = old_env->object;
 }
 
-void update_distance( unsigned short value, Sensors* sensors, OutsideObject* obj )
-{
-  sensors->distance = value;
-  obj->distance     = value;
-}
-void update_speed( unsigned short value, Sensors* sensors )
-{
-  sensors->speed = value;
-}
-void set_object( OutsideObject* object )
-{
-  object->object = TRUE;
-}
-void remove_object( OutsideObject* object )
-{
-  object->object = FALSE;
-}
 void *simulate_distance(void *data)
 {
   simulatorRequest_t *info = ( simulatorRequest_t* ) data;
-  int t = 500; // ms
+  int t = 100; // ms
   double d_obj, d_car, dist;
   dist = d_obj = d_car = 0;
   //sleep(1);
@@ -338,13 +321,13 @@ void *simulate_skid_stop( void * data)
       rand_int = (int)( ( 10 * rand() / RAND_MAX) );
       AbsMessageInput *message = ( AbsMessageInput *) malloc( sizeof( AbsMessageInput) );
       // Send updates to ABS
+      usleep( rand_int * t * 1000 );
       info->env->skid = 0;
       message->skid = 0;
-      if( MsgSendPulsePtr( info->coid, 2, SIMULATOR, (void *) message) == -1 )
+      if( MsgSendPulsePtr( info->coid, 10, SIMULATOR, (void *) message) == -1 )
       {
         perror(">>>>>Skid simulator: MsgSendPulsePtr():");
       }
-      usleep( rand_int * t * 1000 );
       pthread_cond_broadcast( &info->env->cond) ;
       pthread_mutex_unlock( &info->env->mutex );
   }

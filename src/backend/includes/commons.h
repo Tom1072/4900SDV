@@ -45,9 +45,9 @@ typedef enum
 
 typedef struct
 {
-  volatile unsigned short skid;         // level of skid
-  unsigned short    brake_level;        // current brake position
-  unsigned short throttle_level;
+  volatile char   skid;         // level of skid
+  unsigned short  brake_level;  // current brake position
+  unsigned short  throttle_level;
   volatile double distance;     // distance from car to object
   double         car_speed;    // car current speed
   double         obj_speed;    // object in front speed

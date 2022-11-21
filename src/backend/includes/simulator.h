@@ -14,10 +14,6 @@ typedef union
 
 void init_env( Sensors* , OutsideObject*, Environment* );
 void copy_updates( Environment*, Environment* );
-void update_distance( unsigned short, Sensors* , OutsideObject* );
-void update_speed( unsigned short, Sensors* );
-void set_object( OutsideObject* );
-void remove_object( OutsideObject* );
 
 // Distance between object and car
 void *simulate_distance( void * data);

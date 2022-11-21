@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <sys/iomsg.h>
 #include <pthread.h>
+#include <sched.h>
 #include "../includes/tests.h"
 #include "../includes/commons.h"
 #include "../includes/simulator.h"
@@ -27,21 +28,21 @@ void *test_comm_sim_actuators_sim_display();
 
 char test_simulator() {
   printf("Testing simulator...\n");
-  pthread_t      test_comm_sim_actuators_sim_display_thread,
-			           mocked_dist_thread, mocked_skid_thread;
-  pthread_attr_t test_comm_sim_actuators_sim_display_attr,
-				         mocked_dist_attr, mocked_skid_attr;
+//  pthread_t      test_comm_sim_actuators_sim_display_thread,
+//			           mocked_dist_thread, mocked_skid_thread;
+//  pthread_attr_t test_comm_sim_actuators_sim_display_attr,
+//				         mocked_dist_attr, mocked_skid_attr;
 
-  create_thread(&test_comm_sim_actuators_sim_display_thread,
-		        &test_comm_sim_actuators_sim_display_attr,
-				1, NULL, test_comm_sim_actuators_sim_display);
+//  create_thread(&test_comm_sim_actuators_sim_display_thread,
+//		        &test_comm_sim_actuators_sim_display_attr,
+//				1, NULL, test_comm_sim_actuators_sim_display);
 //  create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, NULL, distance_test);
 //  create_thread(&mocked_skid_thread, &mocked_skid_attr, 2, NULL, skid_test);
 
-  pthread_join(test_comm_sim_actuators_sim_display_thread, NULL);
+//  pthread_join(test_comm_sim_actuators_sim_display_thread, NULL);
 //  pthread_join(mocked_dist_thread, NULL);
 //  pthread_join(mocked_skid_thread, NULL);
-
+//
   return TRUE;
 }
 
@@ -62,6 +63,7 @@ void *test_comm_sim_actuators_sim_display()
   pthread_join(mocked_acc_thread, NULL);
   pthread_join(mocked_abs_thread, NULL);
 
+  return NULL;
 }
 void *mocked_comm()
 {
@@ -390,11 +392,12 @@ void *skid_test()
   Sensors        sen;
   OutsideObject  obj;
   simulatorRequest_t abs_request;
-  pthread_t          skid_simulator, mocked_abs_server_thread;
+  pthread_t          skid_simulator_thread, mocked_abs_server_thread;
 
   init_env( &sen, &obj, &env );
 
   // Create a thread for ABS server simulation
+//  pthread_setschedprio( mocked_abs_server_thread , 10 );
   pthread_create(&mocked_abs_server_thread, NULL, mocked_abs_server, NULL);
   sleep(1);
   int coid_abs = name_open(ABS_NAME, 0);
@@ -408,16 +411,18 @@ void *skid_test()
   pthread_t simulator = pthread_self();
   struct sched_param param;
   int policy;
-  pthread_getschedparam( simulator, &policy, &param );
-  pthread_setschedprio( skid_simulator , param.sched_priority + 2 );
-  printf("Priority of the simulator = %d ; priority of skid_stop = %d\n",
-		  param.sched_priority, param.sched_priority + 2);
-  pthread_create(&skid_simulator, NULL, simulate_skid_stop, (void *)&abs_request);
 
-  printf("Car skid before is %u\n", env.skid);
+  pthread_getschedparam( simulator, &policy, &param );
+  pthread_setschedprio( skid_simulator_thread , param.sched_priority + 2 );
+  pthread_create( &skid_simulator_thread, NULL, simulate_skid_stop, (void *)&abs_request );
+  // ----------------------------------------------------------------
+  sleep(1); //let the skid run with skid=0
 
   env.skid = 1;
   printf("Car skid is set to %u by user\n", env.skid);
+  while(env.skid != 0){
+	  pthread_cond_wait(&env.cond, &env.mutex);
+  }
   printf("Car skid should be 0 = %u\n", env.skid);
 
   pthread_mutex_lock(&env.mutex);
@@ -430,6 +435,9 @@ void *skid_test()
   pthread_mutex_unlock(&env.mutex);
 
   printf("Car skid  set to %u by user\n", env.skid);
+  while(env.skid != 0){
+	  pthread_cond_wait(&env.cond, &env.mutex);
+  }
   printf("Car skid should be 0 = %u\n", env.skid);
 
   pthread_mutex_lock(&env.mutex);
@@ -442,10 +450,13 @@ void *skid_test()
   pthread_mutex_unlock(&env.mutex);
 
   printf("Car skid  set to %u by user\n", env.skid);
+  while(env.skid != 0){
+	  pthread_cond_wait(&env.cond, &env.mutex);
+  }
   printf("Car skid should be 0 = %u\n", env.skid);
 
   name_close(coid_abs);
-  pthread_join(skid_simulator, NULL);
+  pthread_join(skid_simulator_thread, NULL);
   pthread_join(mocked_abs_server_thread, NULL);
   pthread_mutex_destroy(&env.mutex);
   return NULL;
