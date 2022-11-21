@@ -9,9 +9,9 @@
 #include "../includes/actuators.h"
 
 void *mocked_simulator_actuator_test();
-void mock_manual(int man_coid, int process_time, int throttle_level, int brake_level);
-void mock_acc(int acc_coid, int process_time, double distance, double desired_speed, double current_speed);
-void mock_abs(int abs_coid, int process_time, char skidding);
+void mock_manual(int man_coid, float process_time, int throttle_level, int brake_level);
+void mock_acc(int acc_coid, float process_time, double distance, double desired_speed, double current_speed);
+void mock_abs(int abs_coid, float process_time, char skidding);
 
 char test_actuators()
 {
@@ -49,24 +49,23 @@ void *mocked_simulator_actuator_test()
 
   /** Demo for Manual Driver only:
    *              coid, t, thr,  br   */
-  // mock_manual(man_coid, 2, 100,   0);
-  // mock_manual(man_coid, 6,   0,   0);
-  // mock_manual(man_coid, 2, 100,   0);
-  // mock_manual(man_coid, 3,   0,   1);
-  // mock_manual(man_coid, 2, 100,   0);
-  // mock_manual(man_coid, 2,   0,  20);
-  // mock_manual(man_coid, 2, 100,   0);
-  // mock_manual(man_coid, 1,   0,  50);
-  // mock_manual(man_coid, 2, 100,   0);
-  // mock_manual(man_coid, 1,   0,  70);
-  // mock_manual(man_coid, 2, 100,   0);
-  // mock_manual(man_coid, 0,   0, 100);
+  mock_manual(man_coid, 2, 100,   0);
+  mock_manual(man_coid, 6,   0,   0);
+  mock_manual(man_coid, 2, 100,   0);
+  mock_manual(man_coid, 3,   0,   1);
+  mock_manual(man_coid, 2, 100,   0);
+  mock_manual(man_coid, 2,   0,  20);
+  mock_manual(man_coid, 2, 100,   0);
+  mock_manual(man_coid, 1,   0,  50);
+  mock_manual(man_coid, 2, 100,   0);
+  mock_manual(man_coid, 1,   0,  70);
+  mock_manual(man_coid, 2, 100,   0);
+  mock_manual(man_coid, 3,   0, 100);
 
   /* Demo for ABS */
   mock_manual(man_coid, 2, 100, 0);
   mock_manual(man_coid, 0, 0, 50);
-  mock_abs(abs_coid, 2, TRUE);
-  mock_manual(man_coid, 2, 20, 0);
+  mock_abs(abs_coid, 1.5, TRUE);
   mock_abs(abs_coid, 0, FALSE);
 
   return NULL;
@@ -81,7 +80,7 @@ void *mocked_simulator_actuator_test()
 */
 void mock_manual(
     int man_coid,
-    int process_time,
+    float process_time,
     int throttle_level,
     int brake_level)
 {
@@ -90,7 +89,7 @@ void mock_manual(
   man_input->throttle_level = throttle_level;
   man_input->brake_level = brake_level;
   MsgSendPulsePtr(man_coid, MANUAL_PRIO, SIMULATOR, (void *)man_input);
-  sleep(process_time);
+  usleep(process_time * 1000 * 1000);
 }
 
 /**
@@ -103,7 +102,7 @@ void mock_manual(
 */
 void mock_acc(
     int acc_coid,
-    int process_time,
+    float process_time,
     double distance,
     double desired_speed,
     double current_speed)
@@ -114,7 +113,7 @@ void mock_acc(
   acc_input->desired_speed = desired_speed;
   acc_input->current_speed = current_speed;
   MsgSendPulsePtr(acc_coid, ACC_PRIO, SIMULATOR, (void *)acc_input);
-  sleep(process_time);
+  usleep(process_time * 1000 * 1000);
 }
 
 /**
@@ -125,12 +124,12 @@ void mock_acc(
 */
 void mock_abs(
     int abs_coid,
-    int process_time,
+    float process_time,
     char skidding)
 {
   printf("ABS: Skidding = %s\n", skidding == TRUE ? "TRUE" : "FALSE");
   AbsMessageInput *abs_input = (AbsMessageInput*) malloc(sizeof(AbsMessageInput));
   abs_input->skid = skidding;
   MsgSendPulsePtr(abs_coid, ABS_PRIO, SIMULATOR, (void *)abs_input);
-  sleep(process_time);
+  usleep(process_time * 1000 * 1000);
 }

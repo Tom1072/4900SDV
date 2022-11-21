@@ -95,7 +95,7 @@ void *abs_processor(void *args)
     sent_brake_level = sent_brake_level == 0 ? brake_level : 0;
     speed = calculate_speed(speed, sent_brake_level, throttle_level);
     sendUpdates(sim_coid, ABS_CODE, sent_brake_level, throttle_level, speed);
-    usleep(150 * 1000);
+    usleep(100 * 1000);
     pthread_mutex_unlock(&mutex);
   }
   return NULL;

@@ -10,8 +10,9 @@
 #include "../includes/utils.h"
 
 #define SPEED_THRESHOLD_COEFFICIENT 0.6
-#define SPEED_DECREASE_COEFFICIENT 1.6
-#define BRAKE_COEFFICIENT 0.04
+#define THROTTLE_DISENGAGED_COEFFICIENT 0.6
+#define FRICTION_COEFFICIENT 1.0
+#define BRAKE_COEFFICIENT 0.05
 
 /**
  * current controller
@@ -31,12 +32,13 @@ volatile double speed = 0;
 volatile char abs_processing = FALSE;
 volatile char acc_processing = FALSE;
 
-double calculate_brake_and_throttle_levels(double desired_speed_change) {
-  double brake_threshold = -SPEED_THRESHOLD_COEFFICIENT * speed;
+void calculate_brake_and_throttle_levels(double desired_speed_change) {
+  double speed_change_factor = (FRICTION_COEFFICIENT + THROTTLE_DISENGAGED_COEFFICIENT);
+  double brake_threshold = (-SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12) * speed_change_factor;
 
-  if (desired_speed_change > brake_threshold) {
+  if (desired_speed_change < brake_threshold) {
     /* Delta S = (throttle_level - SPEED_THRESHOLD_COEFFICIENT * speed) / 12 */
-    throttle_level = round(desired_speed_change * 12 + SPEED_THRESHOLD_COEFFICIENT * speed);
+    throttle_level = round((desired_speed_change / speed_change_factor) * 12 + SPEED_THRESHOLD_COEFFICIENT * speed);
     brake_level = 0;
   } else {
     /**
@@ -44,7 +46,7 @@ double calculate_brake_and_throttle_levels(double desired_speed_change) {
      * Delta S = max_speed_change * (1 + brake_level * BRAKE_COEFFICIENT)
     */
     double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12;
-    brake_level = round(((desired_speed_change / max_speed_change) - 1) / BRAKE_COEFFICIENT);
+    brake_level = round(((desired_speed_change / max_speed_change) - FRICTION_COEFFICIENT) / BRAKE_COEFFICIENT);
     throttle_level = 0;
   }
 
@@ -56,8 +58,8 @@ double calculate_brake_and_throttle_levels(double desired_speed_change) {
 */
 double calculate_speed(double speed, int brake_level, int throttle_level) {
   if (brake_level > 0) {
-    double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12; // with 0 throttle and 0 gas
-    return max(0, speed - max_speed_change * (1 + brake_level * BRAKE_COEFFICIENT));
+    double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12; // MAX_SPEED with 0 throttle and 0 gas
+    return max(0, speed - max_speed_change * (FRICTION_COEFFICIENT + brake_level * BRAKE_COEFFICIENT));
   }
 
   double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
@@ -69,7 +71,7 @@ double calculate_speed(double speed, int brake_level, int throttle_level) {
   else if (throttle_level > speed_maintain_threshold)
     return min(MAX_SPEED, speed + speed_change);
 
-  return max(0, speed + speed_change * SPEED_DECREASE_COEFFICIENT - 0.1);
+  return max(0, speed + speed_change * (FRICTION_COEFFICIENT + THROTTLE_DISENGAGED_COEFFICIENT) - 0.1);
 }
 
 /**
