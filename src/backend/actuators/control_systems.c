@@ -33,23 +33,31 @@ volatile char abs_processing = FALSE;
 volatile char acc_processing = FALSE;
 
 void calculate_brake_and_throttle_levels(double desired_speed_change) {
-  double speed_change_factor = (FRICTION_COEFFICIENT + THROTTLE_DISENGAGED_COEFFICIENT);
-  double brake_threshold = (-SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12) * speed_change_factor;
+  if (desired_speed_change == 0) return;
 
-  if (desired_speed_change < brake_threshold) {
-    /* Delta S = (throttle_level - SPEED_THRESHOLD_COEFFICIENT * speed) / 12 */
-    throttle_level = round((desired_speed_change / speed_change_factor) * 12 + SPEED_THRESHOLD_COEFFICIENT * speed);
+  if (desired_speed_change > 0) {
+    double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
+    throttle_level = round(desired_speed_change * 12 + speed_maintain_threshold);
     brake_level = 0;
   } else {
-    /**
-     * max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12
-     * Delta S = max_speed_change * (1 + brake_level * BRAKE_COEFFICIENT)
-    */
-    double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12;
-    brake_level = round(((desired_speed_change / max_speed_change) - FRICTION_COEFFICIENT) / BRAKE_COEFFICIENT);
-    throttle_level = 0;
-  }
+    double speed_change_factor = (FRICTION_COEFFICIENT + THROTTLE_DISENGAGED_COEFFICIENT);
+    double brake_threshold = (SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12) * speed_change_factor;
+    desired_speed_change = -desired_speed_change;
 
+    if (desired_speed_change < brake_threshold) {
+      /* Delta S = (throttle_level - SPEED_THRESHOLD_COEFFICIENT * speed) / 12 */
+      throttle_level = round((desired_speed_change / speed_change_factor) * 12 + SPEED_THRESHOLD_COEFFICIENT * speed);
+      brake_level = 0;
+    } else {
+      /**
+       * max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12
+       * Delta S = max_speed_change * (1 + brake_level * BRAKE_COEFFICIENT)
+      */
+      double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12;
+      brake_level = round(((desired_speed_change / max_speed_change) - FRICTION_COEFFICIENT) / BRAKE_COEFFICIENT);
+      throttle_level = 0;
+    }
+  }
   speed = calculate_speed(speed, brake_level, throttle_level);
 }
 
