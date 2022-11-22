@@ -19,7 +19,6 @@ volatile extern unsigned short brake_level;
 volatile extern unsigned short throttle_level;
 volatile extern double speed;
 
-volatile extern char man_processing;
 volatile extern char abs_processing;
 volatile extern char acc_processing;
 
@@ -59,14 +58,8 @@ void *ManualDriver()
         if (!(input->brake_level > 0 && input->throttle_level > 0))
         {
             copy_man_input_payload(input, processed_input);
-
-            // If both are 0 -> no manual input, no need to process, and vice versa.
-            if (input->brake_level == 0 && input->throttle_level == 0)
-                man_processing = FALSE;
-            else
-                man_processing = TRUE;
-
-            // brake_level = input->brake_level;
+            brake_level = min(100, input->brake_level);
+            throttle_level = min(100, input->throttle_level);
             set_state(); // IMPORTANT: set determine the next state machine to run
         }
 
@@ -95,21 +88,10 @@ void *man_processor(void *args)
         while (state != MANUAL_DRIVER_STATE)
             pthread_cond_wait(&cond, &mutex);
 
-        // printf("data throttle %d\n", data->throttle_level);
+        speed = calculate_speed(speed, brake_level, throttle_level);
 
-        // If brake_level == 0, throttle is engaging
-        // and if throttle_level == 0, brake is engaging
-        if (data->brake_level == 0)
-        {
-            speed = min(MAX_SPEED, speed + ACTUATOR_SPEED_CHANGE);
-        }
-        else
-        {
-            speed = max(0, speed - ACTUATOR_SPEED_CHANGE);
-        }
-
-        sendUpdates(sim_coid, MANUAL_DRIVER, brake_level, throttle_level, speed);
-        usleep(50 * 1000);
+        sendUpdates(sim_coid, brake_level, throttle_level, speed);
+        usleep(100 * 1000);
         pthread_mutex_unlock(&mutex);
     }
     return NULL;

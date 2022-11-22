@@ -19,7 +19,6 @@ volatile extern unsigned short brake_level;
 volatile extern unsigned short throttle_level;
 volatile extern double speed;
 
-volatile extern char man_processing;
 volatile extern char abs_processing;
 volatile extern char acc_processing;
 
@@ -31,10 +30,8 @@ void *ABS()
   name_attach_t *attach;
   struct _pulse pulse_msg;
   AbsMessageInput *input, *processed_input;
-  char skidding = FALSE;
-  pthread_t processor_thread;
-
-  printf("ABS attached\n");
+  volatile char skidding = FALSE;
+  pthread_t processor_thread; 
   if ((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
     pthread_exit(NULL);
 
@@ -84,9 +81,9 @@ void *ABS()
 void *abs_processor(void *args)
 {
   usleep(100000);
+  int sent_brake_level = 0;
   int sim_coid = name_open(SIMULATOR_NAME, 0);
   // AbsMessageInput *data = args;
-  int brake_engaged = brake_level;
 
   while (1)
   {
@@ -95,10 +92,10 @@ void *abs_processor(void *args)
     while (state != ABS_STATE)
       pthread_cond_wait(&cond, &mutex);
 
-    brake_engaged = !brake_engaged; // Pulsing the brake
-    printf("ABS: brake set to %d\n", brake_engaged);
-    sendUpdates(sim_coid, ABS_CODE, brake_level, throttle_level, speed);
-    usleep(200 * 1000);
+    sent_brake_level = sent_brake_level == 0 ? brake_level : 0;
+    speed = calculate_speed(speed, sent_brake_level, throttle_level);
+    sendUpdates(sim_coid, sent_brake_level, throttle_level, speed);
+    usleep(100 * 1000);
     pthread_mutex_unlock(&mutex);
   }
   return NULL;

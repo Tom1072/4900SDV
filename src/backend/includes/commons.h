@@ -74,7 +74,7 @@ typedef struct
 
 typedef struct
 {
-  unsigned short skid;
+  volatile char skid;
 } AbsMessageInput;
 
 typedef struct
