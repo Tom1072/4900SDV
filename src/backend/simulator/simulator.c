@@ -120,14 +120,14 @@ int init(void){
           other_car.speed      = data.spawn_car_data.obj_speed;
           other_car.init_speed = data.spawn_car_data.obj_speed;
           // Update display
-		  Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );
-	      // fill the data
-		  copy_updates( &car_env, new_env_t );
-		  // Send updates to display
-		  if( MsgSendPulsePtr( coid_comm, 2, SIMULATOR, ( void * )new_env_t ) == -1 )
-		  {
-			perror("***Simulator: MsgSendPulsePtr()");
-		  }
+          Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );
+          // fill the data
+          copy_updates( &car_env, new_env_t );
+          // Send updates to display
+          if( MsgSendPulsePtr( coid_comm, 2, SIMULATOR, ( void * )new_env_t ) == -1 )
+          {
+            perror("***Simulator: MsgSendPulsePtr()");
+          }
           break;
         }
         case DESPAWN_CAR:
@@ -142,16 +142,15 @@ int init(void){
           other_car.speed      = 0;
           other_car.init_speed = 0;
           // Update display
-		  Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );
-			// fill the data
-		  copy_updates( &car_env, new_env_t );
-		    printf("***Simulator DESPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
-		  // Send updates to display
-		  if( MsgSendPulsePtr( coid_comm, 2, SIMULATOR, ( void * )new_env_t ) == -1 )
-		  {
-			perror("***Simulator: MsgSendPulsePtr()");
-		  }
-
+          Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );/
+          // fill the data
+          copy_updates( &car_env, new_env_t );
+          printf("***Simulator DESPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
+          // Send updates to display
+          if( MsgSendPulsePtr( coid_comm, 2, SIMULATOR, ( void * )new_env_t ) == -1 )
+          {
+            perror("***Simulator: MsgSendPulsePtr()");
+            }
           break;
         }
         case THROTTLE:
@@ -172,20 +171,30 @@ int init(void){
         {
           // User presses brake pedal
           ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
-  		  manual->brake_level = data.brake_level;
-  		  manual->throttle_level = data.throttle_level;
-      	  if( MsgSendPulsePtr( coid_driver, 5, SIMULATOR, (void *)manual ) == -1 )
-      	  {
-      	    perror("***Simulator: MsgSendPulsePtr()");
-      	  }
+          manual->brake_level = data.brake_data.brake_level;
+          manual->throttle_level = data.throttle_level; // This one may be obsolete
+          if( MsgSendPulsePtr( coid_driver, 5, SIMULATOR, (void *)manual ) == -1 )
+          {
+            perror("***Simulator: MsgSendPulsePtr()");
+          }
       	  usleep( 100 );
           car.skid = car_env.skid = data.brake_data.skid_on;
           break;
         }
-        case SKID:
+        case ACC_ENGAGE:
         {
-          // TODO: If COMM to send this command - what to send and where?
-//        	car.skid = car_env.skid = data.brake_data.skid_on;
+          // TODO: What to send to ACC?
+          car_env.set_speed = data.acc_speed;
+          AccMessageInput * acc_data = ( AccMessageInput * )malloc( sizeof(AccMessageInput) );
+          acc_data->brake_level   = car_env.brake_level;
+          acc_data->current_speed = car_env.car_speed;
+          acc_data->desired_speed = data.acc_speed;
+          acc_data->distance      = car_env.distance;
+          if(MsgSendPulsePtr( coid_acc, 4, SIMULATOR, (void *)acc_data ) == -1 )
+          {
+            perror("***Simulator: MsgSendPulsePtr()");
+          }
+          break;
         }
         case ACC_SPEED:
         {
@@ -286,19 +295,19 @@ void *simulate_distance(void *data)
     } // TODO: add the distance updates if no object to be distance_max
     else if( ( info->env->object == FALSE ))
     {
-        // Send pulse to ACC
-        AccMessageInput *message = ( AccMessageInput *) malloc( sizeof(AccMessageInput) );
-        message->brake_level = info->env->brake_level;
-        message->throttle_level = info->env->throttle_level;
-        message->current_speed = info->env->car_speed;
-        message->desired_speed = info->env->set_speed;
-        message->distance = USHRT_MAX;
-        if(MsgSendPulsePtr( info->coid, 2, SIMULATOR, (void *) message) == -1 )
-        {
-          perror(">>>>>Distance simulator: MsgSendPulsePtr():");
-        }
+      // Send pulse to ACC
+      AccMessageInput *message = ( AccMessageInput *) malloc( sizeof(AccMessageInput) );
+      message->brake_level = info->env->brake_level;
+      message->throttle_level = info->env->throttle_level;
+      message->current_speed = info->env->car_speed;
+      message->desired_speed = info->env->set_speed;
+      message->distance = USHRT_MAX;
+      if(MsgSendPulsePtr( info->coid, 2, SIMULATOR, (void *) message) == -1 )
+      {
+        perror(">>>>>Distance simulator: MsgSendPulsePtr():");
+      }
     }
-    // Sleep 500 ms
+    // Sleep 100 ms
     usleep( t * 1000 );
   }
   printf("No car in front OR you have crashed\n");
@@ -316,7 +325,7 @@ void *simulate_skid_stop( void * data)
     srand( time(0) );
     if( info->env->skid == 1 )
     {
-  	  printf(">>>>>Skid simulator: init skid = %d\n", info->env->skid);
+      printf(">>>>>Skid simulator: init skid = %d\n", info->env->skid);
       pthread_mutex_lock( &info->env->mutex );
       rand_int = (int)( ( 10 * rand() / RAND_MAX) );
       AbsMessageInput *message = ( AbsMessageInput *) malloc( sizeof( AbsMessageInput) );
@@ -330,7 +339,7 @@ void *simulate_skid_stop( void * data)
       }
       pthread_cond_broadcast( &info->env->cond) ;
       pthread_mutex_unlock( &info->env->mutex );
-  }
+    }
   }
   return NULL;
 }

@@ -397,7 +397,7 @@ void *skid_test()
   init_env( &sen, &obj, &env );
 
   // Create a thread for ABS server simulation
-//  pthread_setschedprio( mocked_abs_server_thread , 10 );
+  //  pthread_setschedprio( mocked_abs_server_thread , 10 );
   pthread_create(&mocked_abs_server_thread, NULL, mocked_abs_server, NULL);
   sleep(1);
   int coid_abs = name_open(ABS_NAME, 0);
