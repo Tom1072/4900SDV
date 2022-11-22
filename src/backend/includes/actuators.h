@@ -17,7 +17,7 @@ typedef enum {
 void *ManualDriver();
 void *ACC();
 void *ABS();
-void sendUpdates(int sim_coid, int code, unsigned short brake_level, unsigned short throttle_level, double speed);
+void sendUpdates(int sim_coid, unsigned short brake_level, unsigned short throttle_level, double speed);
 void set_state();
 void copy_man_input_payload(ManMessageInput *input, ManMessageInput *copied);
 void copy_acc_input_payload(AccMessageInput *input, AccMessageInput *copied);
