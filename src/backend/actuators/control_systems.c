@@ -4,10 +4,15 @@
 #include <unistd.h>
 #include <sys/neutrino.h>
 #include <sys/dispatch.h>
+#include <math.h>
 #include "../includes/actuators.h"
 #include "../includes/commons.h"
 #include "../includes/utils.h"
 
+#define SPEED_THRESHOLD_COEFFICIENT 0.6
+#define THROTTLE_DISENGAGED_COEFFICIENT 0.6
+#define FRICTION_COEFFICIENT 1.0
+#define BRAKE_COEFFICIENT 0.05
 
 /**
  * current controller
@@ -24,12 +29,57 @@ volatile double speed = 0;
  * These 3 is for set_state() function to determine
  * the next important state to be taken over
 */
-volatile char man_processing = FALSE;
 volatile char abs_processing = FALSE;
 volatile char acc_processing = FALSE;
 
-double calculate_speed(unsigned short brake_level, unsigned short throttle_level) {
-  return 0.0;
+void calculate_brake_and_throttle_levels(double desired_speed_change) {
+  if (desired_speed_change == 0) return;
+
+  if (desired_speed_change > 0) {
+    double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
+    throttle_level = round(desired_speed_change * 12 + speed_maintain_threshold);
+    brake_level = 0;
+  } else {
+    double speed_change_factor = (FRICTION_COEFFICIENT + THROTTLE_DISENGAGED_COEFFICIENT);
+    double brake_threshold = (SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12) * speed_change_factor;
+    desired_speed_change = -desired_speed_change;
+
+    if (desired_speed_change < brake_threshold) {
+      /* Delta S = (throttle_level - SPEED_THRESHOLD_COEFFICIENT * speed) / 12 */
+      throttle_level = round((desired_speed_change / speed_change_factor) * 12 + SPEED_THRESHOLD_COEFFICIENT * speed);
+      brake_level = 0;
+    } else {
+      /**
+       * max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12
+       * Delta S = max_speed_change * (1 + brake_level * BRAKE_COEFFICIENT)
+      */
+      double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12;
+      brake_level = round(((desired_speed_change / max_speed_change) - FRICTION_COEFFICIENT) / BRAKE_COEFFICIENT);
+      throttle_level = 0;
+    }
+  }
+  speed = calculate_speed(speed, brake_level, throttle_level);
+}
+
+/**
+ * Calculate speed based on brake_level or throttle_level
+*/
+double calculate_speed(double speed, int brake_level, int throttle_level) {
+  if (brake_level > 0) {
+    double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12; // MAX_SPEED with 0 throttle and 0 gas
+    return max(0, speed - max_speed_change * (FRICTION_COEFFICIENT + brake_level * BRAKE_COEFFICIENT));
+  }
+
+  double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
+  double speed_change = (throttle_level - speed_maintain_threshold) / 12;
+
+  // smaller: slow down, equals: maintain, larger: speed up
+  if (throttle_level == speed_maintain_threshold)
+    return speed;
+  else if (throttle_level > speed_maintain_threshold)
+    return min(MAX_SPEED, speed + speed_change);
+
+  return max(0, speed + speed_change * (FRICTION_COEFFICIENT + THROTTLE_DISENGAGED_COEFFICIENT) - 0.1);
 }
 
 /**
@@ -39,12 +89,13 @@ void set_state()
 {
   if (abs_processing)
     state = ABS_STATE;
-  else if (man_processing)
+  else if (throttle_level > 0 || brake_level > 0)
     state = MANUAL_DRIVER_STATE;
   else if (acc_processing)
     state = ACC_STATE;
   else
-    state = NOT_ACQUIRED;
+    state = MANUAL_DRIVER_STATE;
+  printf("CURRENT STATE: %d\n", state);
 }
 
 /**
