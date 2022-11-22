@@ -228,7 +228,7 @@ void *mocked_acc()
 		  info->throttle_level = 1;
 		}
 
-		if( MsgSendPulsePtr(sim_coid, 3, ACTUATORS, (void *) info) == -1)
+		if( MsgSendPulsePtr(sim_coid, ACC_PRIO, ACTUATORS, (void *) info) == -1)
 		{
 		  perror("TEST: MsgReceivePulse()");
 		}
@@ -277,7 +277,7 @@ void *mocked_abs()
 	updates->brake_level = 25;
 	updates->throttle_level = 2;
 	updates->speed = 10;
-	if( MsgSendPulsePtr(sim_coid, 4, ACTUATORS, updates) == -1)
+	if( MsgSendPulsePtr(sim_coid, ABS_PRIO, ACTUATORS, updates) == -1)
 	{
 	  perror("TEST ABS: MsgSendPulse()");
 	}
@@ -557,7 +557,7 @@ void *mocked_manual()
 	updates->throttle_level = 2;
 	updates->speed = 33;
 
-	if( MsgSendPulsePtr(sim_coid, 2, ACTUATORS, updates) == -1)
+	if( MsgSendPulsePtr(sim_coid, MANUAL_PRIO, ACTUATORS, updates) == -1)
 	{
 	  perror("TEST Manual: MsgSendPulse()");
 	}

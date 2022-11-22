@@ -4,17 +4,18 @@
 #include <pthread.h>
 
 // Constants
-#define TRUE 1
+#define TRUE  1
 #define FALSE 0
-#define OK 0
-#define NOK -1
+#define OK    0
+#define NOK  -1
 
 #define MAX_STRING_LEN    512
 #define MAX_SPEED         100
 
-#define MANUAL_PRIO 2
-#define ACC_PRIO 1
-#define ABS_PRIO 3
+#define MANUAL_PRIO    12
+#define ACC_PRIO       11
+#define ABS_PRIO       13
+#define COMM_PRIO      10
 
 #define TIME_INTERVAL 100 // milliseconds
 
@@ -40,7 +41,7 @@ typedef enum
   ABS_CODE,
   THROTTLE_ACTUATOR,
   BRAKE_ACTUATOR,
-	ACTUATORS
+  ACTUATORS
 } PulseCode;
 
 typedef struct
@@ -49,10 +50,10 @@ typedef struct
   unsigned short  brake_level;  // current brake position
   unsigned short  throttle_level;
   volatile double distance;     // distance from car to object
-  double         car_speed;    // car current speed
-  double         obj_speed;    // object in front speed
-  double         set_speed;    // ACC set speed
-  char           object;       // can be either TRUE or FALSE if not set
+  double          car_speed;    // car current speed
+  double          obj_speed;    // object in front speed
+  double          set_speed;    // ACC set speed
+  char            object;       // can be either TRUE or FALSE if not set
   pthread_mutex_t mutex;       // to lock the data for distance simulation
   pthread_cond_t  cond;
 } Environment;

@@ -23,7 +23,7 @@ int init(void){
   // Define variables
 
   struct _pulse           message;
-  name_attach_t 		     *attach;
+  name_attach_t           *attach;
   int                     coid_acc, coid_abs, coid_driver, coid_comm;
   int                     rcvid;
   Sensors                 car;
