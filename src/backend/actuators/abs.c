@@ -30,7 +30,7 @@ void *ABS()
   name_attach_t *attach;
   struct _pulse pulse_msg;
   AbsMessageInput *input, *processed_input;
-  char skidding = FALSE;
+  volatile char skidding = FALSE;
   pthread_t processor_thread; 
   if ((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
     pthread_exit(NULL);

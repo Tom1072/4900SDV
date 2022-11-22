@@ -74,7 +74,7 @@ typedef struct
 
 typedef struct
 {
-  char skid;
+  volatile char skid;
 } AbsMessageInput;
 
 typedef struct
