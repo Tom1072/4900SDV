@@ -126,12 +126,18 @@ static void mocked_simulator_receiver()
         case BRAKE:
           printf("MOCKED_SIMULATOR: Received a BRAKE command\n");
           printf("MOCKED_SIMULATOR:   - command=%d\n", command);
-          printf("MOCKED_SIMULATOR:   - data.brake_level=%d\n", data.brake_level);
+          printf("MOCKED_SIMULATOR:   - data.brake_data.brake_level=%d\n", data.brake_data.brake_level);
+          printf("MOCKED_SIMULATOR:   - data.brake_data.skid=%d\n", data.brake_data.skid_on);
           break;
-        case SKID:
-          printf("MOCKED_SIMULATOR: Received a SKID command\n");
+        case ACC_ENGAGE:
+          printf("MOCKED_SIMULATOR: Received a ACC_ENGAGE command\n");
           printf("MOCKED_SIMULATOR:   - command=%d\n", command);
-          printf("MOCKED_SIMULATOR:   - data.skid_on=%s\n", data.skid_on ? "TRUE" : "FALSE");
+          printf("MOCKED_SIMULATOR:   - data.acc_engage=%d\n", data.acc_engage);
+          break;
+        case ACC_SPEED:
+          printf("MOCKED_SIMULATOR: Received a ACC_SPEED command\n");
+          printf("MOCKED_SIMULATOR:   - command=%d\n", command);
+          printf("MOCKED_SIMULATOR:   - data.acc_speed=%d\n", data.acc_speed);
           break;
         default:
           printf("MOCKED_SIMULATOR: Received an unknown command\n");
