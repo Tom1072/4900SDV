@@ -230,24 +230,24 @@ int init(void){
 
 void init_env( Environment* env )
 {
-  env->skid = 0;
-  env->distance = 0;
-  env->car_speed = 0;
-  env->brake_level = 0;
-  env->obj_speed = 0;
-  env->object = FALSE;
-  env->set_speed = 0;
+  env->skid         = 0;
+  env->distance     = 0;
+  env->car_speed    = 0;
+  env->brake_level  = 0;
+  env->obj_speed    = 0;
+  env->object   = FALSE;
+  env->set_speed    = 0;
 }
 
 void copy_updates( Environment* old_env, Environment* new_env )
 {
-	new_env->skid        = old_env->skid;
-	new_env->distance    = old_env->distance;
-	new_env->car_speed   = old_env->car_speed;
-	new_env->brake_level = old_env->brake_level;
-	new_env->obj_speed   = old_env->obj_speed;
-	new_env->set_speed   = old_env->set_speed;
-	new_env->object      = old_env->object;
+  new_env->skid        = old_env->skid;
+  new_env->distance    = old_env->distance;
+  new_env->car_speed   = old_env->car_speed;
+  new_env->brake_level = old_env->brake_level;
+  new_env->obj_speed   = old_env->obj_speed;
+  new_env->set_speed   = old_env->set_speed;
+  new_env->object      = old_env->object;
 }
 
 void *simulate_distance(void *data)
