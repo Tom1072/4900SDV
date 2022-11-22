@@ -12,8 +12,9 @@ typedef enum
   DESPAWN_CAR,
   THROTTLE,
   BRAKE,
-  SKID,
-  ACC_SPEED
+  ACC_SPEED,
+  ACC_ENGAGE,
+  SKID // Deprecated, use BRAKE instead
 } CommandType;
 
 typedef struct
@@ -31,11 +32,12 @@ typedef struct
 typedef union
 {
   SpawnCarData spawn_car_data; // used for SPAWN_CAR command
-  int throttle_level;          // 0-100, used for GAS command
-  int brake_level;             // 0-100, used for BRAKE command
-  char skid_on;                // TRUE or FALSE
-  int acc_speed;               // Used for ACC speed command
+  int throttle_level;          // 0-100 (%), used for GAS command
   BrakeData brake_data;        // Used for BRAKE command
+  int acc_speed;               // 0-100 (km/h), used for ACC_SPEED command
+  char acc_engage;                    // TRUE to engage acc or FALSE to disengage acc, used for ACC command
+  int brake_level;             // Deprecated, use BrakeData instead
+  char skid_on;                // Deprecated, use BrakeData instead
 } CommandData;
 
 typedef struct
