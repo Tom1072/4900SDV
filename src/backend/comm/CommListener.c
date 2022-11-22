@@ -184,15 +184,33 @@ void parse_message(char *message, CommListenerMessage **parsed_message)
       {
         int brake_level = atoi(token);
 
-        *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
-        memset(*parsed_message, 0, sizeof(CommListenerMessage));
+        token = strtok(NULL, " ");
+        if (token != NULL)
+        {
+          if (strcmp(token, "on") == 0)
+          {
+            *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
+            memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
-        (*parsed_message)->command = BRAKE;
-        (*parsed_message)->data.brake_level = brake_level;
+            (*parsed_message)->command = BRAKE;
+            (*parsed_message)->data.brake_level = brake_level;
+            (*parsed_message)->data.brake_data.skid_on = TRUE;
+          }
+          else if (strcmp(token, "off") == 0)
+          {
+            *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
+            memset(*parsed_message, 0, sizeof(CommListenerMessage));
+
+            (*parsed_message)->command = BRAKE;
+            (*parsed_message)->data.brake_level = brake_level;
+            (*parsed_message)->data.brake_data.skid_on = FALSE;
+          }
+        }
       }
     }
-    else if (strcmp(token, "skid") == 0)
+    else if (strcmp(token, "acc-engage") == 0)
     {
+      // Engage ACC
       token = strtok(NULL, " ");
       if (token != NULL)
       {
@@ -201,16 +219,34 @@ void parse_message(char *message, CommListenerMessage **parsed_message)
           *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
           memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
-          (*parsed_message)->command = SKID;
-          (*parsed_message)->data.skid_on = TRUE;
+          (*parsed_message)->command = ACC_ENGAGE;
+          (*parsed_message)->data.acc_engage = TRUE;
         }
         else if (strcmp(token, "off") == 0)
         {
           *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
           memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
-          (*parsed_message)->command = SKID;
-          (*parsed_message)->data.skid_on = FALSE;
+          (*parsed_message)->command = ACC_ENGAGE;
+          (*parsed_message)->data.acc_engage = FALSE;
+        }
+      }
+    }
+    else if (strcmp(token, "acc-speed") == 0)
+    {
+      // Change ACC speed
+      token = strtok(NULL, " ");
+      if (token != NULL)
+      {
+        int acc_speed = atoi(token);
+
+        if (check_atoi(acc_speed, token) && in_range(acc_speed, 0, 100))
+        {
+          *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
+          memset(*parsed_message, 0, sizeof(CommListenerMessage));
+
+          (*parsed_message)->command = ACC_SPEED;
+          (*parsed_message)->data.acc_speed = acc_speed;
         }
       }
     }
