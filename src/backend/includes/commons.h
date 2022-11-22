@@ -33,13 +33,13 @@
 
 typedef enum
 {
-    COMM = 0, // Msg from the communication module
-    SIMULATOR,
-    MANUAL_DRIVER,
-    ACC_CODE,
-    ABS_CODE,
-    THROTTLE_ACTUATOR,
-    BRAKE_ACTUATOR,
+  COMM = 0, // Msg from the communication module
+  SIMULATOR,
+  MANUAL_DRIVER,
+  ACC_CODE,
+  ABS_CODE,
+  THROTTLE_ACTUATOR,
+  BRAKE_ACTUATOR,
 	ACTUATORS
 } PulseCode;
 
