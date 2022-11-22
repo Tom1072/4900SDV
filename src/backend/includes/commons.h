@@ -15,7 +15,8 @@
 #define MANUAL_PRIO    12
 #define ACC_PRIO       11
 #define ABS_PRIO       13
-#define COMM_PRIO      10
+#define COMM_PRIO       9
+#define SIMULATOR_PRIO 10
 
 #define TIME_INTERVAL 100 // milliseconds
 

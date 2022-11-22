@@ -11,7 +11,6 @@
 #include "../includes/tests.h"
 #include "../includes/commons.h"
 #include "../includes/simulator.h"
-#include "../includes/car_structs.h"
 #include "../includes/utils.h"
 #include "../includes/CommListener.h"
 #include "../includes/actuators.h"
@@ -100,7 +99,7 @@ void *mocked_comm()
   // Send only ONE message to Simulator and keep receiving update to the screen
   // Test only 5 updates
   int updates = 0;
-  if( MsgSendPulsePtr(sim_coid, -1, COMM, (void *)msg) == -1)
+  if( MsgSendPulsePtr(sim_coid, COMM_PRIO, COMM, (void *)msg) == -1)
   {
     perror("TEST COMM: MessageSendPulsePtr()");
   }
@@ -108,14 +107,14 @@ void *mocked_comm()
 //---------------------------------------------------------------
   //------------- Server side ------------------------------------
 
-  while(updates < 15)
+  while(updates < 12)
   {
 	  if( updates == 3)
 	  {
 		// TEST 2: DESPAWN CAR
 	    CommListenerMessage* msg = (CommListenerMessage*) malloc(sizeof(CommListenerMessage));
 	    msg->command = DESPAWN_CAR;
-	    if( MsgSendPulsePtr(sim_coid, -1, COMM, (void *)msg) == -1)
+	    if( MsgSendPulsePtr(sim_coid, COMM_PRIO, COMM, (void *)msg) == -1)
 	    {
 	      perror("TEST COMM DESPAWN: MessageSendPulsePtr()");
 	    }
@@ -125,7 +124,7 @@ void *mocked_comm()
 	    msg->command = BRAKE;
 	    msg->data.brake_data.skid_on = TRUE;
 	    msg->data.brake_data.brake_level = 22;
-	    if( MsgSendPulsePtr(sim_coid, -1, COMM, (void *)msg) == -1)
+	    if( MsgSendPulsePtr(sim_coid, COMM_PRIO, COMM, (void *)msg) == -1)
 	    {
 	      perror("TEST COMM SKID: MessageSendPulsePtr()");
 	    }
@@ -282,9 +281,6 @@ void *mocked_abs()
 	  perror("TEST ABS: MsgSendPulse()");
 	}
   }
-//  printf("abs reply: %d\n", reply_brakes);
-//  reply_brakes = MsgSendPulse(sim_coid, -1, ACTUATORS, -20);
-//  printf("abs reply: %d\n", reply_brakes);
 
   name_close(sim_coid);
   name_detach(attach, 0);
@@ -299,15 +295,12 @@ void *test_sim()
 
 void *distance_test()
 {
-  Environment    env;
-  Sensors        sen;
-  OutsideObject  obj;
-
+  Environment        env;
   int                coid_acc;
   pthread_t          distance_simulator, mocked_acc_thread;
   simulatorRequest_t acc_request;
 
-  init_env( &sen, &obj, &env );
+  init_env( &env );
 
   pthread_mutex_init(&env.mutex, NULL);
 
@@ -409,12 +402,10 @@ void *distance_test()
 void *skid_test()
 {
   Environment    env;
-  Sensors        sen;
-  OutsideObject  obj;
   simulatorRequest_t abs_request;
   pthread_t          skid_simulator_thread, mocked_abs_server_thread;
 
-  init_env( &sen, &obj, &env );
+  init_env( &env );
 
   // Create a thread for ABS server simulation
   //  pthread_setschedprio( mocked_abs_server_thread , 10 );
