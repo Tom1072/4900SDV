@@ -325,10 +325,11 @@ void *simulate_skid_stop( void * data)
         // Then update skid after random time
         rand_int = (int)( ( 10 * rand() / RAND_MAX) );
 
-        pthread_mutex_lock( &info->env->mutex );
         AbsMessageInput *message_skid_off = ( AbsMessageInput *) malloc( sizeof( AbsMessageInput) );
         // Send updates to ABS
+        usleep( 5 * t * 1000 );  // sleep for 500 ms 
         usleep( rand_int * t * 1000 );
+        pthread_mutex_lock( &info->env->mutex );
         info->env->skid = 0;
         message_skid_off->skid = 0;
         if( MsgSendPulsePtr( info->coid, SIMULATOR_PRIO, SIMULATOR, (void *) message_skid_off) == -1 )
