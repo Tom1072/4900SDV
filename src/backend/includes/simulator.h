@@ -1,7 +1,7 @@
 #pragma once
 
 #include <sys/iomsg.h>
-#include "../includes/car_structs.h"
+//#include "../includes/car_structs.h"
 #include "../includes/commons.h"
 
 int init(void);
@@ -12,12 +12,9 @@ typedef union
   char rmsg [MAX_STRING_LEN +1];
 } message_t;
 
-void init_env( Sensors* , OutsideObject*, Environment* );
+//void init_env( Sensors* , OutsideObject*, Environment* );
+void init_env( Environment* );
 void copy_updates( Environment*, Environment* );
-void update_distance( unsigned short, Sensors* , OutsideObject* );
-void update_speed( unsigned short, Sensors* );
-void set_object( OutsideObject* );
-void remove_object( OutsideObject* );
 
 // Distance between object and car
 void *simulate_distance( void * data);

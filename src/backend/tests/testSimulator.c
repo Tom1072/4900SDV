@@ -7,10 +7,10 @@
 #include <errno.h>
 #include <sys/iomsg.h>
 #include <pthread.h>
+#include <sched.h>
 #include "../includes/tests.h"
 #include "../includes/commons.h"
 #include "../includes/simulator.h"
-#include "../includes/car_structs.h"
 #include "../includes/utils.h"
 #include "../includes/CommListener.h"
 #include "../includes/actuators.h"
@@ -21,53 +21,73 @@ void *test_sim();
 void *mocked_acc();
 void *mocked_abs();
 void *mocked_abs_server();
+void *mocked_manual();
 void *distance_test();
 void *skid_test();
+void *test_comm_sim_actuators_sim_display();
 
 char test_simulator() {
   printf("Testing simulator...\n");
-//  pthread_t      mocked_comm_thread, test_sim_thread,
-//  	  	  	     mocked_acc_thread, mocked_abs_thread,
-//			           mocked_dist_thread, mocked_skid_thread;
-//  pthread_attr_t mocked_comm_attr, test_sim_attr,
-//  	  	  	  	 mocked_acc_attr, mocked_abs_attr,
-//				         mocked_dist_attr, mocked_skid_attr;
+  pthread_t      test_comm_sim_actuators_sim_display_thread,
+			           mocked_dist_thread, mocked_skid_thread;
+  pthread_attr_t test_comm_sim_actuators_sim_display_attr,
+				         mocked_dist_attr, mocked_skid_attr;
 
-//  create_thread(&test_sim_thread, &test_sim_attr, 1, NULL, test_sim);
-//  create_thread(&mocked_comm_thread, &mocked_comm_attr, 2, NULL, mocked_comm);
-//  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, NULL, mocked_acc); -- DO NOT USE THIS ON ITS OWN
-//  create_thread(&mocked_abs_thread, &mocked_abs_attr, 2, NULL, mocked_abs);
+  create_thread(&test_comm_sim_actuators_sim_display_thread,
+		        &test_comm_sim_actuators_sim_display_attr,
+				1, NULL, test_comm_sim_actuators_sim_display);
 //  create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, NULL, distance_test);
 //  create_thread(&mocked_skid_thread, &mocked_skid_attr, 2, NULL, skid_test);
 
-//  pthread_join(test_sim_thread, NULL);
-//  pthread_join(mocked_comm_thread, NULL);
-//  pthread_join(mocked_acc_thread, NULL); -- DO NOT USE THIS ON ITS OWN
-//  pthread_join(mocked_abs_thread, NULL);
+  pthread_join(test_comm_sim_actuators_sim_display_thread, NULL);
 //  pthread_join(mocked_dist_thread, NULL);
 //  pthread_join(mocked_skid_thread, NULL);
-
+//
   return TRUE;
 }
 
+void *test_comm_sim_actuators_sim_display()
+{
+  pthread_t      mocked_comm_thread, test_sim_thread,
+				 mocked_acc_thread, mocked_abs_thread,
+				 mocked_manual_thread;
+  pthread_attr_t mocked_comm_attr, test_sim_attr,
+  	  	  	  	 mocked_acc_attr, mocked_abs_attr,
+				 mocked_manual_attr;
+
+  create_thread(&test_sim_thread, &test_sim_attr, 1, NULL, test_sim);
+  create_thread(&mocked_comm_thread, &mocked_comm_attr, 2, NULL, mocked_comm);
+  create_thread(&mocked_acc_thread, &mocked_acc_attr, 2, NULL, mocked_acc);
+  create_thread(&mocked_abs_thread, &mocked_abs_attr, 2, NULL, mocked_abs);
+  create_thread(&mocked_manual_thread, &mocked_manual_attr, 2, NULL, mocked_manual);
+
+  pthread_join(test_sim_thread, NULL);
+  pthread_join(mocked_comm_thread, NULL);
+  pthread_join(mocked_acc_thread, NULL);
+  pthread_join(mocked_abs_thread, NULL);
+  pthread_join(mocked_manual_thread, NULL);
+
+  return NULL;
+}
 void *mocked_comm()
 {
 
   printf("Testing communication...\n");
   int sim_coid;
-  name_attach_t 		  *attach;
+  name_attach_t           *attach;
   struct _pulse           message;
 
-
   // Create Channel
-  if((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
+  if((attach = name_attach(NULL, COMM_NAME, 0)) == NULL)
   {
     //if there was an error creating the channel
-    perror("ACC name_attach():");
+    perror("COMM name_attach():");
     exit(EXIT_FAILURE);
   }
   sleep(1);
 
+
+  /// TEST 1 : SPAWN CAR ---------------------------------
   CommListenerMessage* msg = (CommListenerMessage*) malloc(sizeof(CommListenerMessage));
   msg->command = SPAWN_CAR;
   msg->data.spawn_car_data.distance = 60;
@@ -75,37 +95,69 @@ void *mocked_comm()
 
   sim_coid = name_open(SIMULATOR_NAME, 0);
 
-  if( MsgSendPulsePtr(sim_coid, -1, COMM, (void *)msg) == -1)
+  // Send only ONE message to Simulator and keep receiving update to the screen
+  // Test only 5 updates
+  int updates = 0;
+  if( MsgSendPulsePtr(sim_coid, COMM_PRIO, COMM, (void *)msg) == -1)
   {
-    perror("TEST: MessageSendPulsePtr()");
+    perror("TEST COMM: MessageSendPulsePtr()");
   }
 
 //---------------------------------------------------------------
   //------------- Server side ------------------------------------
 
-  if( MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL) == -1)
+  while(updates < 12)
   {
-    perror("TEST: MessageSendPulsePtr()");
+	  if( updates == 3)
+	  {
+		// TEST 2: DESPAWN CAR
+	    CommListenerMessage* msg = (CommListenerMessage*) malloc(sizeof(CommListenerMessage));
+	    msg->command = DESPAWN_CAR;
+	    if( MsgSendPulsePtr(sim_coid, COMM_PRIO, COMM, (void *)msg) == -1)
+	    {
+	      perror("TEST COMM DESPAWN: MessageSendPulsePtr()");
+	    }
+	    // TEST 3: SET SKID
+	    usleep(100*1000);
+	    msg = (CommListenerMessage*) malloc(sizeof(CommListenerMessage));
+	    msg->command = BRAKE;
+	    msg->data.brake_data.skid_on = TRUE;
+	    msg->data.brake_data.brake_level = 22;
+	    if( MsgSendPulsePtr(sim_coid, COMM_PRIO, COMM, (void *)msg) == -1)
+	    {
+	      perror("TEST COMM SKID: MessageSendPulsePtr()");
+	    }
+	  }
+	  if( MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL) == -1)
+	  {
+		perror("TEST COMM: MessageSendPulsePtr()");
+	  }
+	  switch(message.code)
+	  {
+		case _PULSE_CODE_DISCONNECT:
+		{
+		  printf("***DISPLAY Client is gone\n");
+		  ConnectDetach(message.scoid);
+		  break;
+		}
+		case SIMULATOR:
+		{
+		  Environment *data = (Environment *)message.value.sival_ptr;
+		  printf("***DISPLAY: speed = %.2f, distance = %.2f, brake_level = %u, skid = %u, obj = %d\n\n",
+				  data->car_speed, data->distance, data->brake_level, data->skid, data->object);
+		  free(data);
+		  break;
+		}
+		default:
+		{
+		  printf("DISPLAY: code value=%d\n", message.code);
+		}
+	  }
+	  updates++;
   }
-    switch(message.code)
-    {
-    case _PULSE_CODE_DISCONNECT:
-      printf("***DISPLAY Client is gone\n");
-      ConnectDetach(message.scoid);
-      break;
-    case SIMULATOR:
-      printf("***DISPLAY: message code = %d\n",message.code);
-  	  Environment *data = (Environment *)message.value.sival_ptr;
-  	  printf("***DISPLAY: speed = %d, distance = %d, brake_level = %d, skid = %d\n",
-  			  data->car_speed, data->distance, data->brake_level, data->skid);
-  	  free(data);
-  	  break;
-    default:
-  	  printf("DISPLAY: code value=%d\n", message.code);
-    }
+  printf("TEST COMM: no more tests. While loop exited.\n");
+
 // --------------------------------------------
-
-
   name_close(sim_coid);
   name_detach(attach, 0);
   return NULL;
@@ -113,25 +165,23 @@ void *mocked_comm()
 
 void *mocked_acc()
 {
-//  int sim_coid;
+  int sim_coid;
   printf("Testing acc replies...\n");
   name_attach_t 		  *attach;
   struct _pulse           message;
-
-
 
   //   Create Channel
   if((attach = name_attach(NULL, ACC_NAME, 0)) == NULL)
   {
     //if there was an error creating the channel
-    perror("ACC name_attach():");
+    perror("TEST ACC: name_attach():");
     exit(EXIT_FAILURE);
   }
 
-//  sleep(1);
+  sleep(1);
 
-//  sim_coid = name_open(SIMULATOR_NAME, 0);
-//  reply = MsgSendPulsePtr(sim_coid, -1, ACC_CODE, 4);
+  sim_coid = name_open(SIMULATOR_NAME, 0);
+  // reply = MsgSendPulsePtr(sim_coid, -1, ACC_CODE, 4);
 
   while(1)
   {
@@ -139,28 +189,48 @@ void *mocked_acc()
 	  {
 	    perror("TEST: MsgReceivePulse()");
 	  }
+    //	printf("TEST ACC: message.code = %d\n", message.code);
 	  switch(message.code)
 	  {
-	  case _PULSE_CODE_DISCONNECT:
-	  {
-		printf("Simulator*** Client is gone\n");
-		ConnectDetach(message.scoid);
-		break;
-	  }
-	  case SIMULATOR:
-	  {
-		AccMessageInput *data = (AccMessageInput *)message.value.sival_ptr;
-		printf("****ACC: Data received:  brakes=%u, gas=%u, speed=%.2f, set_speed=%.2f, distance=%.2f\n",
-			  data->brake_level, data->throttle_level, data->current_speed, data->desired_speed, data->distance);
-		free(data);
-		break;
-	  }
-	  default:
-		printf("ACC: code value unknown=%d\n", message.code);
+      case _PULSE_CODE_DISCONNECT:
+      {
+        printf("TEST ACC: Client is gone\n");
+        ConnectDetach(message.scoid);
+        break;
+      }
+      case SIMULATOR:
+      {
+        AccMessageInput *data = (AccMessageInput *)message.value.sival_ptr;
+        printf("TEST ACC: Data received:  speed=%.2f, distance=%.2f, "
+                        "brake_level=%u, gas=%u, set_speed=%.2f\n",
+                        data->current_speed, data->distance,
+                        data->brake_level, data->throttle_level,
+                        data->desired_speed);
+        free(data);
+        // Send back data to mocked simulator to display the new data
+        ActuatorOutputPayload * info = ( ActuatorOutputPayload *) malloc(sizeof(ActuatorOutputPayload));
+        if(data->desired_speed == 0)
+        {
+          info->brake_level = data->brake_level;
+          info->speed = data->current_speed;
+          info->throttle_level = data->throttle_level;
+        }else{
+          info->brake_level = 1;
+          info->speed = 1;
+          info->throttle_level = 1;
+        }
+        if( MsgSendPulsePtr(sim_coid, ACC_PRIO, ACTUATORS, (void *) info) == -1)
+        {
+          perror("TEST: MsgReceivePulse()");
+        }
+        break;
+      }
+      default:
+      printf("TEST ACC: code value unknown=%d\n", message.code);
 	  }
   }
 
-//  name_close(sim_coid);
+  name_close(sim_coid);
   name_detach(attach, 0);
 
   return NULL;
@@ -170,14 +240,42 @@ void *mocked_abs()
 {
   int sim_coid;
   printf("Testing abs replies...\n");
+  name_attach_t          *attach;
+  struct _pulse          message;
+
+  //   Create Channel
+  if((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
+  {
+    //if there was an error creating the channel
+    perror("ABS name_attach():");
+    exit(EXIT_FAILURE);
+  }
   sleep(1);
   sim_coid = name_open(SIMULATOR_NAME, 0);
-//  int reply_brakes = MsgSendPulse(sim_coid, -1, ABS_CODE, 25);
-//  printf("abs reply: %d\n", reply_brakes);
-//  reply_brakes = MsgSendPulse(sim_coid, -1, ABS_CODE, -20);
-//  printf("abs reply: %d\n", reply_brakes);
+  //-------------------------------------------------------
+  //------- Receive the pulse from simulator --------------
+  while(1)
+  {
+    if( MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL) == -1)
+    {
+      perror("TEST: MsgReceivePulse()");
+    }
+    AbsMessageInput *input = (AbsMessageInput *)message.value.sival_ptr;
+    printf("TEST ABS: Data received skid = %d\n", input->skid);
+    free(input);
+    // Assemble payload
+    ActuatorOutputPayload *updates = malloc( sizeof(ActuatorOutputPayload) );
+    updates->brake_level = 25;
+    updates->throttle_level = 2;
+    updates->speed = 10;
+    if( MsgSendPulsePtr(sim_coid, ABS_PRIO, ACTUATORS, updates) == -1)
+    {
+      perror("TEST ABS: MsgSendPulse()");
+    }
+  }
 
   name_close(sim_coid);
+  name_detach(attach, 0);
   return NULL;
 }
 
@@ -189,16 +287,12 @@ void *test_sim()
 
 void *distance_test()
 {
-  Environment    env;
-  Sensors        sen;
-  OutsideObject  obj;
-
+  Environment        env;
   int                coid_acc;
   pthread_t          distance_simulator, mocked_acc_thread;
   simulatorRequest_t acc_request;
 
-  init_env( &sen, &obj, &env );
-
+  init_env( &env );
   pthread_mutex_init(&env.mutex, NULL);
 
   // Create a thread for ACC server simulation
@@ -226,7 +320,6 @@ void *distance_test()
 	  env.object = FALSE;
 	  break;
     }
-
   }
 
   printf("Thread stopped calculating the distance\n");
@@ -244,10 +337,11 @@ void *distance_test()
   while(env.distance > -1)
   {
     usleep(500000);
-	if(i > 10){
-	  env.object = FALSE;
-	  break;
-	}i++;
+    if(i > 10)
+    {
+      env.object = FALSE;
+      break;
+    } i++;
   }
   printf("Thread stopped calculating the distance\n");
 
@@ -263,11 +357,12 @@ void *distance_test()
 
   while(env.distance > -1)
   {
-	  usleep(500000);
-	  if(i > 10){
-		  env.object = FALSE;
-		  break;
-	  }i++;
+    usleep(500000);
+    if(i > 10)
+    {
+      env.object = FALSE;
+      break;
+      } i++;
   }
   printf("Thread stopped calculating the distance\n");
 
@@ -282,11 +377,12 @@ void *distance_test()
 
    while(env.distance > -1)
    {
- 	  usleep(500000);
- 	  if(i > 20){
- 		  env.object = FALSE;
- 		  break;
- 	  }i++;
+    usleep(500000);
+    if(i > 20)
+    {
+      env.object = FALSE;
+      break;
+    } i++;
    }
    printf("Thread stopped calculating the distance\n");
 
@@ -295,15 +391,14 @@ void *distance_test()
   pthread_mutex_destroy(&env.mutex);
   return NULL;
 }
+
 void *skid_test()
 {
-  Environment    env;
-  Sensors        sen;
-  OutsideObject  obj;
+  Environment        env;
   simulatorRequest_t abs_request;
-  pthread_t          skid_simulator, mocked_abs_server_thread;
+  pthread_t          skid_simulator_thread, mocked_abs_server_thread;
 
-  init_env( &sen, &obj, &env );
+  init_env( &env );
 
   // Create a thread for ABS server simulation
   pthread_create(&mocked_abs_server_thread, NULL, mocked_abs_server, NULL);
@@ -319,16 +414,18 @@ void *skid_test()
   pthread_t simulator = pthread_self();
   struct sched_param param;
   int policy;
-  pthread_getschedparam( simulator, &policy, &param );
-  pthread_setschedprio( skid_simulator , param.sched_priority + 2 );
-  printf("Priority of the simulator = %d ; priority of skid_stop = %d\n",
-		  param.sched_priority, param.sched_priority + 2);
-  pthread_create(&skid_simulator, NULL, simulate_skid_stop, (void *)&abs_request);
 
-  printf("Car skid before is %u\n", env.skid);
+  pthread_getschedparam( simulator, &policy, &param );
+  pthread_setschedprio( skid_simulator_thread , param.sched_priority + 2 );
+  pthread_create( &skid_simulator_thread, NULL, simulate_skid_stop, (void *)&abs_request );
+  // ----------------------------------------------------------------
+  sleep(1); //let the skid run with skid=0
 
   env.skid = 1;
   printf("Car skid is set to %u by user\n", env.skid);
+  while(env.skid != 0){
+	  pthread_cond_wait(&env.cond, &env.mutex);
+  }
   printf("Car skid should be 0 = %u\n", env.skid);
 
   pthread_mutex_lock(&env.mutex);
@@ -341,6 +438,9 @@ void *skid_test()
   pthread_mutex_unlock(&env.mutex);
 
   printf("Car skid  set to %u by user\n", env.skid);
+  while(env.skid != 0){
+	  pthread_cond_wait(&env.cond, &env.mutex);
+  }
   printf("Car skid should be 0 = %u\n", env.skid);
 
   pthread_mutex_lock(&env.mutex);
@@ -353,12 +453,15 @@ void *skid_test()
   pthread_mutex_unlock(&env.mutex);
 
   printf("Car skid  set to %u by user\n", env.skid);
+  while(env.skid != 0){
+	  pthread_cond_wait(&env.cond, &env.mutex);
+  }
   printf("Car skid should be 0 = %u\n", env.skid);
 
-  name_close(coid_abs);
-  pthread_join(skid_simulator, NULL);
-  pthread_join(mocked_abs_server_thread, NULL);
-  pthread_mutex_destroy(&env.mutex);
+  name_close( coid_abs );
+  pthread_join( skid_simulator_thread, NULL );
+  pthread_join( mocked_abs_server_thread, NULL );
+  pthread_mutex_destroy( &env.mutex );
   return NULL;
 }
 void *mocked_abs_server()
@@ -370,36 +473,82 @@ void *mocked_abs_server()
   // Create Channel
   if((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
   {
-	//if there was an error creating the channel
-	perror("ABS name_attach():");
-	exit(EXIT_FAILURE);
+    //if there was an error creating the channel
+    perror("ABS name_attach():");
+    exit(EXIT_FAILURE);
   }
-    while(1)
+  while(1)
+  {
+    printf("Waiting for message...\n");
+    if( MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL) == -1)
     {
-    	printf("Waiting for message...\n");
-	  if( MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL) == -1)
-	  {
-	    perror("TEST: MsgReceivePulse()");
-	  }
-		switch(message.code)
-		{
-		case _PULSE_CODE_DISCONNECT:
-		{
-		  printf("***Mocked ABS: Client is gone\n");
-		  ConnectDetach(message.scoid);
-		  break;
-		}
-		case SIMULATOR:
-		{
-		  AbsMessageInput *data = (AbsMessageInput *)message.value.sival_ptr;
-		  printf("***Mocked ABS: skid changed to = %d\n",data->skid);
-		  free(data);
-		  break;
-		}
-		default:
-		  printf("Mocked ABS: code value=%d\n", message.code);
-		}
+      perror("TEST: MsgReceivePulse()");
     }
+    switch(message.code)
+    {
+      case _PULSE_CODE_DISCONNECT:
+      {
+        printf("***Mocked ABS: Client is gone\n");
+        ConnectDetach(message.scoid);
+        break;
+      }
+      case SIMULATOR:
+      {
+        AbsMessageInput *data = (AbsMessageInput *)message.value.sival_ptr;
+        printf("***Mocked ABS: skid changed to = %d\n",data->skid);
+        free(data);
+        break;
+      }
+      default:
+      printf("Mocked ABS: code value=%d\n", message.code);
+    }
+  }
   name_detach(attach, 0);
+  return NULL;
+}
+void *mocked_manual()
+{
+  int sim_coid;
+  printf("Testing manual replies...\n");
+  name_attach_t 		  *attach;
+  struct _pulse           message;
+
+  //   Create Channel
+  if((attach = name_attach(NULL, MANUAL_NAME, 0)) == NULL)
+  {
+    //if there was an error creating the channel
+    perror("Manual name_attach():");
+    exit(EXIT_FAILURE);
+  }
+  sleep(1);
+  sim_coid = name_open(SIMULATOR_NAME, 0);
+  //-------------------------------------------------------
+  //------- Receive the pulse from simulator
+  while(1)
+  {
+    if( MsgReceivePulse(attach->chid, (void *) &message, sizeof(message), NULL) == -1)
+    {
+      perror("TEST: MsgReceivePulse()");
+    }
+    ManMessageInput *manual = ( ManMessageInput * )message.value.sival_ptr;
+    printf("TEST Manual: received message brake_level = %u, gas = %u\n",
+                           manual->brake_level, manual->throttle_level);
+    free(manual);
+    // Assemble payload
+    ActuatorOutputPayload *updates = malloc( sizeof(ActuatorOutputPayload) );
+    updates->brake_level = 45;
+    updates->throttle_level = 2;
+    updates->speed = 33;
+    
+    if( MsgSendPulsePtr(sim_coid, MANUAL_PRIO, ACTUATORS, updates) == -1)
+    {
+      perror("TEST Manual: MsgSendPulse()");
+    }
+  }
+//  printf("abs reply: %d\n", reply_brakes);
+//  reply_brakes = MsgSendPulse(sim_coid, -1, ACTUATORS, -20);
+//  printf("abs reply: %d\n", reply_brakes);
+
+  name_close(sim_coid);
   return NULL;
 }
