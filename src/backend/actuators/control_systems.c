@@ -5,6 +5,7 @@
 #include <sys/neutrino.h>
 #include <sys/dispatch.h>
 #include <math.h>
+#include <assert.h>
 #include "../includes/actuators.h"
 #include "../includes/commons.h"
 #include "../includes/utils.h"
@@ -32,11 +33,24 @@ volatile double speed = 0;
 volatile char abs_processing = FALSE;
 volatile char acc_processing = FALSE;
 
-void calculate_brake_and_throttle_levels(double desired_speed_change) {
+// 100 km/h | a = -10 m/s^2 | -> -10m/s -> -36 km/h^2 => km/h
+/**
+ * Assign brake and throttle so that the speed is changed to the new speed in 1s
+ * @param desired_acceleration  (m/s^2)
+ */
+void calculate_brake_and_throttle_levels(double acceleration) {
+  double desired_speed_change_per_interval = acceleration * ((double)TIME_INTERVAL / 1000);
+  double desired_speed_change = desired_speed_change_per_interval * 3.6; // km/h
+  // printf("desired_speed_change_per_interval: %lf, desired_speed_change: %lf\n", desired_speed_change_per_interval, desired_speed_change);
+  // printf("a: %lf, desired speed change: %lf\n", acceleration, desired_speed_change);
+  // 
   if (desired_speed_change == 0) return;
 
+
+  double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
   if (desired_speed_change > 0) {
-    double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
+    // printf("SPEED MAINTAIN: %lf\n", speed_maintain_threshold);
+    // double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
     throttle_level = round(desired_speed_change * 12 + speed_maintain_threshold);
     brake_level = 0;
   } else {
@@ -45,8 +59,7 @@ void calculate_brake_and_throttle_levels(double desired_speed_change) {
     desired_speed_change = -desired_speed_change;
 
     if (desired_speed_change < brake_threshold) {
-      /* Delta S = (throttle_level - SPEED_THRESHOLD_COEFFICIENT * speed) / 12 */
-      throttle_level = round((desired_speed_change / speed_change_factor) * 12 + SPEED_THRESHOLD_COEFFICIENT * speed);
+      throttle_level = round((-desired_speed_change + 0.1) / (FRICTION_COEFFICIENT + THROTTLE_DISENGAGED_COEFFICIENT) * 12 + speed_maintain_threshold);
       brake_level = 0;
     } else {
       /**
@@ -95,7 +108,26 @@ void set_state()
     state = ACC_STATE;
   else
     state = MANUAL_DRIVER_STATE;
-  printf("CURRENT STATE: %d\n", state);
+  
+  char *state_name;
+
+  switch (state)
+  {
+    case ABS_STATE:
+      state_name = "ABS_STATE";
+      break;
+    case ACC_STATE:
+      state_name = "ACC_STATE";
+      break;
+    case MANUAL_DRIVER_STATE:
+      state_name = "MANUAL_DRIVER_STATE";
+      break;
+    default:
+      state_name = "NOT_ACQUIRED";
+      break;
+  }
+
+  printf("CURRENT STATE: %s\n", state_name);
 }
 
 /**

@@ -7,7 +7,7 @@
 #include <sys/dispatch.h>
 #include <errno.h>
 #include <sys/iomsg.h>
-#include <limits.h>
+#include <float.h>
 #include <time.h>
 #include <semaphore.h>
 
@@ -289,7 +289,7 @@ void *simulate_distance(void *data)
       message->throttle_level = info->env->throttle_level;
       message->current_speed = info->env->car_speed;
       message->desired_speed = info->env->set_speed;
-      message->distance = USHRT_MAX;
+      message->distance = DBL_MAX;
       if(MsgSendPulsePtr( info->coid, SIMULATOR_PRIO, SIMULATOR, (void *) message) == -1 )
       {
         perror(">>>>>Distance simulator: MsgSendPulsePtr():");
@@ -327,17 +327,43 @@ void *simulate_skid_stop( void * data)
 
         AbsMessageInput *message_skid_off = ( AbsMessageInput *) malloc( sizeof( AbsMessageInput) );
         // Send updates to ABS
-        usleep( 5 * t * 1000 );  // sleep for 500 ms 
-        usleep( rand_int * t * 1000 );
-        pthread_mutex_lock( &info->env->mutex );
-        info->env->skid = 0;
-        message_skid_off->skid = 0;
-        if( MsgSendPulsePtr( info->coid, SIMULATOR_PRIO, SIMULATOR, (void *) message_skid_off) == -1 )
+
+        for (int i=0; i<100; i++)
         {
-          perror(">>>>>Skid simulator: MsgSendPulsePtr():");
+          if (info->env->car_speed == 0)
+          {
+            // Send skid off rightaway
+            pthread_mutex_lock( &info->env->mutex );
+            info->env->skid = 0;
+            message_skid_off->skid = 0;
+
+            if( MsgSendPulsePtr( info->coid, SIMULATOR_PRIO, SIMULATOR, (void *) message_skid_off) == -1 )
+            {
+              perror(">>>>>Skid simulator: MsgSendPulsePtr():");
+            }
+            pthread_cond_broadcast( &info->env->cond) ;
+            pthread_mutex_unlock( &info->env->mutex );
+          }
+          usleep( 5 * t/100 * 1000 );  // sleep for 500 ms 
         }
-        pthread_cond_broadcast( &info->env->cond) ;
-        pthread_mutex_unlock( &info->env->mutex );
+
+        // usleep( 5 * t * 1000 );  // sleep for 500 ms 
+        // usleep( rand_int * t * 1000 );
+        if (info->env->skid == TRUE)
+        {
+          // Send skid off now
+          pthread_mutex_lock( &info->env->mutex );
+          info->env->skid = 0;
+          message_skid_off->skid = 0;
+
+          if( MsgSendPulsePtr( info->coid, SIMULATOR_PRIO, SIMULATOR, (void *) message_skid_off) == -1 )
+          {
+            perror(">>>>>Skid simulator: MsgSendPulsePtr():");
+          }
+          pthread_cond_broadcast( &info->env->cond) ;
+          pthread_mutex_unlock( &info->env->mutex );
+        }
+
         printf(">>>>>Skid simulator: skid = %d\n", info->env->skid); // TODO: remove print statement
     }
   }

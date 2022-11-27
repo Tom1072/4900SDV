@@ -25,5 +25,5 @@ void copy_abs_input_payload(AbsMessageInput *input, AbsMessageInput *copied);
 void *man_processor(void *args);
 void *acc_processor(void *args);
 void *abs_processor(void *args);
-void calculate_brake_and_throttle_levels(double desired_speed_change);
+void calculate_brake_and_throttle_levels(double desired_speed_changed);
 double calculate_speed(double speed, int brake_level, int throttle_level);

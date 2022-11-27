@@ -13,7 +13,7 @@
  */
 void sendUpdates(int sim_coid, unsigned short brake_level, unsigned short throttle_level, double speed)
 {
-  printf("Brake: %3d, throttle: %3d, speed: %6.2f\n", brake_level, throttle_level, speed);
+  printf("Brake: %3d, throttle: %3d, speed: %lf\n", brake_level, throttle_level, speed);
   // ActuatorOutputPayload msg = { brake_level, throttle_level, speed };
   // MsgSendPulsePtr(sim_coid, -1, ACTUATORS, (void *)&msg); // TODO: Enable this
 }

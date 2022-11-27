@@ -91,7 +91,7 @@ void *man_processor(void *args)
         speed = calculate_speed(speed, brake_level, throttle_level);
 
         sendUpdates(sim_coid, brake_level, throttle_level, speed);
-        usleep(100 * 1000);
+        usleep(TIME_INTERVAL * 1000);
         pthread_mutex_unlock(&mutex);
     }
     return NULL;
