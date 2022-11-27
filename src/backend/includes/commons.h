@@ -24,8 +24,8 @@
 #define MIN_DISTANCE 5                          // m, the minimum distance between this car and the lead car
 #define MAX_DEACCELERATION -15                  // m/s^2, the maximum deacceleration of the car when braking
 #define SPEED_CONTROL_DEFAULT_ACCELERATION 1    // m/s^2, the default acceleration of the car when in speed control mode
-#define SPEED_CONTROL_DEFAULT_DEACCELERATION -10  // m/s^2, the default deacceleration of the car when in speed control mode
-#define SPEED_ERROR_TOLERANCE 0                 // m/s, the error tolerance of the speed control mode
+#define SPEED_CONTROL_DEFAULT_DEACCELERATION -1  // m/s^2, the default deacceleration of the car when in speed control mode
+#define SPEED_ERROR_TOLERANCE 0.5                 // m/s, the error tolerance of the speed control mode
 
 // Names of the channels
 #define MANUAL_NAME     "manual_driver_attach_name"

@@ -32,6 +32,7 @@ volatile extern double speed;
 
 volatile extern char abs_processing;
 volatile extern char acc_processing;
+volatile extern char manual_processing;
 
 
 // long long current_timestamp()
@@ -86,11 +87,23 @@ void *ACC()
     // copy_acc_input_payload(input, processed_input);
     memcpy(&process_input, input, sizeof(AccMessageInput));
 
-    // If desired_speed == 0, ACC is turned off
-    if (input->desired_speed == 0)
-      acc_processing = FALSE;
-    else
-      acc_processing = TRUE;
+    // Drive mode is ACC when
+    //     when desired speed is greater than 0
+    //     and the manual driver is not engaged
+    //     and the abs is not engaged
+    if (!abs_processing)
+    {
+      if (process_input.desired_speed > 0)
+      {
+        acc_processing = TRUE;
+        manual_processing = FALSE;
+      }
+      else 
+      {
+        acc_processing = FALSE;
+        manual_processing = TRUE;
+      }
+    }
 
     set_state(); // IMPORTANT: set determine the next state machine to run
 
@@ -193,13 +206,13 @@ void *acc_processor(void *args)
         if (speed > data->desired_speed)
         {
           // Slow down
-          // printf("ACC: Slow down\n");
+          printf("ACC: Slow down to %lf\n", data->desired_speed);
           desired_acceleration = SPEED_CONTROL_DEFAULT_DEACCELERATION;
         }
         else
         {
           // Speed up
-          // printf("ACC: Speed up\n");
+          printf("ACC: Speed up to %lf\n", data->desired_speed);
           desired_acceleration = SPEED_CONTROL_DEFAULT_ACCELERATION;
         }
         // printf("desired_acceleration: %lf\n", desired_acceleration);

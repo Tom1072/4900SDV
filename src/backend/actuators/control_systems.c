@@ -32,6 +32,7 @@ volatile double speed = 0;
 */
 volatile char abs_processing = FALSE;
 volatile char acc_processing = FALSE;
+volatile char manual_processing = TRUE;
 
 // 100 km/h | a = -10 m/s^2 | -> -10m/s -> -36 km/h^2 => km/h
 /**
@@ -100,14 +101,17 @@ double calculate_speed(double speed, int brake_level, int throttle_level) {
 */
 void set_state()
 {
+  // There must be at exactly one state engaged because of the speed update loop that send back to the simulator
+  assert(abs_processing + acc_processing + manual_processing == 1);
+
   if (abs_processing)
     state = ABS_STATE;
-  else if (throttle_level > 0 || brake_level > 0)
+  else if (manual_processing)
     state = MANUAL_DRIVER_STATE;
   else if (acc_processing)
     state = ACC_STATE;
   else
-    state = MANUAL_DRIVER_STATE;
+    assert(FALSE);
   
   char *state_name;
 
