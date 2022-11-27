@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <time.h>
 #include <semaphore.h>
+#include <signal.h>
 
 
 #include "../includes/commons.h"
@@ -71,8 +72,29 @@ int init(void){
       {
         case _PULSE_CODE_DISCONNECT:
         {
-          printf("Simulator*** Client is gone\n");
+          printf("****Simulator Client is gone\n");
           ConnectDetach( message.scoid );
+          // Kill the distance and skid simulators
+          pthread_kill( distance_simulator, SIGTERM );
+          pthread_kill( skid_simulator, SIGTERM );
+
+          // Send the termination code to actuators
+          int abs_return, acc_return, man_return;
+          abs_return = MsgSendPulse( coid_abs, SIMULATOR_PRIO, STOP_CODE, 0 );
+          acc_return = MsgSendPulse( coid_acc, SIMULATOR_PRIO, STOP_CODE, 0 );
+          man_return = MsgSendPulse( coid_driver, SIMULATOR_PRIO, STOP_CODE, 0 );
+          if( ( abs_return != -1) && ( acc_return != -1 ) && ( man_return != -1 ))
+          {
+            // Terminate simulator itself
+            //remove the name from the namespace and destroy the channel
+            name_close( coid_acc );
+            name_close( coid_abs );
+            name_close( coid_driver );
+            name_close( coid_comm );
+            name_detach( attach, 0 );
+            printf("****Simulator: exiting\n");
+            return( EXIT_SUCCESS );
+          }
           break;
         }
         case ACTUATORS:
@@ -217,6 +239,7 @@ int init(void){
   } // End while
   // Destroy mutex
   pthread_join( distance_simulator, NULL );
+  pthread_join( skid_simulator, NULL );
   pthread_mutex_destroy( &car_env.mutex );
 
   //remove the name from the namespace and destroy the channel
