@@ -46,6 +46,7 @@ char test_simulator() {
   return TRUE;
 }
 
+//==============================================================
 void *test_comm_sim_actuators_sim_display()
 {
   pthread_t      mocked_comm_thread, test_sim_thread,
@@ -69,6 +70,8 @@ void *test_comm_sim_actuators_sim_display()
 
   return NULL;
 }
+
+//==============================================================
 void *mocked_comm()
 {
 
@@ -167,6 +170,7 @@ void *mocked_comm()
   return NULL;
 }
 
+//==============================================================
 void *mocked_acc()
 {
   int sim_coid;
@@ -249,6 +253,7 @@ void *mocked_acc()
   return NULL;
 }
 
+//==============================================================
 void *mocked_abs()
 {
   int sim_coid;
@@ -317,13 +322,14 @@ void *mocked_abs()
   return NULL;
 }
 
+//==============================================================
 void *test_sim()
 {
   init();
   return NULL;
 }
 
-
+//==============================================================
 void *mocked_abs_server()
 {
   printf("Testing ABS_skid...\n");
@@ -366,6 +372,8 @@ void *mocked_abs_server()
   name_detach(attach, 0);
   return NULL;
 }
+
+//==============================================================
 void *mocked_manual()
 {
   int sim_coid;
@@ -567,7 +575,7 @@ void *skid_test()
 
   pthread_getschedparam( simulator, &policy, &param );
   pthread_setschedprio( skid_simulator_thread , param.sched_priority + 2 );
-  pthread_create( &skid_simulator_thread, NULL, simulate_skid_stop, (void *)&abs_request );
+  pthread_create( &skid_simulator_thread, NULL, (void *)simulate_skid_stop, (void *)&abs_request );
   // ----------------------------------------------------------------
   sleep(2); //let the skid run with skid=0
 

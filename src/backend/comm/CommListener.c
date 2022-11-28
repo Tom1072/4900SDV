@@ -47,6 +47,7 @@ void start_listener()
     pthread_exit(NULL);
   }
 
+  sleep(1);
   // establish a connection to the simulator's channel
   coid = name_open(SIMULATOR_NAME, _NTO_CHF_DISCONNECT);
 
@@ -89,6 +90,7 @@ void start_listener()
         printf("COMM_LISTENER: Sending \"%s\" to client\n", response);
         sendto(server_socket, response, strlen(response), 0,
                (struct sockaddr *)&client_addr, addr_size);
+//        status = MsgSendPulse(coid, -1, _PULSE_CODE_DISCONNECT, 0);
         break;
       }
       else
@@ -99,7 +101,7 @@ void start_listener()
         {
           printf("COMM_LISTENER: Command parsed\n");
           response = "OK: Command parsed.";
-          status = MsgSendPulsePtr(coid, 0, COMM, (void *)msg);
+          status = MsgSendPulsePtr(coid, -1, COMM, (void *)msg);
         }
         else
         {

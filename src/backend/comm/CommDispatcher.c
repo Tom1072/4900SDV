@@ -21,7 +21,7 @@ void start_dispatcher()
 
   // create a channel
   name_attach_t *attach = NULL;
-  attach = name_attach(NULL, COMM_NAME, 0);
+  attach = name_attach(NULL, COMM_NAME, _NTO_CHF_DISCONNECT);
 
   // init view
   init_view();

@@ -20,5 +20,5 @@ void copy_updates( Environment*, Environment* );
 void *simulate_distance( void * data);
 
 // Simulate skid stop based on random event and speed
-void *simulate_skid_stop( void * data);
+void simulate_skid_stop( void * data);
 
