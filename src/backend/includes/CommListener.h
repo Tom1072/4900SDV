@@ -35,7 +35,7 @@ typedef union
   SpawnCarData spawn_car_data; // used for SPAWN_CAR command
   int throttle_level;          // 0-100 (%), used for GAS command
   BrakeData brake_data;        // Used for BRAKE command
-  int acc_speed;               // 0-100 (km/h), used for ACC_SPEED command
+  double acc_speed;               // 0-100 (km/h), used for ACC_SPEED command
   char acc_engage;                    // TRUE to engage acc or FALSE to disengage acc, used for ACC command
   int brake_level;             // Deprecated, use BrakeData instead
   char skid_on;                // Deprecated, use BrakeData instead

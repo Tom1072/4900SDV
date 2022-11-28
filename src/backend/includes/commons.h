@@ -26,7 +26,7 @@
 #define SPEED_CONTROL_DEFAULT_ACCELERATION 1    // m/s^2, the default acceleration of the car when in speed control mode
 #define SPEED_CONTROL_DEFAULT_DEACCELERATION -1  // m/s^2, the default deacceleration of the car when in speed control mode
 #define SPEED_ERROR_TOLERANCE 0.5                 // m/s, the error tolerance of the speed control mode
-#define DISTANCE_BUFFER 1
+#define DISTANCE_BUFFER 3
 
 #define DEBUG FALSE
 #define PRINT_ON_DEBUG(...) if (DEBUG) printf(__VA_ARGS__)

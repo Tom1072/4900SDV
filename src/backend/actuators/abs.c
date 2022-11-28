@@ -113,6 +113,7 @@ void *abs_processor(void *args)
     else
       sent_brake_level = brake_level;
 
+    PRINT_ON_DEBUG("ABS: sent_brake_level: %d, speed=%lf, brake_level=%d\n", sent_brake_level, speed, brake_level);
     speed = calculate_speed(speed, sent_brake_level, throttle_level);
     sendUpdates(sim_coid, sent_brake_level, throttle_level, speed);
     usleep(TIME_INTERVAL * 1000);

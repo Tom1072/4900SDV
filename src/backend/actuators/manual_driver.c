@@ -61,6 +61,8 @@ void *ManualDriver()
         
         memcpy(&processed_input, input, sizeof(ManMessageInput));
 
+        brake_level = min(100, input->brake_level);
+
         // If input is invalid (both throttle and brake engaged)
         if (!(input->brake_level > 0 && input->throttle_level > 0))
         {

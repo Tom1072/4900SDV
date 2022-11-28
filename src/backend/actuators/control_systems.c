@@ -137,7 +137,7 @@ void set_state()
       break;
   }
 
-  // PRINT_ON_DEBUG("CURRENT STATE: %s\n", state_name);
+  PRINT_ON_DEBUG("CURRENT STATE: %s\n", state_name);
 }
 
 /**

@@ -52,7 +52,6 @@ volatile extern char manual_processing;
  */
 void *ACC()
 {
-  usleep(1000000);
   name_attach_t *attach;
   struct _pulse pulse_msg;
   AccMessageInput *input;
@@ -82,7 +81,10 @@ void *ACC()
     }
 
     pthread_mutex_lock(&mutex);
+  
     input = (AccMessageInput *)pulse_msg.value.sival_ptr;
+    // printf("ACC: desired_speed=%lf, distance=%lf\n", input->desired_speed, input->distance == DBL_MAX ? 9999 : input->distance);
+
     memcpy(&process_input, input, sizeof(AccMessageInput));
 
     char manual_passive = manual_processing && throttle_level == 0 && brake_level == 0;
@@ -133,7 +135,7 @@ void *acc_processor(void *args)
 
     while (state != ACC_STATE)
       pthread_cond_wait(&cond, &mutex);
-    // PRINT_ON_DEBUG("ACC: Processing simulator message\n");
+    // printf("ACC: Processing simulator message, desired_speed=%lf, distance=%lf\n", data->desired_speed, data->distance == DBL_MAX ? 99999 : data->distance);
 
     speed_in_mps = speed / 3.6;
 
@@ -163,12 +165,13 @@ void *acc_processor(void *args)
     desired_distance = ((-speed_in_mps / MAX_DEACCELERATION) * (speed_in_mps / 2)) + MIN_DISTANCE + DISTANCE_BUFFER; // (m)
     // PRINT_ON_DEBUG("ACC: desired_distance: %lf\n", desired_distance);
     // Print out every calculation so far
+    desired_distance = 10;
 
     if (data->distance < desired_distance)
     {
       // Current distance is less than desired distance, we need to keep the distance
       if (mode == SPEED_CONTROL)
-        // PRINT_ON_DEBUG("ACC: Switch to DISTANCE_CONTROL\n");
+        PRINT_ON_DEBUG("ACC: Switch to DISTANCE_CONTROL\n");
 
       mode = DISTANCE_CONTROL;
     }
@@ -177,7 +180,7 @@ void *acc_processor(void *args)
       // We are in DISTANCE_CONTROL and car in front speed up too much
       // or when we are far enough from the lead car
       if (mode == DISTANCE_CONTROL)
-        // PRINT_ON_DEBUG("ACC: Switch to SPEED_CONTROL\n");
+        PRINT_ON_DEBUG("ACC: Switch to SPEED_CONTROL\n");
       mode = SPEED_CONTROL;
     }
 
@@ -185,16 +188,16 @@ void *acc_processor(void *args)
     {
       if (speed_in_mps > lead_speed)
       {
-        assert(relative_speed > 0); // We are moving faster than the lead car
+        // assert(relative_speed > 0); // We are moving faster than the lead car
 
         time_to_lead = (data->distance - MIN_DISTANCE) / relative_speed;
-        assert(time_to_lead >= 0); // data->distance > MIN_DISTANCE
+        // assert(time_to_lead >= 0); // data->distance > MIN_DISTANCE
 
         desired_acceleration = (lead_speed - speed_in_mps) / time_to_lead;
-        assert(desired_acceleration < 0); // we are moving faster than the lead car --> we need to slow down
+        // assert(desired_acceleration < 0); // we are moving faster than the lead car --> we need to slow down
 
         calculate_brake_and_throttle_levels(desired_acceleration);
-        sendUpdates(sim_coid, brake_level, throttle_level, speed);
+        // sendUpdates(sim_coid, brake_level, throttle_level, speed);
       }
     }
     else if (mode == SPEED_CONTROL)
@@ -213,9 +216,10 @@ void *acc_processor(void *args)
         }
         // PRINT_ON_DEBUG("desired_acceleration: %lf\n", desired_acceleration);
         calculate_brake_and_throttle_levels(desired_acceleration);
-        sendUpdates(sim_coid, brake_level, throttle_level, speed);
+        // sendUpdates(sim_coid, brake_level, throttle_level, speed);
       }
     }
+    sendUpdates(sim_coid, brake_level, throttle_level, speed);
 
     prev_distance = data->distance;
     usleep(TIME_INTERVAL * 1000);

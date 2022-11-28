@@ -45,7 +45,7 @@ int init(void){
 
   //PRINT_ON_DEBUG("****Simulator: attach id  = %d\n", );
   // Create a channel to use as client for sending pulses
-  usleep(500000); // to allow them to attach to simulator
+  usleep(900000); // to allow them to attach to simulator
   coid_acc    = name_open( ACC_NAME, _NTO_CHF_DISCONNECT );
   coid_abs    = name_open( ABS_NAME, _NTO_CHF_DISCONNECT );
   coid_driver = name_open( MANUAL_NAME, _NTO_CHF_DISCONNECT );
@@ -155,7 +155,7 @@ int init(void){
               // Car in front is removed from the view
               car_env.object    = FALSE;
               car_env.obj_speed = 0;
-              car_env.distance  = USHRT_MAX;
+              car_env.distance  = DBL_MAX;
 
               // Update display
               Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );
@@ -202,21 +202,7 @@ int init(void){
               car_env.skid = data.brake_data.skid_on;
               break;
             }
-            case ACC_ENGAGE: /* Obsolete case - to depricate */
-            {
-              // TODO: What to send to ACC?
-              car_env.set_speed = data.acc_speed;
-              AccMessageInput * acc_data = ( AccMessageInput * )malloc( sizeof(AccMessageInput) );
-              acc_data->brake_level   = car_env.brake_level;
-              acc_data->current_speed = car_env.car_speed;
-              acc_data->desired_speed = data.acc_speed;
-              acc_data->distance      = car_env.distance;
-              if(MsgSendPulsePtr( coid_acc, SIMULATOR_PRIO, SIMULATOR, (void *)acc_data ) == -1 )
-              {
-                perror("***Simulator: MsgSendPulsePtr()");
-              }
-              break;
-            }
+
             case ACC_SPEED:
             {
               car_env.set_speed = data.acc_speed;
@@ -226,7 +212,6 @@ int init(void){
               acc_data->desired_speed = data.acc_speed;
               acc_data->distance      = car_env.distance;
               // TODO: remove print statement
-		      PRINT_ON_DEBUG("***Simulator ACC_SPEED: Env vars: set_speed = %d, brake = %d\n", acc_data->desired_speed, acc_data->brake_level);
               if( MsgSendPulsePtr( coid_acc, SIMULATOR_PRIO, SIMULATOR, (void *)acc_data ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -263,8 +248,9 @@ int init(void){
 void init_env( Environment* env )
 {
   env->skid         = 0;
-  env->distance     = 0;
+  env->distance     = DBL_MAX;
   env->car_speed    = 0;
+  env->throttle_level = 0;
   env->brake_level  = 0;
   env->obj_speed    = 0;
   env->object   = FALSE;
@@ -276,6 +262,7 @@ void copy_updates( Environment* old_env, Environment* new_env )
   new_env->skid        = old_env->skid;
   new_env->distance    = old_env->distance;
   new_env->car_speed   = old_env->car_speed;
+  new_env->throttle_level = old_env->throttle_level;
   new_env->brake_level = old_env->brake_level;
   new_env->obj_speed   = old_env->obj_speed;
   new_env->set_speed   = old_env->set_speed;
@@ -336,7 +323,6 @@ void *simulate_distance(void *data)
 void simulate_skid_stop( void * data)
 {
   simulatorRequest_t *info = ( simulatorRequest_t * ) data;
-  int t = 100; // s
   int rand_int;
 
   PRINT_ON_DEBUG(">>>>>Skid simulator: init skid = %d\n", info->env->skid); // TODO: remove print statement
@@ -356,18 +342,20 @@ void simulate_skid_stop( void * data)
         // Then update skid after random time
         rand_int = (int)( ( 10 * rand() / RAND_MAX) );
         int total_sleep_time = rand_int * TIME_INTERVAL * 1000;
-        PRINT_ON_DEBUG("total_sleep_time = %d\n", total_sleep_time);
+        int min_sleep = 100000;
 
-        AbsMessageInput *message_skid_off = ( AbsMessageInput *) malloc( sizeof( AbsMessageInput) );
+        AbsMessageInput *message_skid_off;
         // Send updates to ABS
+        int num_iterations = 100;
 
-        for (int i=0; i<100; i++)
+        for (int i=0; i<num_iterations; i++)
         {
           if (info->env->car_speed == 0)
           {
             // Send skid off rightaway
             pthread_mutex_lock( &info->env->mutex );
             info->env->skid = FALSE;
+            message_skid_off = ( AbsMessageInput *) malloc( sizeof( AbsMessageInput) );
             message_skid_off->skid = FALSE;
             pthread_cond_broadcast( &info->env->cond) ;
             pthread_mutex_unlock( &info->env->mutex );
@@ -378,7 +366,8 @@ void simulate_skid_stop( void * data)
             }
             break;
           }
-          usleep( total_sleep_time / 100);  // sleep for 500 ms 
+          usleep(min_sleep / num_iterations);
+          usleep( total_sleep_time / num_iterations);  // sleep for 500 ms 
         }
 
         if (info->env->skid == TRUE)
@@ -386,6 +375,7 @@ void simulate_skid_stop( void * data)
           // Send skid off now
           pthread_mutex_lock( &info->env->mutex );
           info->env->skid = 0;
+          message_skid_off = ( AbsMessageInput *) malloc( sizeof( AbsMessageInput) );
           message_skid_off->skid = 0;
           pthread_cond_broadcast( &info->env->cond) ;
           pthread_mutex_unlock( &info->env->mutex );
