@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/neutrino.h>
 #include <sys/dispatch.h>
+#include <assert.h>
 #include "../includes/actuators.h"
 #include "../includes/commons.h"
 #include "../includes/utils.h"
@@ -15,12 +16,13 @@ volatile extern int state;
 extern pthread_mutex_t mutex;
 extern pthread_cond_t cond;
 
-volatile extern unsigned short brake_level;
-volatile extern unsigned short throttle_level;
+volatile extern short brake_level;
+volatile extern short throttle_level;
 volatile extern double speed;
 
 volatile extern char abs_processing;
 volatile extern char acc_processing;
+volatile extern char manual_processing;
 
 /**
  * Handler of the ABS thread.
@@ -32,6 +34,8 @@ void *ABS()
   AbsMessageInput *input, *processed_input;
   volatile char skidding = FALSE;
   pthread_t processor_thread; 
+  ControllerState prev_state;
+
   if ((attach = name_attach(NULL, ABS_NAME, 0)) == NULL)
     pthread_exit(NULL);
 
@@ -42,7 +46,7 @@ void *ABS()
   while (1)
   {
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
-    printf("ABS got input\n");
+    // PRINT_ON_DEBUG("ABS got input\n");
 
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
@@ -54,16 +58,28 @@ void *ABS()
     input = (AbsMessageInput *)pulse_msg.value.sival_ptr;
     copy_abs_input_payload(input, processed_input);
 
-    printf("Skidding: %d, input skidding: %d\n", skidding, input->skid);
-    if (!skidding && input->skid) // If currently not skidding, and receive skidding input
+    // PRINT_ON_DEBUG("Skidding: %d, input skidding: %d\n", skidding, input->skid);
+
+    if (!skidding && input->skid && speed > 0) // If currently not skidding, and receive skidding input
     {
+      prev_state = state;
+      assert(state == ACC_STATE || state == MANUAL_DRIVER_STATE);
+
       skidding = TRUE;
       abs_processing = TRUE;
+      manual_processing = acc_processing = FALSE;
     }
     else if (skidding && !input->skid) // If currently skidding, and receive not skidding input
     {
       skidding = FALSE;
+
       abs_processing = FALSE;
+
+      // Resume to the previous state
+      if (prev_state == ACC_STATE)
+        acc_processing = TRUE;
+      else if (prev_state == MANUAL_DRIVER_STATE)
+        manual_processing = TRUE;
     }
 
     set_state(); // IMPORTANT: set determine the next state machine to run
@@ -92,10 +108,15 @@ void *abs_processor(void *args)
     while (state != ABS_STATE)
       pthread_cond_wait(&cond, &mutex);
 
-    sent_brake_level = sent_brake_level == 0 ? brake_level : 0;
+    if (speed > 0)
+      sent_brake_level = sent_brake_level == 0 ? brake_level : 0;
+    else
+      sent_brake_level = brake_level;
+
+    PRINT_ON_DEBUG("ABS: sent_brake_level: %d, speed=%lf, brake_level=%d\n", sent_brake_level, speed, brake_level);
     speed = calculate_speed(speed, sent_brake_level, throttle_level);
     sendUpdates(sim_coid, sent_brake_level, throttle_level, speed);
-    usleep(100 * 1000);
+    usleep(TIME_INTERVAL * 1000);
     pthread_mutex_unlock(&mutex);
   }
   return NULL;

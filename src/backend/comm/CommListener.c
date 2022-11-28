@@ -39,7 +39,7 @@ void start_listener()
   server_addr.sin_port = htons(SERVER_PORT);
 
   // Bind the server socket
-  printf("Binding to port %d\n", SERVER_PORT);
+  PRINT_ON_DEBUG("Binding to port %d\n", SERVER_PORT);
   status = bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (status < 0)
   {
@@ -59,7 +59,7 @@ void start_listener()
     FD_ZERO(&writefds);
     FD_SET(server_socket, &writefds);
 
-    printf("COMM_LISTENER: start_listener: Waiting for message...\n");
+    PRINT_ON_DEBUG("COMM_LISTENER: start_listener: Waiting for message...\n");
     status = select(FD_SETSIZE, &readfds, &writefds, NULL, NULL);
     if (status == 0)
     { // Timeout occurred, no client ready
@@ -78,16 +78,16 @@ void start_listener()
       if (bytes_received > 0)
       {
         buffer[bytes_received] = '\0';
-        printf("COMM_LISTENER: Received client request: %s\n", buffer);
+        PRINT_ON_DEBUG("COMM_LISTENER: Received client request: %s\n", buffer);
       }
       // If the client said to stop, then I'll stop myself
       if (strcmp(buffer, "stop") == 0)
       {
         // Respond with an "OK" message
-        printf("COMM_LISTENER: Closing CommListener server\n");
+        PRINT_ON_DEBUG("COMM_LISTENER: Closing CommListener server\n");
         response = "OK: Closing CommListener server.";
 
-        printf("COMM_LISTENER: Sending \"%s\" to client\n", response);
+        PRINT_ON_DEBUG("COMM_LISTENER: Sending \"%s\" to client\n", response);
         sendto(server_socket, response, strlen(response), 0,
                (struct sockaddr *)&client_addr, addr_size);
         status = MsgSendPulse(coid, -1, _PULSE_CODE_DISCONNECT, 0);
@@ -99,17 +99,17 @@ void start_listener()
         parse_message(buffer, &msg);
         if (msg != NULL)
         {
-          printf("COMM_LISTENER: Command parsed\n");
+          PRINT_ON_DEBUG("COMM_LISTENER: Command parsed\n");
           response = "OK: Command parsed.";
           status = MsgSendPulsePtr(coid, -1, COMM, (void *)msg);
         }
         else
         {
-          printf("COMM_LISTENER: Cannot parse command sent by client.\n");
+          PRINT_ON_DEBUG("COMM_LISTENER: Cannot parse command sent by client.\n");
           response = "NOK: Cannot parse command sent by client.";
         }
 
-        printf("COMM_LISTENER: Sending \"%s\" to client\n", response);
+        PRINT_ON_DEBUG("COMM_LISTENER: Sending \"%s\" to client\n", response);
         sendto(server_socket, response, strlen(response), 0,
                (struct sockaddr *)&client_addr, addr_size);
       }
@@ -123,14 +123,14 @@ void parse_message(char *message, CommListenerMessage **parsed_message)
 {
   if (message == NULL || parsed_message == NULL)
   {
-    printf("COMM_LISTENER: parse_message: Invalid arguments\n");
+    PRINT_ON_DEBUG("COMM_LISTENER: parse_message: Invalid arguments\n");
     return;
   }
   // Split string by spaces
   char *token = strtok(message, " ");
   if (token != NULL)
   {
-    printf("COMM_LISTENER: parse_message: %s\n", token);
+    PRINT_ON_DEBUG("COMM_LISTENER: parse_message: %s\n", token);
     if (strcmp(token, "spawn") == 0)
     {
       token = strtok(NULL, " ");
@@ -210,43 +210,18 @@ void parse_message(char *message, CommListenerMessage **parsed_message)
         }
       }
     }
-    else if (strcmp(token, "acc-engage") == 0)
-    {
-      // Engage ACC
-      token = strtok(NULL, " ");
-      if (token != NULL)
-      {
-        if (strcmp(token, "on") == 0)
-        {
-          *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
-          memset(*parsed_message, 0, sizeof(CommListenerMessage));
-
-          (*parsed_message)->command = ACC_ENGAGE;
-          (*parsed_message)->data.acc_engage = TRUE;
-        }
-        else if (strcmp(token, "off") == 0)
-        {
-          *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
-          memset(*parsed_message, 0, sizeof(CommListenerMessage));
-
-          (*parsed_message)->command = ACC_ENGAGE;
-          (*parsed_message)->data.acc_engage = FALSE;
-        }
-      }
-    }
     else if (strcmp(token, "acc-speed") == 0)
     {
       // Change ACC speed
       token = strtok(NULL, " ");
       if (token != NULL)
       {
-        int acc_speed = atoi(token);
+        double acc_speed = atof(token);
 
-        if (check_atoi(acc_speed, token) && in_range(acc_speed, 0, 100))
+        if (in_range(acc_speed, 0, 100))
         {
           *parsed_message = (CommListenerMessage *)malloc(sizeof(CommListenerMessage));
           memset(*parsed_message, 0, sizeof(CommListenerMessage));
-
           (*parsed_message)->command = ACC_SPEED;
           (*parsed_message)->data.acc_speed = acc_speed;
         }

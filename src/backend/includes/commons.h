@@ -20,6 +20,17 @@
 
 #define TIME_INTERVAL 100 // milliseconds
 
+// ACC configurations
+#define MIN_DISTANCE 5                          // m, the minimum distance between this car and the lead car
+#define MAX_DEACCELERATION -15                  // m/s^2, the maximum deacceleration of the car when braking
+#define SPEED_CONTROL_DEFAULT_ACCELERATION 1    // m/s^2, the default acceleration of the car when in speed control mode
+#define SPEED_CONTROL_DEFAULT_DEACCELERATION -1  // m/s^2, the default deacceleration of the car when in speed control mode
+#define SPEED_ERROR_TOLERANCE 0.5                 // m/s, the error tolerance of the speed control mode
+#define DISTANCE_BUFFER 3
+
+#define DEBUG FALSE
+#define PRINT_ON_DEBUG(...) if (DEBUG) printf(__VA_ARGS__)
+
 // Names of the channels
 #define MANUAL_NAME     "manual_driver_attach_name"
 #define ABS_NAME        "ABS_attach_name"
@@ -49,8 +60,8 @@ typedef enum
 typedef struct
 {
   volatile char   skid;         // level of skid
-  unsigned short  brake_level;  // current brake position
-  unsigned short  throttle_level;
+  short  brake_level;  // current brake position
+  short  throttle_level;
   volatile double distance;     // distance from car to object
   double          car_speed;    // car current speed
   double          obj_speed;    // object in front speed
@@ -68,8 +79,8 @@ typedef struct
 
 typedef struct
 {
-  unsigned short brake_level;
-  unsigned short throttle_level;
+  short brake_level;
+  short throttle_level;
   double current_speed;
   double desired_speed;
   double distance;
@@ -82,13 +93,13 @@ typedef struct
 
 typedef struct
 {
-  unsigned short brake_level;
-  unsigned short throttle_level;
+  short brake_level;
+  short throttle_level;
 } ManMessageInput;
 
 
 typedef struct {
-  unsigned short brake_level;
-  unsigned short throttle_level;
+  short brake_level;
+  short throttle_level;
   double speed;
 } ActuatorOutputPayload;
