@@ -176,8 +176,10 @@ int init(void){
             {
               // User presses gas pedal
               ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
-              manual->brake_level = data.brake_level;
+              manual->brake_level = 0;
               manual->throttle_level = data.throttle_level;
+              // TODO: remove print statement
+			  printf("***Simulator THROTTLE: Env vars: gas = %d, brake = %d\n", manual->throttle_level, manual->brake_level);
               if( MsgSendPulsePtr(coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -189,9 +191,9 @@ int init(void){
               // User presses brake pedal
               ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
               manual->brake_level = data.brake_data.brake_level;
-              manual->throttle_level = data.throttle_level; // This one may be obsolete
+              manual->throttle_level = 0; // This one may be obsolete
               // TODO: remove print statement
-              printf("***Simulator BRAKE: Env vars: skid = %d, brake = %d\n", car_env.skid, car_env.brake_level); 
+              printf("***Simulator BRAKE: Env vars: skid = %d, brake = %d\n", data.brake_data.skid_on, manual->brake_level);
               if( MsgSendPulsePtr( coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -223,6 +225,8 @@ int init(void){
               acc_data->current_speed = car_env.car_speed;
               acc_data->desired_speed = data.acc_speed;
               acc_data->distance      = car_env.distance;
+              // TODO: remove print statement
+		      printf("***Simulator ACC_SPEED: Env vars: set_speed = %d, brake = %d\n", acc_data->desired_speed, acc_data->brake_level);
               if( MsgSendPulsePtr( coid_acc, SIMULATOR_PRIO, SIMULATOR, (void *)acc_data ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -348,7 +352,6 @@ void simulate_skid_stop( void * data)
       {
         perror(">>>>>Skid simulator: MsgSendPulsePtr():");
       }
-        printf(">>>>>Skid simulator: init skid = %d\n", info->env->skid);// TODO: remove print statement
 
         // Then update skid after random time
         rand_int = (int)( ( 10 * rand() / RAND_MAX) );
@@ -362,7 +365,7 @@ void simulate_skid_stop( void * data)
         message_skid_off->skid = 0;
         pthread_cond_broadcast( &info->env->cond) ;
         pthread_mutex_unlock( &info->env->mutex );
-        if( MsgSendPulsePtr( info->coid, SIMULATOR_PRIO, SIMULATOR, (void *) message_skid_off) == -1 )
+        if( MsgSendPulsePtr( info->coid, SIMULATOR_PRIO, SIMULATOR, (void *)message_skid_off) == -1 )
         {
           perror(">>>>>Skid simulator: MsgSendPulsePtr():");
         }

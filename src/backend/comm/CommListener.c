@@ -49,7 +49,7 @@ void start_listener()
 
   sleep(1);
   // establish a connection to the simulator's channel
-  coid = name_open(SIMULATOR_NAME, _NTO_CHF_DISCONNECT);
+  coid = name_open(SIMULATOR_NAME, 0);//_NTO_CHF_DISCONNECT);
 
   // Wait for clients now
   while (TRUE)
@@ -90,7 +90,7 @@ void start_listener()
         printf("COMM_LISTENER: Sending \"%s\" to client\n", response);
         sendto(server_socket, response, strlen(response), 0,
                (struct sockaddr *)&client_addr, addr_size);
-//        status = MsgSendPulse(coid, -1, _PULSE_CODE_DISCONNECT, 0);
+        status = MsgSendPulse(coid, -1, _PULSE_CODE_DISCONNECT, 0);
         break;
       }
       else
