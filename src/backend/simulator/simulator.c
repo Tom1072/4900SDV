@@ -10,6 +10,7 @@
 #include <float.h>
 #include <time.h>
 #include <semaphore.h>
+#include <signal.h>
 
 
 #include "../includes/commons.h"
@@ -42,25 +43,29 @@ int init(void){
     exit( EXIT_FAILURE );
   }
 
+  //printf("****Simulator: attach id  = %d\n", );
   // Create a channel to use as client for sending pulses
-  sleep(1); // to allow them to attach to simulator
-  coid_acc    = name_open( ACC_NAME, 0 );
-  coid_abs    = name_open( ABS_NAME, 0 );
-  coid_driver = name_open( MANUAL_NAME, 0 );
-  coid_comm   = name_open( COMM_NAME, 0 );
+  usleep(500000); // to allow them to attach to simulator
+  coid_acc    = name_open( ACC_NAME, _NTO_CHF_DISCONNECT );
+  coid_abs    = name_open( ABS_NAME, _NTO_CHF_DISCONNECT );
+  coid_driver = name_open( MANUAL_NAME, _NTO_CHF_DISCONNECT );
+  coid_comm   = name_open( COMM_NAME, _NTO_CHF_DISCONNECT );
+
   // Create a thread for distance simulation
   abs_request.env = acc_request.env = &car_env;
   abs_request.coid = coid_abs;
   acc_request.coid = coid_acc;
 
   pthread_create( &distance_simulator, NULL, &simulate_distance, (void *)&acc_request );
-  pthread_create( &skid_simulator, NULL, &simulate_skid_stop, (void *)&abs_request );
+  pthread_create( &skid_simulator, NULL, (void *)simulate_skid_stop, (void *)&abs_request );
   //the server should keep receiving, processing and replying to messages
 
   while(1)
   {
     //code to receive message or pulse from client
+	printf("****Simulator: waiting to receive a pulse...\n");
     rcvid = MsgReceivePulse( attach->chid, (void *) &message, sizeof(message), NULL );
+    printf("****Simulator: rcvid = %d, scoid = %d\n", rcvid, message.scoid);
     if( rcvid == -1 )
     {
       perror("MsgReceivePulse()");
@@ -71,8 +76,30 @@ int init(void){
       {
         case _PULSE_CODE_DISCONNECT:
         {
-          printf("Simulator*** Client is gone\n");
+          printf("****Simulator Client is gone\n");
           ConnectDetach( message.scoid );
+          // Kill the distance and skid simulators
+          pthread_kill( distance_simulator, SIGTERM );
+          pthread_kill( skid_simulator, SIGTERM );
+
+          // Send the termination code to actuators
+          int abs_return, acc_return, man_return, com_return;
+          abs_return = MsgSendPulse( coid_abs, SIMULATOR_PRIO, STOP_CODE, 0 );
+          acc_return = MsgSendPulse( coid_acc, SIMULATOR_PRIO, STOP_CODE, 0 );
+          man_return = MsgSendPulse( coid_driver, SIMULATOR_PRIO, STOP_CODE, 0 );
+          com_return = MsgSendPulse( coid_comm, SIMULATOR_PRIO, STOP_CODE, 0 );
+          if( ( abs_return != -1) && ( acc_return != -1 ) && ( man_return != -1 ) && ( com_return != -1 ))
+          {
+            // Terminate simulator itself
+            //remove the name from the namespace and destroy the channel
+            name_close( coid_acc );
+            name_close( coid_abs );
+            name_close( coid_driver );
+            name_close( coid_comm );
+            name_detach( attach, 0 );
+            printf("****Simulator: exiting\n");
+            return( EXIT_SUCCESS );
+          }
           break;
         }
         case ACTUATORS:
@@ -149,8 +176,10 @@ int init(void){
             {
               // User presses gas pedal
               ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
-              manual->brake_level = data.brake_level;
+              manual->brake_level = 0;
               manual->throttle_level = data.throttle_level;
+              // TODO: remove print statement
+			  printf("***Simulator THROTTLE: Env vars: gas = %d, brake = %d\n", manual->throttle_level, manual->brake_level);
               if( MsgSendPulsePtr(coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -162,9 +191,9 @@ int init(void){
               // User presses brake pedal
               ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
               manual->brake_level = data.brake_data.brake_level;
-              manual->throttle_level = data.throttle_level; // This one may be obsolete
+              manual->throttle_level = 0; // This one may be obsolete
               // TODO: remove print statement
-              printf("***Simulator BRAKE: Env vars: skid = %d, brake = %d\n", car_env.skid, car_env.brake_level); 
+              printf("***Simulator BRAKE: Env vars: skid = %d, brake = %d\n", data.brake_data.skid_on, manual->brake_level);
               if( MsgSendPulsePtr( coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -196,6 +225,8 @@ int init(void){
               acc_data->current_speed = car_env.car_speed;
               acc_data->desired_speed = data.acc_speed;
               acc_data->distance      = car_env.distance;
+              // TODO: remove print statement
+		      printf("***Simulator ACC_SPEED: Env vars: set_speed = %d, brake = %d\n", acc_data->desired_speed, acc_data->brake_level);
               if( MsgSendPulsePtr( coid_acc, SIMULATOR_PRIO, SIMULATOR, (void *)acc_data ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -217,6 +248,7 @@ int init(void){
   } // End while
   // Destroy mutex
   pthread_join( distance_simulator, NULL );
+  pthread_join( skid_simulator, NULL );
   pthread_mutex_destroy( &car_env.mutex );
 
   //remove the name from the namespace and destroy the channel
@@ -225,7 +257,7 @@ int init(void){
   name_close( coid_driver );
   name_close( coid_comm );
   name_detach( attach, 0 );
-  return( EXIT_SUCCESS );
+  return EXIT_SUCCESS;
 }
 
 void init_env( Environment* env )
@@ -281,7 +313,7 @@ void *simulate_distance(void *data)
         perror(">>>>>Distance simulator: MsgSendPulsePtr():");
       }
     } // TODO: add the distance updates if no object to be distance_max
-    else if( ( info->env->object == FALSE ))
+  /*  else if( ( info->env->object == FALSE ))
     {
       // Send pulse to ACC
       AccMessageInput *message = ( AccMessageInput *) malloc( sizeof(AccMessageInput) );
@@ -294,14 +326,14 @@ void *simulate_distance(void *data)
       {
         perror(">>>>>Distance simulator: MsgSendPulsePtr():");
       }
-    }
+    }*/
     // Sleep 100 ms
     usleep( t * 1000 );
   }
   printf("No car in front OR you have crashed\n"); // TODO: remove print statement
   return NULL;
 }
-void *simulate_skid_stop( void * data)
+void simulate_skid_stop( void * data)
 {
   simulatorRequest_t *info = ( simulatorRequest_t * ) data;
   int t = 100; // s
@@ -320,10 +352,11 @@ void *simulate_skid_stop( void * data)
       {
         perror(">>>>>Skid simulator: MsgSendPulsePtr():");
       }
-        printf(">>>>>Skid simulator: init skid = %d\n", info->env->skid);// TODO: remove print statement
 
         // Then update skid after random time
         rand_int = (int)( ( 10 * rand() / RAND_MAX) );
+        int total_sleep_time = rand_int * TIME_INTERVAL * 1000;
+        printf("total_sleep_time = %d\n", total_sleep_time);
 
         AbsMessageInput *message_skid_off = ( AbsMessageInput *) malloc( sizeof( AbsMessageInput) );
         // Send updates to ABS
@@ -334,39 +367,38 @@ void *simulate_skid_stop( void * data)
           {
             // Send skid off rightaway
             pthread_mutex_lock( &info->env->mutex );
-            info->env->skid = 0;
-            message_skid_off->skid = 0;
+            info->env->skid = FALSE;
+            message_skid_off->skid = FALSE;
+            pthread_cond_broadcast( &info->env->cond) ;
+            pthread_mutex_unlock( &info->env->mutex );
 
             if( MsgSendPulsePtr( info->coid, SIMULATOR_PRIO, SIMULATOR, (void *) message_skid_off) == -1 )
             {
               perror(">>>>>Skid simulator: MsgSendPulsePtr():");
             }
-            pthread_cond_broadcast( &info->env->cond) ;
-            pthread_mutex_unlock( &info->env->mutex );
+            break;
           }
-          usleep( 5 * t/100 * 1000 );  // sleep for 500 ms 
+          usleep( total_sleep_time / 100);  // sleep for 500 ms 
         }
 
-        // usleep( 5 * t * 1000 );  // sleep for 500 ms 
-        // usleep( rand_int * t * 1000 );
         if (info->env->skid == TRUE)
         {
           // Send skid off now
           pthread_mutex_lock( &info->env->mutex );
           info->env->skid = 0;
           message_skid_off->skid = 0;
+          pthread_cond_broadcast( &info->env->cond) ;
+          pthread_mutex_unlock( &info->env->mutex );
 
           if( MsgSendPulsePtr( info->coid, SIMULATOR_PRIO, SIMULATOR, (void *) message_skid_off) == -1 )
           {
             perror(">>>>>Skid simulator: MsgSendPulsePtr():");
           }
-          pthread_cond_broadcast( &info->env->cond) ;
-          pthread_mutex_unlock( &info->env->mutex );
         }
 
         printf(">>>>>Skid simulator: skid = %d\n", info->env->skid); // TODO: remove print statement
     }
   }
-  return NULL;
+//  return NULL;
 }
 

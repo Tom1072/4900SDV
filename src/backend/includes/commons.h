@@ -50,7 +50,8 @@ typedef enum
   ABS_CODE,
   THROTTLE_ACTUATOR,
   BRAKE_ACTUATOR,
-  ACTUATORS
+  ACTUATORS,
+  STOP_CODE  // To stop the vehicle
 } PulseCode;
 
 typedef struct
