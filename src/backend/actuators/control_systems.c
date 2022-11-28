@@ -22,8 +22,8 @@ volatile int state = NOT_ACQUIRED;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
-volatile unsigned short brake_level = 0;
-volatile unsigned short throttle_level = 0;
+volatile short brake_level = 0;
+volatile short throttle_level = 0;
 volatile double speed = 0;
 
 /**
@@ -62,15 +62,21 @@ void calculate_brake_and_throttle_levels(double acceleration) {
     if (desired_speed_change < brake_threshold) {
       throttle_level = round((-desired_speed_change + 0.1) / (FRICTION_COEFFICIENT + THROTTLE_DISENGAGED_COEFFICIENT) * 12 + speed_maintain_threshold);
       brake_level = 0;
-    } else {
-      /**
-       * max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12
-       * Delta S = max_speed_change * (1 + brake_level * BRAKE_COEFFICIENT)
-      */
-      double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12;
-      brake_level = round(((desired_speed_change / max_speed_change) - FRICTION_COEFFICIENT) / BRAKE_COEFFICIENT);
-      throttle_level = 0;
+      if (throttle_level > 0) {
+        speed = calculate_speed(speed, brake_level, throttle_level);
+        return;
+      }
     }
+    
+    /**
+      * max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12
+      * Delta S = max_speed_change * (1 + brake_level * BRAKE_COEFFICIENT)
+    */
+    // return max(0, speed - max_speed_change * (FRICTION_COEFFICIENT + brake_level * BRAKE_COEFFICIENT));
+    double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12;
+    // brake_level = round((-desired_speed_change / max_speed_change - FRICTION_COEFFICIENT) / BRAKE_COEFFICIENT);
+    brake_level = -round(((-desired_speed_change / max_speed_change) - FRICTION_COEFFICIENT) / BRAKE_COEFFICIENT);
+    throttle_level = 0;
   }
   speed = calculate_speed(speed, brake_level, throttle_level);
 }

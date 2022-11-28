@@ -16,8 +16,8 @@ volatile extern int state;
 extern pthread_mutex_t mutex;
 extern pthread_cond_t cond;
 
-volatile extern unsigned short brake_level;
-volatile extern unsigned short throttle_level;
+volatile extern short brake_level;
+volatile extern short throttle_level;
 volatile extern double speed;
 
 volatile extern char abs_processing;

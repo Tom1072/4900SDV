@@ -26,14 +26,13 @@ volatile extern int state;
 extern pthread_mutex_t mutex;
 extern pthread_cond_t cond;
 
-volatile extern unsigned short brake_level;
-volatile extern unsigned short throttle_level;
+volatile extern short brake_level;
+volatile extern short throttle_level;
 volatile extern double speed;
 
 volatile extern char abs_processing;
 volatile extern char acc_processing;
 volatile extern char manual_processing;
-
 
 // long long current_timestamp()
 // {
@@ -86,17 +85,16 @@ void *ACC()
     input = (AccMessageInput *)pulse_msg.value.sival_ptr;
     memcpy(&process_input, input, sizeof(AccMessageInput));
 
-
     char manual_passive = manual_processing && throttle_level == 0 && brake_level == 0;
 
     if (!abs_processing)
     {
-      if (process_input.desired_speed > 0 && (manual_passive || acc_processing) )
+      if (process_input.desired_speed > 0 && (manual_passive || acc_processing))
       {
         acc_processing = TRUE;
         manual_processing = FALSE;
       }
-      else 
+      else
       {
         acc_processing = FALSE;
         manual_processing = TRUE;
@@ -162,24 +160,26 @@ void *acc_processor(void *args)
     // printf("ACC: lead_speed: %lf\n", lead_speed);
 
     // Desired distance is the minimum distance that allow the car to stop in time
-    desired_distance = ((-speed_in_mps / MAX_DEACCELERATION) * (speed_in_mps / 2)) + MIN_DISTANCE; // (m)
+    desired_distance = ((-speed_in_mps / MAX_DEACCELERATION) * (speed_in_mps / 2)) + MIN_DISTANCE + DISTANCE_BUFFER; // (m)
     // printf("ACC: desired_distance: %lf\n", desired_distance);
-
     // Print out every calculation so far
 
     if (data->distance < desired_distance)
     {
       // Current distance is less than desired distance, we need to keep the distance
+      if (mode == SPEED_CONTROL)
+        printf("ACC: Switch to DISTANCE_CONTROL\n");
+
       mode = DISTANCE_CONTROL;
     }
     else if (speed > data->desired_speed || data->distance >= desired_distance)
     {
       // We are in DISTANCE_CONTROL and car in front speed up too much
       // or when we are far enough from the lead car
+      if (mode == DISTANCE_CONTROL)
+        printf("ACC: Switch to SPEED_CONTROL\n");
       mode = SPEED_CONTROL;
     }
-
-    // printf("ACC: mode: %s\n", mode == DISTANCE_CONTROL ? "DISTANCE_CONTROL" : "SPEED_CONTROL");
 
     if (mode == DISTANCE_CONTROL)
     {
@@ -188,7 +188,7 @@ void *acc_processor(void *args)
         assert(relative_speed > 0); // We are moving faster than the lead car
 
         time_to_lead = (data->distance - MIN_DISTANCE) / relative_speed;
-        assert(time_to_lead > 0); // data->distance > MIN_DISTANCE
+        assert(time_to_lead >= 0); // data->distance > MIN_DISTANCE
 
         desired_acceleration = (lead_speed - speed_in_mps) / time_to_lead;
         assert(desired_acceleration < 0); // we are moving faster than the lead car --> we need to slow down

@@ -75,22 +75,41 @@ static void *mocked_simulator()
   */
 
   /** TEST */
-  // printf("\n***\n");
-  // printf("ACC speed up x2 -> ACC slow down x2 -> ACC speed up x2 -> ACC slow down x2\n");
+  /*
+  printf("\n***\n");
+  printf("ACC speed up x2 -> ACC slow down x2 -> ACC speed up x2 -> ACC slow down x2\n");
 
-  // printf("ACC speed up to 20km/h\n");
-  // mock_acc(acc_coid, 10, DBL_MAX, 20, 0);
-  // printf("ACC speed up to 30km/h\n");
-  // mock_acc(acc_coid, 5, DBL_MAX, 30, 0);
-  // printf("ACC slow down to 20km/h\n");
-  // mock_acc(acc_coid, 5, DBL_MAX, 20, 0);
-  // printf("ACC slow down to 10km/h\n");
-  // mock_acc(acc_coid, 5, DBL_MAX, 10, 0);
-  // printf("ACC speed up to 100km/h\n");
-  // mock_acc(acc_coid, 20, DBL_MAX, 100, 0);
-  // printf("ACC slow down to 20km/h\n");
-  // mock_acc(acc_coid, 5, DBL_MAX, 20, 0);
+  printf("ACC speed up to 20km/h\n");
+  mock_acc(acc_coid, 10, DBL_MAX, 20, 0);
+  printf("ACC speed up to 30km/h\n");
+  mock_acc(acc_coid, 5, DBL_MAX, 30, 0);
+  printf("ACC slow down to 20km/h\n");
+  mock_acc(acc_coid, 5, DBL_MAX, 20, 0);
+  printf("ACC slow down to 10km/h\n");
+  mock_acc(acc_coid, 5, DBL_MAX, 10, 0);
+  printf("ACC speed up to 100km/h\n");
+  mock_acc(acc_coid, 20, DBL_MAX, 100, 0);
+  printf("ACC slow down to 20km/h\n");
+  mock_acc(acc_coid, 5, DBL_MAX, 20, 0);
+  printf("Reseting\n");
+  mock_manual(man_coid, 2, 0, 100);
+  mock_manual(man_coid, 0, 0, 0);
+  */
 
+  /** TEST */
+  printf("\n***\n");
+  printf("ACC speed up -> Object in moving closer\n");
+  mock_acc(acc_coid, 10, DBL_MAX, 30, 0);
+  for (double d=10; d>MIN_DISTANCE; d-= ((double)TIME_INTERVAL)/1000)
+  {
+    mock_acc(acc_coid, ((double)TIME_INTERVAL)/1000, d, 30, 0);
+  }
+  printf("After this, the car should stop\n");
+
+  for (double d=MIN_DISTANCE; d<10; d+= ((double)TIME_INTERVAL)/1000)
+  {
+    mock_acc(acc_coid, ((double)TIME_INTERVAL)/1000, d, 30, 0);
+  }
 
   return NULL;
 }

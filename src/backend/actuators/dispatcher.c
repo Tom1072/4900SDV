@@ -11,7 +11,7 @@
  * Engage the actuators.
  * This function sends an ActuatorOutputPayload to Simulator
  */
-void sendUpdates(int sim_coid, unsigned short brake_level, unsigned short throttle_level, double speed)
+void sendUpdates(int sim_coid, short brake_level, short throttle_level, double speed)
 {
   printf("Brake: %3d, throttle: %3d, speed: %lf\n", brake_level, throttle_level, speed);
   // ActuatorOutputPayload msg = { brake_level, throttle_level, speed };
