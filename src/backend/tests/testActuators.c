@@ -45,80 +45,51 @@ static void *mocked_simulator()
   int abs_coid = name_open(ABS_NAME, 0);
   sleep(1);
 
-  /** Demo for ACC only: coid, t, thr,  br   */
-  double distance;        //meters
-  double desired_speed;   // km/h
-  double current_speed;   // km/h
-  double process_time;    // seconds
 
+  /** TEST */
+  /*
+  printf("\n***\n");
+  printf("ACC speed up -> Manual brake -> ABS -> Manual release -> ACC speed up\n");
 
-  // current speed < desired & no object ahead.
-  // Expect change in throttle level
-  // printf("ACC test 1\n");
-  // distance = DBL_MAX;    //meters
-  // desired_speed = 30;    // km/h
-  // current_speed = 0;     // km/h
-  // process_time = 10;     // seconds
-  // mock_acc(acc_coid, process_time, distance, desired_speed, current_speed); 
+  printf("Engage ACC to 30km/h\n");
+  mock_acc(acc_coid, 10, DBL_MAX, 30, 0);
+  printf("\n");
 
-  // printf("ACC test 2\n");
-  // desired_speed = 40;    // km/h
-  // mock_acc(acc_coid, process_time, distance, desired_speed, current_speed); 
+  printf("Engage ACC to 70km/h\n");
+  mock_acc(acc_coid, 15, DBL_MAX, 70, 0);
+  printf("\n");
 
-  // printf("ACC test 3\n");
-  // desired_speed = 0;    // km/h
-  // mock_acc(acc_coid, process_time, distance, desired_speed, current_speed); 
-
-
-
-  /** Demo for Manual Driver only:
-   *              coid, t, thr,  br   */
-  printf("Manual test\n");
-  mock_manual(man_coid, 2, 100,   0);
-  mock_manual(man_coid, 6,   0,   0);
-  // mock_manual(man_coid, 2, 100,   0);
-  // mock_manual(man_coid, 3,   0,   1);
-  // mock_manual(man_coid, 2, 100,   0);
-  // mock_manual(man_coid, 2,   0,  20);
-  // mock_manual(man_coid, 2, 100,   0);
-  // mock_manual(man_coid, 1,   0,  50);
-  // mock_manual(man_coid, 2, 100,   0);
-  // mock_manual(man_coid, 1,   0,  70);
-  mock_manual(man_coid, 2, 100,   0);
-  mock_manual(man_coid, 3,   0, 100);
-
-  /* Demo for ABS */
-  printf("ABS test 1\n");
-  mock_manual(man_coid, 2, 100, 0);
-
-  printf("ABS test 1: Apply brake\n");
-  mock_manual(man_coid, 0.25, 0, 50);
-
-  printf("ABS test 1: start skidding\n");
-  mock_abs(abs_coid, 1.5, TRUE);
-  mock_manual(man_coid, 0, 0, 100);
-  printf("ABS test 2: stop skidding\n");
-  mock_abs(abs_coid, 0, FALSE);
-
-  // Go back to manual
-  printf("Manual speed up\n");
-  mock_manual(man_coid, 5, 100, 0);
-
-  // Full brake with skid again
-  printf("Apply full brake with skid\n");
-  mock_manual(man_coid, 0.25, 0, 100);
-  mock_abs(abs_coid, 1, TRUE);
-  mock_abs(abs_coid, 0, FALSE);
-
-  // Start ACC
-  printf("Engage ACC to 40km/h\n");
-  mock_acc(acc_coid, 10, DBL_MAX, 40, 0);
-
-  // Apply full brake with skid
   printf("Engage full brake with skid on ACC\n");
-  mock_manual(man_coid, 0.25, 0, 100);
+  mock_manual(man_coid, 0.25, 0, 20);
   mock_abs(abs_coid, 1, TRUE);
-  mock_abs(abs_coid, 0, FALSE);
+  mock_abs(abs_coid, 2, FALSE);
+  printf("\n");
+
+  printf("Expect to go back to ACC\n");
+  mock_manual(man_coid, 1, 0, 0);
+  mock_acc(acc_coid, 10, DBL_MAX, 70, 0);
+
+  printf("Reseting\n");
+  mock_manual(man_coid, 2, 0, 100);
+  mock_manual(man_coid, 0, 0, 0);
+  */
+
+  /** TEST */
+  // printf("\n***\n");
+  // printf("ACC speed up x2 -> ACC slow down x2 -> ACC speed up x2 -> ACC slow down x2\n");
+
+  // printf("ACC speed up to 20km/h\n");
+  // mock_acc(acc_coid, 10, DBL_MAX, 20, 0);
+  // printf("ACC speed up to 30km/h\n");
+  // mock_acc(acc_coid, 5, DBL_MAX, 30, 0);
+  // printf("ACC slow down to 20km/h\n");
+  // mock_acc(acc_coid, 5, DBL_MAX, 20, 0);
+  // printf("ACC slow down to 10km/h\n");
+  // mock_acc(acc_coid, 5, DBL_MAX, 10, 0);
+  // printf("ACC speed up to 100km/h\n");
+  // mock_acc(acc_coid, 20, DBL_MAX, 100, 0);
+  // printf("ACC slow down to 20km/h\n");
+  // mock_acc(acc_coid, 5, DBL_MAX, 20, 0);
 
 
   return NULL;

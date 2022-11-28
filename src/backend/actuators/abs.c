@@ -60,7 +60,7 @@ void *ABS()
 
     printf("Skidding: %d, input skidding: %d\n", skidding, input->skid);
 
-    if (!skidding && input->skid) // If currently not skidding, and receive skidding input
+    if (!skidding && input->skid && speed > 0) // If currently not skidding, and receive skidding input
     {
       prev_state = state;
       assert(state == ACC_STATE || state == MANUAL_DRIVER_STATE);
@@ -108,7 +108,11 @@ void *abs_processor(void *args)
     while (state != ABS_STATE)
       pthread_cond_wait(&cond, &mutex);
 
-    sent_brake_level = sent_brake_level == 0 ? brake_level : 0;
+    if (speed > 0)
+      sent_brake_level = sent_brake_level == 0 ? brake_level : 0;
+    else
+      sent_brake_level = brake_level;
+
     speed = calculate_speed(speed, sent_brake_level, throttle_level);
     sendUpdates(sim_coid, sent_brake_level, throttle_level, speed);
     usleep(TIME_INTERVAL * 1000);

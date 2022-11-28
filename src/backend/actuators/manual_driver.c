@@ -59,7 +59,6 @@ void *ManualDriver()
 
         pthread_mutex_lock(&mutex);
         
-        printf("MAN: Copied input\n");
         memcpy(&processed_input, input, sizeof(ManMessageInput));
 
         // If input is invalid (both throttle and brake engaged)
@@ -68,7 +67,6 @@ void *ManualDriver()
 
             // Manual Driver is turned on when user set the throttle or brake and abs is not engaged
             //                  turned off when abs is engaged
-            printf("MAN: here\n");
             if (!abs_processing && (input->brake_level > 0 || input->throttle_level > 0))
             {
                 manual_processing = TRUE;

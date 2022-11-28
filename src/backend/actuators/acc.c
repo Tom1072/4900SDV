@@ -84,16 +84,14 @@ void *ACC()
 
     pthread_mutex_lock(&mutex);
     input = (AccMessageInput *)pulse_msg.value.sival_ptr;
-    // copy_acc_input_payload(input, processed_input);
     memcpy(&process_input, input, sizeof(AccMessageInput));
 
-    // Drive mode is ACC when
-    //     when desired speed is greater than 0
-    //     and the manual driver is not engaged
-    //     and the abs is not engaged
+
+    char manual_passive = manual_processing && throttle_level == 0 && brake_level == 0;
+
     if (!abs_processing)
     {
-      if (process_input.desired_speed > 0)
+      if (process_input.desired_speed > 0 && (manual_passive || acc_processing) )
       {
         acc_processing = TRUE;
         manual_processing = FALSE;
@@ -206,13 +204,11 @@ void *acc_processor(void *args)
         if (speed > data->desired_speed)
         {
           // Slow down
-          printf("ACC: Slow down to %lf\n", data->desired_speed);
           desired_acceleration = SPEED_CONTROL_DEFAULT_DEACCELERATION;
         }
         else
         {
           // Speed up
-          printf("ACC: Speed up to %lf\n", data->desired_speed);
           desired_acceleration = SPEED_CONTROL_DEFAULT_ACCELERATION;
         }
         // printf("desired_acceleration: %lf\n", desired_acceleration);
