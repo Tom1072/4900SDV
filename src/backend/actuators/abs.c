@@ -46,7 +46,7 @@ void *ABS()
   while (1)
   {
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
-    printf("ABS got input\n");
+    // PRINT_ON_DEBUG("ABS got input\n");
 
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
@@ -58,7 +58,7 @@ void *ABS()
     input = (AbsMessageInput *)pulse_msg.value.sival_ptr;
     copy_abs_input_payload(input, processed_input);
 
-    printf("Skidding: %d, input skidding: %d\n", skidding, input->skid);
+    // PRINT_ON_DEBUG("Skidding: %d, input skidding: %d\n", skidding, input->skid);
 
     if (!skidding && input->skid && speed > 0) // If currently not skidding, and receive skidding input
     {

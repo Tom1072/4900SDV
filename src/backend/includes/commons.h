@@ -28,6 +28,9 @@
 #define SPEED_ERROR_TOLERANCE 0.5                 // m/s, the error tolerance of the speed control mode
 #define DISTANCE_BUFFER 1
 
+#define DEBUG FALSE
+#define PRINT_ON_DEBUG(...) if (DEBUG) printf(__VA_ARGS__)
+
 // Names of the channels
 #define MANUAL_NAME     "manual_driver_attach_name"
 #define ABS_NAME        "ABS_attach_name"

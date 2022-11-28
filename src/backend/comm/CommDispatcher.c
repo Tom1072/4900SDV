@@ -44,28 +44,28 @@ void start_dispatcher()
     }
 
     // print the returned value of MsgReceive
-    printf("COMM_DISPATCHER: MsgReceive() rcid = %d\n", rcid);
+    // PRINT_ON_DEBUG("COMM_DISPATCHER: MsgReceive() rcid = %d\n", rcid);
 
     // check if it was a pulse or a message
     if (rcid == 0)
     {
       if (pulse.code == _PULSE_CODE_DISCONNECT)
       {
-        printf("COMM_DISPATCHER: Simulator is gone\n");
+        PRINT_ON_DEBUG("COMM_DISPATCHER: Simulator is gone\n");
         ConnectDetach(pulse.scoid);
         break;
       }
       else
       {
         Environment *env = (Environment *)pulse.value.sival_ptr;
-        printf("COMM_DISPATCHER: new Evironment received, updating View\n");
+        // PRINT_ON_DEBUG("COMM_DISPATCHER: new Evironment received, updating View\n");
         set_environment(env);
         free(env);
       }
     }
     else
     {
-      printf("Message received, something's wrong\n");
+      PRINT_ON_DEBUG("Message received, something's wrong\n");
     }
   }
 

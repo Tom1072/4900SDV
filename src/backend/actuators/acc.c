@@ -43,7 +43,7 @@ volatile extern char manual_processing;
 //   struct timeval te;
 //   gettimeofday(&te, NULL);                                         // get current time
 //   long long milliseconds = te.tv_sec * 1000LL + te.tv_usec / 1000; // calculate milliseconds
-//   // printf("milliseconds: %lld\n", milliseconds);
+//   // PRINT_ON_DEBUG("milliseconds: %lld\n", milliseconds);
 //   return milliseconds;
 // }
 
@@ -62,7 +62,7 @@ void *ACC()
 
   memset(&process_input, 0, sizeof(AccMessageInput));
 
-  printf("ACC: attached\n");
+  // PRINT_ON_DEBUG("ACC: attached\n");
 
   pthread_create(&processor_thread, NULL, acc_processor, &process_input);
 
@@ -73,7 +73,7 @@ void *ACC()
   {
     MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
 
-    printf("ACC: Got input from Simulator\n");
+    // PRINT_ON_DEBUG("ACC: Got input from Simulator\n");
 
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
@@ -133,42 +133,42 @@ void *acc_processor(void *args)
 
     while (state != ACC_STATE)
       pthread_cond_wait(&cond, &mutex);
-    // printf("ACC: Processing simulator message\n");
+    // PRINT_ON_DEBUG("ACC: Processing simulator message\n");
 
     speed_in_mps = speed / 3.6;
 
     // Print out the data
-    // printf("ACC: distance: %lf, desired_speed: %lf, current_speed: %lf\n", data->distance, data->desired_speed, data->current_speed);
+    // PRINT_ON_DEBUG("ACC: distance: %lf, desired_speed: %lf, current_speed: %lf\n", data->distance, data->desired_speed, data->current_speed);
 
     // The difference (m) between the current distance recording and the previous one
     // delta_distance < 0 when distance is decreasing since data->distance < prev_distance
     // delta_distance > 0 when distance is increasing
     delta_distance = (prev_distance == DBL_MAX) ? 0 : data->distance - prev_distance;
-    // printf("ACC: delta_distance: %lf\n", delta_distance);
+    // PRINT_ON_DEBUG("ACC: delta_distance: %lf\n", delta_distance);
 
     // The relative speed (m/s) between this car and the lead car
     // relative_speed > 0 when this car is moving faster than the lead car since delta_distance < 0
     // relative_speed < 0 when this car is moving slower than the lead car since delta_distance > 0
     relative_speed = -delta_distance / TIME_INTERVAL * 1000;
-    // printf("ACC: relative_speed: %lf\n", relative_speed);
+    // PRINT_ON_DEBUG("ACC: relative_speed: %lf\n", relative_speed);
 
     // The speed of the lead car (m/s)
     // if this car speed is 50m/s, and it's moving 10m/s faster than the lead car
     // --> relative_speed > 0
     // --> the lead car speed is 50 - 10 = 40
     lead_speed = speed_in_mps - relative_speed;
-    // printf("ACC: lead_speed: %lf\n", lead_speed);
+    // PRINT_ON_DEBUG("ACC: lead_speed: %lf\n", lead_speed);
 
     // Desired distance is the minimum distance that allow the car to stop in time
     desired_distance = ((-speed_in_mps / MAX_DEACCELERATION) * (speed_in_mps / 2)) + MIN_DISTANCE + DISTANCE_BUFFER; // (m)
-    // printf("ACC: desired_distance: %lf\n", desired_distance);
+    // PRINT_ON_DEBUG("ACC: desired_distance: %lf\n", desired_distance);
     // Print out every calculation so far
 
     if (data->distance < desired_distance)
     {
       // Current distance is less than desired distance, we need to keep the distance
       if (mode == SPEED_CONTROL)
-        printf("ACC: Switch to DISTANCE_CONTROL\n");
+        // PRINT_ON_DEBUG("ACC: Switch to DISTANCE_CONTROL\n");
 
       mode = DISTANCE_CONTROL;
     }
@@ -177,7 +177,7 @@ void *acc_processor(void *args)
       // We are in DISTANCE_CONTROL and car in front speed up too much
       // or when we are far enough from the lead car
       if (mode == DISTANCE_CONTROL)
-        printf("ACC: Switch to SPEED_CONTROL\n");
+        // PRINT_ON_DEBUG("ACC: Switch to SPEED_CONTROL\n");
       mode = SPEED_CONTROL;
     }
 
@@ -211,7 +211,7 @@ void *acc_processor(void *args)
           // Speed up
           desired_acceleration = SPEED_CONTROL_DEFAULT_ACCELERATION;
         }
-        // printf("desired_acceleration: %lf\n", desired_acceleration);
+        // PRINT_ON_DEBUG("desired_acceleration: %lf\n", desired_acceleration);
         calculate_brake_and_throttle_levels(desired_acceleration);
         sendUpdates(sim_coid, brake_level, throttle_level, speed);
       }

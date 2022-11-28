@@ -37,7 +37,7 @@ void *ManualDriver()
 
     memset(&processed_input, 0, sizeof(ManMessageInput));
 
-    printf("Manual Driver attached\n");
+    // PRINT_ON_DEBUG("Manual Driver attached\n");
     if ((attach = name_attach(NULL, MANUAL_NAME, 0)) == NULL)
         pthread_exit(NULL);
 
@@ -47,7 +47,7 @@ void *ManualDriver()
     while (1)
     {
         MsgReceivePulse(attach->chid, &pulse_msg, sizeof(pulse_msg), NULL);
-        printf("Manual got input\n");
+        // PRINT_ON_DEBUG("Manual got input\n");
 
         if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
         {
@@ -76,7 +76,7 @@ void *ManualDriver()
         }
         else
         {
-            printf("Invalid input: both throttle and brake are engaged\n");
+            PRINT_ON_DEBUG("Invalid input: both throttle and brake are engaged\n");
         }
 
         pthread_cond_broadcast(&cond);

@@ -13,7 +13,7 @@
  */
 void sendUpdates(int sim_coid, short brake_level, short throttle_level, double speed)
 {
-  //  printf("Brake: %3d, throttle: %3d, speed: %6.2f\n", brake_level, throttle_level, speed);
+  PRINT_ON_DEBUG("Brake: %3d, throttle: %3d, speed: %6.2f\n", brake_level, throttle_level, speed);
   ActuatorOutputPayload *msg = malloc(sizeof(ActuatorOutputPayload));
   msg->brake_level = brake_level;
   msg->throttle_level = throttle_level;

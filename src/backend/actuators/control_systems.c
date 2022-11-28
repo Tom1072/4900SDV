@@ -42,15 +42,15 @@ volatile char manual_processing = TRUE;
 void calculate_brake_and_throttle_levels(double acceleration) {
   double desired_speed_change_per_interval = acceleration * ((double)TIME_INTERVAL / 1000);
   double desired_speed_change = desired_speed_change_per_interval * 3.6; // km/h
-  // printf("desired_speed_change_per_interval: %lf, desired_speed_change: %lf\n", desired_speed_change_per_interval, desired_speed_change);
-  // printf("a: %lf, desired speed change: %lf\n", acceleration, desired_speed_change);
+  // PRINT_ON_DEBUG("desired_speed_change_per_interval: %lf, desired_speed_change: %lf\n", desired_speed_change_per_interval, desired_speed_change);
+  // PRINT_ON_DEBUG("a: %lf, desired speed change: %lf\n", acceleration, desired_speed_change);
   // 
   if (desired_speed_change == 0) return;
 
 
   double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
   if (desired_speed_change > 0) {
-    // printf("SPEED MAINTAIN: %lf\n", speed_maintain_threshold);
+    // PRINT_ON_DEBUG("SPEED MAINTAIN: %lf\n", speed_maintain_threshold);
     // double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
     throttle_level = round(desired_speed_change * 12 + speed_maintain_threshold);
     brake_level = 0;
@@ -137,7 +137,7 @@ void set_state()
       break;
   }
 
-  printf("CURRENT STATE: %s\n", state_name);
+  // PRINT_ON_DEBUG("CURRENT STATE: %s\n", state_name);
 }
 
 /**

@@ -43,7 +43,7 @@ int init(void){
     exit( EXIT_FAILURE );
   }
 
-  //printf("****Simulator: attach id  = %d\n", );
+  //PRINT_ON_DEBUG("****Simulator: attach id  = %d\n", );
   // Create a channel to use as client for sending pulses
   usleep(500000); // to allow them to attach to simulator
   coid_acc    = name_open( ACC_NAME, _NTO_CHF_DISCONNECT );
@@ -63,9 +63,9 @@ int init(void){
   while(1)
   {
     //code to receive message or pulse from client
-	printf("****Simulator: waiting to receive a pulse...\n");
+	PRINT_ON_DEBUG("****Simulator: waiting to receive a pulse...\n");
     rcvid = MsgReceivePulse( attach->chid, (void *) &message, sizeof(message), NULL );
-    printf("****Simulator: rcvid = %d, scoid = %d\n", rcvid, message.scoid);
+    PRINT_ON_DEBUG("****Simulator: rcvid = %d, scoid = %d\n", rcvid, message.scoid);
     if( rcvid == -1 )
     {
       perror("MsgReceivePulse()");
@@ -76,7 +76,7 @@ int init(void){
       {
         case _PULSE_CODE_DISCONNECT:
         {
-          printf("****Simulator Client is gone\n");
+          PRINT_ON_DEBUG("****Simulator Client is gone\n");
           ConnectDetach( message.scoid );
           // Kill the distance and skid simulators
           pthread_kill( distance_simulator, SIGTERM );
@@ -97,7 +97,7 @@ int init(void){
             name_close( coid_driver );
             name_close( coid_comm );
             name_detach( attach, 0 );
-            printf("****Simulator: exiting\n");
+            PRINT_ON_DEBUG("****Simulator: exiting\n");
             return( EXIT_SUCCESS );
           }
           break;
@@ -142,7 +142,7 @@ int init(void){
               // fill the data
               copy_updates( &car_env, new_env_t );
               // TODO: remove print statement
-              printf("***Simulator SPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
+              PRINT_ON_DEBUG("***Simulator SPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
               // Send updates to display
               if( MsgSendPulsePtr( coid_comm, SIMULATOR_PRIO, SIMULATOR, ( void * )new_env_t ) == -1 )
               {
@@ -164,7 +164,7 @@ int init(void){
               copy_updates( &car_env, new_env_t );
 
               // TODO: remove print statement
-              printf("***Simulator DESPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
+              PRINT_ON_DEBUG("***Simulator DESPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
               // Send updates to display
               if( MsgSendPulsePtr( coid_comm, SIMULATOR_PRIO, SIMULATOR, ( void * )new_env_t ) == -1 )
               {
@@ -179,7 +179,7 @@ int init(void){
               manual->brake_level = 0;
               manual->throttle_level = data.throttle_level;
               // TODO: remove print statement
-			  printf("***Simulator THROTTLE: Env vars: gas = %d, brake = %d\n", manual->throttle_level, manual->brake_level);
+			  PRINT_ON_DEBUG("***Simulator THROTTLE: Env vars: gas = %d, brake = %d\n", manual->throttle_level, manual->brake_level);
               if( MsgSendPulsePtr(coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -193,7 +193,7 @@ int init(void){
               manual->brake_level = data.brake_data.brake_level;
               manual->throttle_level = 0; // This one may be obsolete
               // TODO: remove print statement
-              printf("***Simulator BRAKE: Env vars: skid = %d, brake = %d\n", data.brake_data.skid_on, manual->brake_level);
+              PRINT_ON_DEBUG("***Simulator BRAKE: Env vars: skid = %d, brake = %d\n", data.brake_data.skid_on, manual->brake_level);
               if( MsgSendPulsePtr( coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -226,7 +226,7 @@ int init(void){
               acc_data->desired_speed = data.acc_speed;
               acc_data->distance      = car_env.distance;
               // TODO: remove print statement
-		      printf("***Simulator ACC_SPEED: Env vars: set_speed = %d, brake = %d\n", acc_data->desired_speed, acc_data->brake_level);
+		      PRINT_ON_DEBUG("***Simulator ACC_SPEED: Env vars: set_speed = %d, brake = %d\n", acc_data->desired_speed, acc_data->brake_level);
               if( MsgSendPulsePtr( coid_acc, SIMULATOR_PRIO, SIMULATOR, (void *)acc_data ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -234,14 +234,14 @@ int init(void){
               break;
             }
             default:
-              printf("Simulator*** Unknown command\n");
+              PRINT_ON_DEBUG("Simulator*** Unknown command\n");
           }
           free( comm_message );
           break;
         }
         default:
         {
-          printf("***Simulator: code = %d. Unknown type\n", message.code);
+          PRINT_ON_DEBUG("***Simulator: code = %d. Unknown type\n", message.code);
         }
       }
     }
@@ -330,7 +330,7 @@ void *simulate_distance(void *data)
     // Sleep 100 ms
     usleep( t * 1000 );
   }
-  printf("No car in front OR you have crashed\n"); // TODO: remove print statement
+  PRINT_ON_DEBUG("No car in front OR you have crashed\n"); // TODO: remove print statement
   return NULL;
 }
 void simulate_skid_stop( void * data)
@@ -339,7 +339,7 @@ void simulate_skid_stop( void * data)
   int t = 100; // s
   int rand_int;
 
-  printf(">>>>>Skid simulator: init skid = %d\n", info->env->skid); // TODO: remove print statement
+  PRINT_ON_DEBUG(">>>>>Skid simulator: init skid = %d\n", info->env->skid); // TODO: remove print statement
   while(1)
   {
     srand( time(0) );
@@ -356,7 +356,7 @@ void simulate_skid_stop( void * data)
         // Then update skid after random time
         rand_int = (int)( ( 10 * rand() / RAND_MAX) );
         int total_sleep_time = rand_int * TIME_INTERVAL * 1000;
-        printf("total_sleep_time = %d\n", total_sleep_time);
+        PRINT_ON_DEBUG("total_sleep_time = %d\n", total_sleep_time);
 
         AbsMessageInput *message_skid_off = ( AbsMessageInput *) malloc( sizeof( AbsMessageInput) );
         // Send updates to ABS
@@ -396,7 +396,7 @@ void simulate_skid_stop( void * data)
           }
         }
 
-        printf(">>>>>Skid simulator: skid = %d\n", info->env->skid); // TODO: remove print statement
+        PRINT_ON_DEBUG(">>>>>Skid simulator: skid = %d\n", info->env->skid); // TODO: remove print statement
     }
   }
 //  return NULL;
