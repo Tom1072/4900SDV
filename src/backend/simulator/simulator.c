@@ -300,7 +300,7 @@ void *simulate_distance(void *data)
         perror(">>>>>Distance simulator: MsgSendPulsePtr():");
       }
     } // TODO: add the distance updates if no object to be distance_max
-  /*  else if( ( info->env->object == FALSE ))
+    else if( ( info->env->object == FALSE ))
     {
       // Send pulse to ACC
       AccMessageInput *message = ( AccMessageInput *) malloc( sizeof(AccMessageInput) );
@@ -313,7 +313,7 @@ void *simulate_distance(void *data)
       {
         perror(">>>>>Distance simulator: MsgSendPulsePtr():");
       }
-    }*/
+    }
     // Sleep 100 ms
     usleep( t * 1000 );
   }
