@@ -1,9 +1,11 @@
 import socket
 import json
+import select
 
-UDP_IP = "192.168.56.1"  # Tom's IP
+# UDP_IP = "192.168.56.1"  # Tom's IP
 # UDP_IP = "192.168.2.226" # Kate's IP
-UDP_IP = "192.168.2.245"  # Kate's IP
+# UDP_IP = "192.168.2.245"  # Kate's IP
+UDP_IP = "172.16.41.1" # Thang's IP
 UDP_PORT = 8080
 
 # Write a python socket server that listens on UDP_PORT 5004 and UDP_IP = "192.168.56.101" and print the response
@@ -15,6 +17,7 @@ class ViewListener:
         self.sock = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM, proto=socket.IPPROTO_UDP)
         self.sock.bind((UDP_IP, UDP_PORT))
+        # self.sock.setblocking(0)
 
     def __enter__(self):
         return self
@@ -23,7 +26,7 @@ class ViewListener:
         self.sock.close()
 
     def start_loop(self):
-        while (True):
+        while True:
             bytes_address_pair = self.sock.recvfrom(1024)
             message = bytes_address_pair[0]
             address = bytes_address_pair[1]
@@ -36,6 +39,22 @@ class ViewListener:
             self.display_data(data)
 
             self.sock.sendto(bytes("Hello from server", "utf-8"), address)
+
+    def listen(self):
+        ready = select.select([self.sock], [], [], 0)
+        if ready[0]:
+            bytes_address_pair = self.sock.recvfrom(1024)
+            message = bytes_address_pair[0]
+            address = bytes_address_pair[1]
+
+            if (message == b'stop'):
+                print("Stopping ViewListener")
+                return "stop"
+
+            data = json.loads(message)
+            self.sock.sendto(bytes("Hello from server", "utf-8"), address)
+
+            return data
 
     def display_data(self, data):
         print("VIEW: throttle={}, brake=({}, {}), speed={:.2f}, distance={:.2f}, obj=({}, {:.2f})\n".format(

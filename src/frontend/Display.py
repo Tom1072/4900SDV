@@ -1,7 +1,8 @@
 from enum import Enum
 from time import sleep
 import PySimpleGUI as sg
-
+from ViewDispatcher import ViewDispatcher
+from ViewListener import ViewListener
 
 class Button(Enum):
     BRAKE = "Brake" 
@@ -12,13 +13,13 @@ class Button(Enum):
 
 
 class Detail(Enum):
-    BRAKE_LEVEL = "BL" 
-    THROTTLE_LEVEL = "TL" 
-    SPEED = "S" 
-    DESIRED_SPEED = "DS"
-    OBJ_SPEED = "OS"
-    DISTANCE = "D"
-    SKID = "Sk"
+    BRAKE_LEVEL = "Brake lv" 
+    THROTTLE_LEVEL = "Gas lv" 
+    SPEED = "Speed" 
+    DESIRED_SPEED = "ACC Speed"
+    OBJ_SPEED = "Obj Speed"
+    DISTANCE = "Distance"
+    SKID = "Skidding"
 
 
 class Color(Enum):
@@ -49,10 +50,14 @@ tooltips_map = {
 BUTTON_HEIGHT = 1
 BUTTON_FONT = ('Arial', 10, 'bold')
 CAR_FRONT_FLAG_KEY = "car_front_tbn"
-
+CONTROLLER_WIDTH = 650
+LEVEL_SLIDER_WIDTH = 45
 
 class Display:
     def __init__(self):
+        self.udp_listener = ViewListener()
+        self.udp_dispatcher = ViewDispatcher()
+
         sg.theme('Light Brown 3')
         self.env = {
             Detail.BRAKE_LEVEL.value: 0,
@@ -68,49 +73,49 @@ class Display:
         brake_input = [sg.Frame(
             "",
             [[
-                sg.Column([[sg.Text("Level")], [sg.Slider(key=InputKey.BRAKE_LEVEL, range=(0, 100), orientation="h", size=(22, 14))]]),
+                sg.Column([[sg.Text("Level")], [sg.Slider(key=InputKey.BRAKE_LEVEL, range=(0, 100), orientation="h", size=(LEVEL_SLIDER_WIDTH, 14))]]),
                 sg.Column([[sg.Text("Skid")], [sg.Radio("on", group_id="skid", key=InputKey.SKID), sg.Radio("off", group_id="skid", default=True)]]),
                 sg.Button("Brake", size=(10, BUTTON_HEIGHT), font=BUTTON_FONT)
             ]],
             border_width=1,
-            size=(450, 70)
+            size=(CONTROLLER_WIDTH, 70)
         )]
         throttle_input = [sg.Frame(
             "",
             [[
-                sg.Column([[sg.Text("Level")], [sg.Slider(key=InputKey.THROTTLE_LEVEL, range=(0, 100), orientation="h", size=(22, 15))]]),
-                sg.Button("Speed up", size=(26, BUTTON_HEIGHT), font=BUTTON_FONT)
+                sg.Column([[sg.Text("Level")], [sg.Slider(key=InputKey.THROTTLE_LEVEL, range=(0, 100), orientation="h", size=(LEVEL_SLIDER_WIDTH, 15))]]),
+                sg.Button("Gas", size=(26, BUTTON_HEIGHT), font=BUTTON_FONT)
             ]],
             border_width=1,
-            size=(450, 70)
+            size=(CONTROLLER_WIDTH, 70)
         )]
         acc_input = [sg.Frame(
             "",
             [[
-                sg.Column([[sg.Text("Desired speed")], [sg.Slider(key=InputKey.DESIRED_SPEED, range=(0, 100), orientation="h", size=(22, 15))]]),
+                sg.Column([[sg.Text("Desired speed")], [sg.Slider(key=InputKey.DESIRED_SPEED, range=(0, 100), orientation="h", size=(LEVEL_SLIDER_WIDTH, 15))]]),
                 sg.Button("Set ACC", size=(26, BUTTON_HEIGHT), font=BUTTON_FONT)
             ]],
             border_width=1,
-            size=(450, 70)
+            size=(CONTROLLER_WIDTH, 70)
         )]
         spawn_input = [sg.Frame(
             "",
             [[
-                sg.Column([[sg.Text("Distance")], [sg.Slider(key=InputKey.DISTANCE, range=(0, 100), orientation="h", size=(18, 15))]]),
-                sg.Column([[sg.Text("Other car speed")], [sg.Slider(key=InputKey.OTHER_SPEED, range=(0, 100), orientation="h", size=(18, 15))]]),
+                sg.Column([[sg.Text("Distance")], [sg.Slider(key=InputKey.DISTANCE, range=(0, 100), orientation="h", size=(22, 15))]]),
+                sg.Column([[sg.Text("Other car speed")], [sg.Slider(key=InputKey.OTHER_SPEED, range=(0, 100), orientation="h", size=(21, 15))]]),
                 sg.Button("Spawn", size=(26, BUTTON_HEIGHT), font=BUTTON_FONT)
             ]],
             border_width=1,
-            size=(450, 70)
+            size=(CONTROLLER_WIDTH, 70)
         )]
         despawn_input = [sg.Frame(
             "",
             [[
-                sg.Button("No car in front", key=CAR_FRONT_FLAG_KEY, size=(20, 4), font=('Arial', 15, 'bold'), disabled=True, disabled_button_color="white"),
+                sg.Button("No car in front", key=CAR_FRONT_FLAG_KEY, size=(36, 4), font=('Arial', 15, 'bold'), disabled=True, disabled_button_color="white"),
                 sg.Button("Despawn", size=(26, BUTTON_HEIGHT), font=BUTTON_FONT)
             ]],
             border_width=1,
-            size=(450, 39)
+            size=(CONTROLLER_WIDTH, 39)
         )]
 
         self.input_map = {
@@ -121,7 +126,7 @@ class Display:
             Button.DESPAWN.value: despawn_input,
         }
 
-        DETAIL_DISPLAY_SIZE = 6
+        DETAIL_DISPLAY_SIZE = 10
         layout = [
             [sg.Text('Long task to perform example')],
             [
@@ -164,38 +169,63 @@ class Display:
         """
 
         # --------------------- EVENT LOOP ---------------------
+        prev_event = None
         self.set_detail_tooltips()
         while True:
             self.update_details()
             # TODO: Add UDP receiver
             event, values = self.window.read(timeout=0)
-            if event in (sg.WIN_CLOSED, 'Exit'):
-                break
+            data = self.udp_listener.listen()
+            if data != None:
+                if data == "stop":
+                    break
+                    
+                self.env[Detail.BRAKE_LEVEL.value] = data["brake"]
+                self.env[Detail.THROTTLE_LEVEL.value] = data["throttle"]
+                self.env[Detail.SPEED.value] = data["speed"]
+                self.env[Detail.DESIRED_SPEED.value] = data["desired-speed"]
+                self.env[Detail.OBJ_SPEED.value] = data["obj-speed"]
+                self.env[Detail.DISTANCE.value] = data["distance"] if data["distance"] < 9999 else "INF"
+                self.env[Detail.SKID.value] = data["skid"]
+                self.env["object"] = data["obj"]
+            else:
+                if prev_event == "Exit":
+                    break
+
+            if event in (sg.WIN_CLOSED, "Exit"):
+                prev_event = "Exit"
+                self.udp_dispatcher.send_message("stop")
             elif event == "Brake":
                 command = f"brake {int(values[InputKey.BRAKE_LEVEL])} {'on' if values[InputKey.SKID] else 'off'}"
+                self.udp_dispatcher.send_message(command)
+                self.udp_dispatcher.receive_message()
                 print(command)
-            elif event == "Speed up":
+            elif event == "Gas":
                 command = f"gas {int(values[InputKey.THROTTLE_LEVEL])}"
+                self.udp_dispatcher.send_message(command)
+                self.udp_dispatcher.receive_message()
                 print(command)
             elif event == "Set ACC":
                 command = f"acc-speed {int(values[InputKey.DESIRED_SPEED])}"
+                self.udp_dispatcher.send_message(command)
+                self.udp_dispatcher.receive_message()
                 print(command)
             elif event == "Despawn":
                 command = "despawn"
+                self.udp_dispatcher.send_message(command)
+                self.udp_dispatcher.receive_message()
                 print(command)
             elif event == "Spawn":
                 command = f"spawn {int(values[InputKey.DISTANCE])} {int(values[InputKey.OTHER_SPEED])}"
+                self.udp_dispatcher.send_message(command)
+                self.udp_dispatcher.receive_message()
                 print(command)
-
-            # print("Skid", values[InputKey.SKID])
-            # print("Brake lvl", values[InputKey.BRAKE_LEVEL])
-            # print("Throttle lvl", values[InputKey.THROTTLE_LEVEL])
-            # print("Desired speed", values[InputKey.DESIRED_SPEED])
-            # print("Distance", values[InputKey.DISTANCE])
-            # print("Other speed", values[InputKey.OTHER_SPEED])
 
         # if user exits the window, then close the window and exit the GUI func
         self.window.close()
 
 if __name__ == '__main__':
-    Display().run()
+    try:
+        Display().run()
+    except:
+        print("Window exited")

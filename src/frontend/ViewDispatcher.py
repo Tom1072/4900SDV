@@ -1,7 +1,8 @@
 import socket
 
 # UDP_IP = "192.168.56.101" # Tom's IP
-UDP_IP = "192.168.2.226" # Kate's IP
+# UDP_IP = "192.168.2.226" # Kate's IP
+UDP_IP = "172.16.41.129" # Thang's IP
 BUFFER_SIZE = 1024
 UDP_PORT = 5003
 
