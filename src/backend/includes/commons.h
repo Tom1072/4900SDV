@@ -3,6 +3,14 @@
 #include <sys/dispatch.h>
 #include <pthread.h>
 
+// Socket configurations
+#define SERVER_ADRESS "192.168.56.101"   // Tom's IP  
+#define VIEW_SERVER_ADDRESS "192.168.56.1"   // Tom's IP  
+// #define SERVER_ADRESS "192.168.2.226" // Kate's IP
+#define SERVER_PORT 5003
+#define CLIENT_PORT 8080
+#define BUFFER_SIZE 1000
+
 // Constants
 #define TRUE  1
 #define FALSE 0
