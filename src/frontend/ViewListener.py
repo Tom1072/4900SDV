@@ -8,16 +8,12 @@ import select
 UDP_IP = "172.16.41.1" # Thang's IP
 UDP_PORT = 8080
 
-# Write a python socket server that listens on UDP_PORT 5004 and UDP_IP = "192.168.56.101" and print the response
-
-
 class ViewListener:
     def __init__(self):
         print(f"Starting ViewListener on {UDP_IP}:{UDP_PORT}")
         self.sock = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM, proto=socket.IPPROTO_UDP)
         self.sock.bind((UDP_IP, UDP_PORT))
-        # self.sock.setblocking(0)
 
     def __enter__(self):
         return self

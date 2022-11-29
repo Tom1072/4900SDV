@@ -55,21 +55,26 @@ LEVEL_SLIDER_WIDTH = 45
 
 class Display:
     def __init__(self):
+        # Initialize UDP listener server and dispatcher
         self.udp_listener = ViewListener()
         self.udp_dispatcher = ViewDispatcher()
+        self.server_connected = False
 
-        sg.theme('Light Brown 3')
+        # Initialize environment
         self.env = {
             Detail.BRAKE_LEVEL.value: 0,
             Detail.THROTTLE_LEVEL.value: 0,
             Detail.SPEED.value: 0,
-            Detail.DESIRED_SPEED.value: 0,
-            Detail.OBJ_SPEED.value: 0,
+            Detail.DESIRED_SPEED.value: 0.0,
+            Detail.OBJ_SPEED.value: 0.0,
             Detail.DISTANCE.value: 0,
             Detail.SKID.value: False,
             "object": False
         }
 
+        sg.theme('Light Brown 3')
+
+        # Brake input elements
         brake_input = [sg.Frame(
             "",
             [[
@@ -80,6 +85,8 @@ class Display:
             border_width=1,
             size=(CONTROLLER_WIDTH, 70)
         )]
+
+        # Throttle input elements
         throttle_input = [sg.Frame(
             "",
             [[
@@ -89,6 +96,8 @@ class Display:
             border_width=1,
             size=(CONTROLLER_WIDTH, 70)
         )]
+
+        # ACC input elements
         acc_input = [sg.Frame(
             "",
             [[
@@ -98,6 +107,8 @@ class Display:
             border_width=1,
             size=(CONTROLLER_WIDTH, 70)
         )]
+
+        # Spawning car input elements
         spawn_input = [sg.Frame(
             "",
             [[
@@ -108,6 +119,8 @@ class Display:
             border_width=1,
             size=(CONTROLLER_WIDTH, 70)
         )]
+
+        # Despawning car input elements
         despawn_input = [sg.Frame(
             "",
             [[
@@ -118,6 +131,7 @@ class Display:
             size=(CONTROLLER_WIDTH, 39)
         )]
 
+        # Despawning car input elements
         self.input_map = {
             Button.BRAKE.value: brake_input,
             Button.THROTTLE.value: throttle_input,
@@ -126,28 +140,30 @@ class Display:
             Button.DESPAWN.value: despawn_input,
         }
 
+        # Main layout for output display
         DETAIL_DISPLAY_SIZE = 10
         layout = [
-            [sg.Text('Long task to perform example')],
+            [sg.Column([[sg.Button("Server NOT connected", key="server_connected", size=(30, 1), font=('Arial', 8, 'bold'), disabled=True, disabled_button_color="white")]], justification="c")],
+            [sg.Text("Your car's information", font=BUTTON_FONT)],
             [
                 sg.Column([
                     [sg.Text(d.value, key="t"+d.value, size=DETAIL_DISPLAY_SIZE, justification="c")],
                     [sg.Input(key=d.value, justification="c", size=DETAIL_DISPLAY_SIZE, disabled=True)]
                 ], justification="c") for d in Detail
             ],
+            [sg.Text("Car controller", font=BUTTON_FONT)],
             [sg.Column([i for i in self.input_map.values()], key="inputs", justification="c")],
             [sg.Button("Exit")],
         ]
 
-        self.window = sg.Window('Multithreaded Window', layout, finalize=True)
-
-
-    def set_detail_tooltips(self):
-        for d in Detail:
-            self.window["t" + d.value].set_tooltip(tooltips_map[d.value])
+        # Tkinter main window
+        self.window = sg.Window("Car Speed Safety Control System", layout, finalize=True)
 
 
     def update_details(self):
+        """
+        Update/refresh the GUI view 
+        """
         btn_color = "green"
         text = "No car in front"
 
@@ -157,29 +173,32 @@ class Display:
 
         self.window[CAR_FRONT_FLAG_KEY].update(text=text, button_color=btn_color)
 
+        btn_color = "green"
+        text = "Server connected"
+
+        if not self.server_connected:
+            btn_color = "red"
+            text = "Server NOT connected"
+
+        self.window["server_connected"].update(text=text, button_color=btn_color)
+
         for d in Detail:
             self.window[d.value].update(value=str(self.env[d.value]))
         
 
     def run(self):
         """
-        Starts and executes the GUI
-        Reads data from a Queue and displays the data to the window
-        Returns when the user exits / closes the window
+        Starts the main event loop of the GUI
         """
-
-        # --------------------- EVENT LOOP ---------------------
         prev_event = None
-        self.set_detail_tooltips()
+
         while True:
             self.update_details()
-            # TODO: Add UDP receiver
             event, values = self.window.read(timeout=0)
             data = self.udp_listener.listen()
             if data != None:
                 if data == "stop":
                     break
-                    
                 self.env[Detail.BRAKE_LEVEL.value] = data["brake"]
                 self.env[Detail.THROTTLE_LEVEL.value] = data["throttle"]
                 self.env[Detail.SPEED.value] = data["speed"]
@@ -188,6 +207,8 @@ class Display:
                 self.env[Detail.DISTANCE.value] = data["distance"] if data["distance"] < 9999 else "INF"
                 self.env[Detail.SKID.value] = data["skid"]
                 self.env["object"] = data["obj"]
+                self.server_connected = True 
+
             else:
                 if prev_event == "Exit":
                     break
@@ -195,7 +216,12 @@ class Display:
             if event in (sg.WIN_CLOSED, "Exit"):
                 prev_event = "Exit"
                 self.udp_dispatcher.send_message("stop")
-            elif event == "Brake":
+                continue
+            
+            if event and not self.server_connected:
+                continue
+            
+            if event == "Brake":
                 command = f"brake {int(values[InputKey.BRAKE_LEVEL])} {'on' if values[InputKey.SKID] else 'off'}"
                 self.udp_dispatcher.send_message(command)
                 self.udp_dispatcher.receive_message()
@@ -221,7 +247,7 @@ class Display:
                 self.udp_dispatcher.receive_message()
                 print(command)
 
-        # if user exits the window, then close the window and exit the GUI func
+        # if user exits, then close the window
         self.window.close()
 
 if __name__ == '__main__':
