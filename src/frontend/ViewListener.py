@@ -2,8 +2,8 @@ import socket
 import json
 
 UDP_IP = "192.168.56.1"  # Tom's IP
-# UDP_IP = "192.168.56.101"
 # UDP_IP = "192.168.2.226" # Kate's IP
+UDP_IP = "192.168.2.245"  # Kate's IP
 UDP_PORT = 8080
 
 # Write a python socket server that listens on UDP_PORT 5004 and UDP_IP = "192.168.56.101" and print the response
