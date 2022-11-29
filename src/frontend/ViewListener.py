@@ -28,8 +28,9 @@ class ViewListener:
             message = bytes_address_pair[0]
             address = bytes_address_pair[1]
 
-            # print(f"Message from Client:{message}")
-            # print(f"Client IP Address:{address}")
+            if (message == b'stop'):
+                print("Stopping ViewListener")
+                break
 
             data = json.loads(message)
             self.display_data(data)
@@ -37,12 +38,12 @@ class ViewListener:
             self.sock.sendto(bytes("Hello from server", "utf-8"), address)
 
     def display_data(self, data):
-        print("VIEW: throttle={}, brake=({}, {}), speed={}, distance={}, obj=({}, {})\n".format(
+        print("VIEW: throttle={}, brake=({}, {}), speed={:.2f}, distance={:.2f}, obj=({}, {:.2f})\n".format(
             data["throttle"],
             data["brake"], data["skid"],
             data["speed"],
-            data["distance"],
-            data["obj"], data["distance"] if data["distance"] < 9999 else "Infinity"))
+            min(data["distance"], 9999.99),
+            data["obj"], min(data["obj-speed"], 9999.99)))
 
 
 if __name__ == "__main__":
