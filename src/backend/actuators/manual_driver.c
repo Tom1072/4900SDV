@@ -52,7 +52,7 @@ void *ManualDriver()
         if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
         {
             ConnectDetach(pulse_msg.scoid);
-            continue;
+            break;
         }
 
         input = (ManMessageInput *)pulse_msg.value.sival_ptr;

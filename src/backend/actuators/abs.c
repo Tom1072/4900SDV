@@ -51,7 +51,7 @@ void *ABS()
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
       ConnectDetach(pulse_msg.scoid);
-      continue;
+      break;
     }
 
     pthread_mutex_lock(&mutex);

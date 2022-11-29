@@ -79,25 +79,28 @@ int init(void){
           PRINT_ON_DEBUG("****Simulator Client is gone\n");
           ConnectDetach( message.scoid );
           // Kill the distance and skid simulators
+          int abs_return, acc_return, man_return, com_return;
+          // First send disconnect to comm
+          com_return = MsgSendPulse( coid_comm, -1, _PULSE_CODE_DISCONNECT, 0 );
+          usleep(1);
           pthread_kill( distance_simulator, SIGTERM );
           pthread_kill( skid_simulator, SIGTERM );
 
           // Send the termination code to actuators
-          int abs_return, acc_return, man_return, com_return;
-          abs_return = MsgSendPulse( coid_abs, SIMULATOR_PRIO, STOP_CODE, 0 );
-          acc_return = MsgSendPulse( coid_acc, SIMULATOR_PRIO, STOP_CODE, 0 );
-          man_return = MsgSendPulse( coid_driver, SIMULATOR_PRIO, STOP_CODE, 0 );
-          com_return = MsgSendPulse( coid_comm, SIMULATOR_PRIO, STOP_CODE, 0 );
+          abs_return = MsgSendPulse( coid_abs, -1, _PULSE_CODE_DISCONNECT, 0 );
+          acc_return = MsgSendPulse( coid_acc, -1, _PULSE_CODE_DISCONNECT, 0 );
+          man_return = MsgSendPulse( coid_driver, -1, _PULSE_CODE_DISCONNECT, 0 );
+
           if( ( abs_return != -1) && ( acc_return != -1 ) && ( man_return != -1 ) && ( com_return != -1 ))
           {
             // Terminate simulator itself
             //remove the name from the namespace and destroy the channel
+        	printf("****Simulator: exiting\n");
             name_close( coid_acc );
             name_close( coid_abs );
             name_close( coid_driver );
             name_close( coid_comm );
             name_detach( attach, 0 );
-            PRINT_ON_DEBUG("****Simulator: exiting\n");
             return( EXIT_SUCCESS );
           }
           break;
