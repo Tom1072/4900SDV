@@ -6,8 +6,10 @@
 // Socket configurations
 // #define SERVER_ADRESS "192.168.56.101"   // Tom's IP  
 // #define VIEW_SERVER_ADDRESS "192.168.56.1"   // Tom's IP  
-#define SERVER_ADRESS "192.168.2.226" // Kate's IP
-#define VIEW_SERVER_ADDRESS "192.168.2.245" // Kate's IP
+// #define SERVER_ADRESS "192.168.2.226" // Kate's IP
+// #define VIEW_SERVER_ADDRESS "192.168.2.245" // Kate's IP
+#define SERVER_ADRESS "172.16.41.129" // Thang's IP
+#define VIEW_SERVER_ADDRESS "172.16.41.1" // Thang's IP
 #define SERVER_PORT 5003
 #define CLIENT_PORT 8080
 #define BUFFER_SIZE 1000
