@@ -95,7 +95,7 @@ void start_dispatcher()
         memset(buffer, 0, sizeof(buffer));
         char *skid_str = env->skid ? "true" : "false";
         char *obj = env->object ? "true" : "false";
-        sprintf(buffer, "{ \"throttle\": %d, \"brake\":%d, \"skid\": %s, \"speed\": %lf, \"distance\": %lf, \"obj\": %s , \"distance\": %lf }",
+        sprintf(buffer, "{ \"throttle\": %d, \"brake\":%d, \"skid\": %s, \"speed\": %lf, \"distance\": %lf, \"obj\": %s , \"obj-speed\": %lf }",
           env->throttle_level,
           env->brake_level, skid_str,
           env->car_speed,
