@@ -77,7 +77,7 @@ void *ACC()
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
       ConnectDetach(pulse_msg.scoid);
-      continue;
+      break;
     }
 
     pthread_mutex_lock(&mutex);
@@ -109,7 +109,6 @@ void *ACC()
     pthread_mutex_unlock(&mutex);
     free(input);
   }
-
   return NULL;
 }
 
@@ -195,7 +194,8 @@ void *acc_processor(void *args)
 
         desired_acceleration = (lead_speed - speed_in_mps) / time_to_lead;
         // assert(desired_acceleration < 0); // we are moving faster than the lead car --> we need to slow down
-
+        PRINT_ON_DEBUG("ACC: delta_dist=%lf rel_v=%lf lead_v=%lf distance=%lf desir_d=%lf time_to_lead=%lf a=%lf\n",
+        		delta_distance, relative_speed, lead_speed, data->distance, desired_distance, time_to_lead, desired_acceleration);
         calculate_brake_and_throttle_levels(desired_acceleration);
         // sendUpdates(sim_coid, brake_level, throttle_level, speed);
       }
@@ -222,8 +222,9 @@ void *acc_processor(void *args)
     sendUpdates(sim_coid, brake_level, throttle_level, speed);
 
     prev_distance = data->distance;
-    usleep(TIME_INTERVAL * 1000);
     pthread_mutex_unlock(&mutex);
+    usleep(TIME_INTERVAL * 1000);
+
   }
   return NULL;
 }
