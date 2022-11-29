@@ -4,9 +4,10 @@
 #include <pthread.h>
 
 // Socket configurations
-#define SERVER_ADRESS "192.168.56.101"   // Tom's IP  
-#define VIEW_SERVER_ADDRESS "192.168.56.1"   // Tom's IP  
-// #define SERVER_ADRESS "192.168.2.226" // Kate's IP
+// #define SERVER_ADRESS "192.168.56.101"   // Tom's IP  
+// #define VIEW_SERVER_ADDRESS "192.168.56.1"   // Tom's IP  
+#define SERVER_ADRESS "192.168.2.226" // Kate's IP
+#define VIEW_SERVER_ADDRESS "192.168.2.245" // Kate's IP
 #define SERVER_PORT 5003
 #define CLIENT_PORT 8080
 #define BUFFER_SIZE 1000
@@ -26,14 +27,14 @@
 #define COMM_PRIO       9
 #define SIMULATOR_PRIO 10
 
-#define TIME_INTERVAL 100 // milliseconds
+#define TIME_INTERVAL 50 // milliseconds
 
 // ACC configurations
 #define MIN_DISTANCE 5                          // m, the minimum distance between this car and the lead car
 #define MAX_DEACCELERATION -15                  // m/s^2, the maximum deacceleration of the car when braking
 #define SPEED_CONTROL_DEFAULT_ACCELERATION 1    // m/s^2, the default acceleration of the car when in speed control mode
 #define SPEED_CONTROL_DEFAULT_DEACCELERATION -1  // m/s^2, the default deacceleration of the car when in speed control mode
-#define SPEED_ERROR_TOLERANCE 0.5                 // m/s, the error tolerance of the speed control mode
+#define SPEED_ERROR_TOLERANCE 0                 // m/s, the error tolerance of the speed control mode
 #define DISTANCE_BUFFER 3
 
 #define DEBUG FALSE
