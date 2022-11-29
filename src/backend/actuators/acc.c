@@ -195,7 +195,8 @@ void *acc_processor(void *args)
 
         desired_acceleration = (lead_speed - speed_in_mps) / time_to_lead;
         // assert(desired_acceleration < 0); // we are moving faster than the lead car --> we need to slow down
-
+        printf("ACC: delta_dist=%lf rel_v=%lf lead_v=%lf distance=%lf desir_d=%lf time_to_lead=%lf a=%lf\n",
+        		delta_distance, relative_speed, lead_speed, data->distance, desired_distance, time_to_lead, desired_acceleration);
         calculate_brake_and_throttle_levels(desired_acceleration);
         // sendUpdates(sim_coid, brake_level, throttle_level, speed);
       }
