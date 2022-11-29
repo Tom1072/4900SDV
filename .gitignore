@@ -67,4 +67,6 @@ build/
 *.core
 
 __pycache__/
-
+.env
+Display.spec
+venv/
