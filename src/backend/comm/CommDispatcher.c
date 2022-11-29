@@ -81,7 +81,6 @@ void start_dispatcher()
         // Send stop to ViewListener
         char *msg = "stop";
         sendto(client_socket, msg, strlen(msg), 0, (struct sockaddr *)&server_address, sizeof(server_address));
-
         ConnectDetach(pulse.scoid);
         break;
       }

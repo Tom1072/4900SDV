@@ -77,7 +77,7 @@ void *ACC()
     if (pulse_msg.code == _PULSE_CODE_DISCONNECT)
     {
       ConnectDetach(pulse_msg.scoid);
-      continue;
+      break;
     }
 
     pthread_mutex_lock(&mutex);
@@ -109,7 +109,6 @@ void *ACC()
     pthread_mutex_unlock(&mutex);
     free(input);
   }
-
   return NULL;
 }
 
