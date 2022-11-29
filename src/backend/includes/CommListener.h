@@ -1,10 +1,6 @@
 #pragma once
 #include "commons.h"
 
-#define SERVER_ADRESS "192.168.56.101"
-// #define SERVER_ADRESS "192.168.2.226"
-#define SERVER_PORT 5003
-#define BUFFER_SIZE 1000
 
 // Public types
 typedef enum
