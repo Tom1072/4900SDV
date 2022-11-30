@@ -71,3 +71,4 @@ __pycache__/
 Display.spec
 venv/
 .cproject
+dist/
