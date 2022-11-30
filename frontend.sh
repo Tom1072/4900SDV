@@ -28,6 +28,7 @@ while getopts ":hirc" option; do
          cd src/frontend/
          pyinstaller --onefile Display.py
          cd ../../
+         deactivate 
          exit;;
       r) # run frontend
          ./src/frontend/dist/Display
