@@ -1,16 +1,15 @@
 import socket
 
-# UDP_IP = "192.168.56.101" # Tom's IP
-UDP_IP = "192.168.2.226" # Kate's IP
 BUFFER_SIZE = 1024
 UDP_PORT = 5003
 
 
 class ViewDispatcher:
-  def __init__(self):
-    print("UDP target IP:", UDP_IP)
+  def __init__(self, udp_ip):
+    print("UDP target IP:", udp_ip)
     print("UDP target port:", UDP_PORT)
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+    self.udp_ip = udp_ip
 
   def __enter__(self):
     return self
@@ -19,7 +18,7 @@ class ViewDispatcher:
     self.sock.close()
 
   def send_message(self, message):
-    self.sock.sendto(bytes(message, "utf-8"), (UDP_IP, UDP_PORT))
+    self.sock.sendto(bytes(message, "utf-8"), (self.udp_ip, UDP_PORT))
 
   def receive_message(self):
     data, addr = self.sock.recvfrom(BUFFER_SIZE)

@@ -66,3 +66,9 @@ build/
 # Debug QNX
 *.core
 
+__pycache__/
+.env
+Display.spec
+venv/
+.cproject
+dist/

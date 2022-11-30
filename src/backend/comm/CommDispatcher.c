@@ -95,12 +95,13 @@ void start_dispatcher()
         memset(buffer, 0, sizeof(buffer));
         char *skid_str = env->skid ? "true" : "false";
         char *obj = env->object ? "true" : "false";
-        sprintf(buffer, "{ \"throttle\": %d, \"brake\":%d, \"skid\": %s, \"speed\": %lf, \"distance\": %lf, \"obj\": %s , \"obj-speed\": %lf }",
+        sprintf(buffer, "{ \"throttle\": %d, \"brake\":%d, \"skid\": %s, \"speed\": %lf, \"distance\": %lf, \"obj\": %s , \"obj-speed\": %lf, \"desired-speed\": %lf }",
           env->throttle_level,
           env->brake_level, skid_str,
           env->car_speed,
           env->distance,
-          obj, env->obj_speed);
+          obj, env->obj_speed,
+          env->set_speed);
 
         PRINT_ON_DEBUG("COMM_DISPATCHER: send %s to ViewListener\n", buffer);
 
