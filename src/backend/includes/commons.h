@@ -105,20 +105,19 @@ typedef struct
   double distance;
 } AccMessageInput;
 
+/** Actuators (ACC + ABS + Manual) Public structs */
 // The message struct that Simulator will send to ABS for skid sensor update*/
 typedef struct
 {
   volatile char skid; } AbsMessageInput;
 
-// The message struct that Simulator will send to for throttle and brake request
+// The message struct that Simulator will send to Manual for throttle and brake request
 typedef struct
 {
   short brake_level;
   short throttle_level;
 } ManMessageInput;
 
-
-/** Actuators (ACC + ABS + Manual) Public structs */
 // The message struct that the Actuators (ACC+ABS+Manual) will send to Simulator for true brake, throttle, and speed update
 typedef struct {
   short brake_level;
