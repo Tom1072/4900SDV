@@ -1,18 +1,19 @@
 #pragma once
 #include "commons.h"
 
+/**
+ * Receive new user commands from the python ViewDispatcher client
+ */
 
-// Public types
-
-
-// Public API
+/** Public APIs */
 
 /**
  * @brief Initialize the communication listener to receiving data from ViewDispatcher python client
  */
 void start_listener();
 
-// Private API
+/** Private APIs */
+
 /**
  * @brief Parse the message received from the ViewDispatcher python client
  * 

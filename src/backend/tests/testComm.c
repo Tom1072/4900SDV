@@ -14,6 +14,11 @@
 static void mocked_simulator_receiver();
 static void mocked_simulator_sender();
 
+/**
+ * @brief Test the Comm module
+ * 
+ * @return char TRUE for success, FALSE for failure
+ */
 char test_comm()
 {
   pthread_t dispatcher_thread;
@@ -56,6 +61,9 @@ char test_comm()
   return TRUE;
 }
 
+/** 
+ * @brief Mocked simulator for receiving pulses
+*/
 static void mocked_simulator_receiver()
 {
   // Declare variables
@@ -155,6 +163,9 @@ static void mocked_simulator_receiver()
   name_detach(attach, 0);
 }
 
+/** 
+ * @brief Mocked simulator for sending update pulses
+*/
 static void mocked_simulator_sender()
 {
   // Declare variables needed

@@ -3,6 +3,10 @@
 #include <sys/dispatch.h>
 #include <pthread.h>
 
+/** 
+ * Store all pre-processing constants, macros and public message structs 
+ */
+
 // Constants
 #define TRUE  1
 #define FALSE 0
@@ -12,12 +16,16 @@
 #define MAX_STRING_LEN    512
 
 /** Log levels */
-#define DEBUG FALSE                           
-#define INFO TRUE
+#define LOG_LEVEL_DEBUG FALSE
+#define LOG_LEVEL_INFO TRUE
+#define LOG_LEVEL_ERROR TRUE
 
 /** Macros */
-#define PRINT_ON_DEBUG(...) if (DEBUG) printf(__VA_ARGS__)
-#define PRINT_ON_INFO(...) if (INFO) printf(__VA_ARGS__)
+#define PRINT_ON_DEBUG(...) if (LOG_LEVEL_DEBUG) printf(__VA_ARGS__)  // Print only if DEBUG is TRUE
+#define PRINT_ON_INFO(...) if (LOG_LEVEL_INFO) printf(__VA_ARGS__)    // Print only if INFO is TRUE
+#define PRINT_ON_ERROR(...) if (LOG_LEVEL_ERROR) printf(__VA_ARGS__)  // Print only if ERROR is TRUE
+
+// Check status and return if NOK
 #define CHECK_STATUS(status) \
     if (status != OK) \
     { \

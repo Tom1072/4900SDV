@@ -14,6 +14,9 @@
 #include "../includes/commons.h"
 #include "../includes/View.h"
 
+/**
+ * Receive new user commands from the python ViewDispatcher client
+ */
 
 /**
  * @brief Initialize the communication listener to receiving data from ViewDispatcher python client
@@ -51,8 +54,8 @@ void start_listener()
     pthread_exit(NULL);
   }
 
-  sleep(1);
-  // establish a connection to the simulator's channel
+  // Establish a connection to the simulator's channel
+  sleep(1); // Wait for the simulator to start
   coid = name_open(SIMULATOR_NAME, 0);//_NTO_CHF_DISCONNECT);
 
   // Wait for clients now
@@ -84,7 +87,7 @@ void start_listener()
         buffer[bytes_received] = '\0';
         PRINT_ON_DEBUG("COMM_LISTENER: Received client request: %s\n", buffer);
       }
-      // If the client said to stop, then I'll stop myself
+      // If the client said to stop, then signal the simulator to stop
       if (strcmp(buffer, "stop") == 0)
       {
         // Respond with an "OK" message

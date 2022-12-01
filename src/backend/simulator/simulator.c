@@ -18,6 +18,13 @@
 #include "../includes/CommListener.h"
 #include "../includes/actuators.h"
 
+/**
+ * Simulate the environment: other car moving closer, skidding, etc.
+ */
+
+/**
+ * @brief Starts the simulator
+*/
 int init(void){
 
   // Define variables
@@ -248,6 +255,11 @@ int init(void){
   return EXIT_SUCCESS;
 }
 
+/**
+ * @brief Initialize the simulator environement
+ * 
+ * @param env The environment to be initialized
+ */
 void init_env( Environment* env )
 {
   env->skid         = 0;
@@ -260,6 +272,12 @@ void init_env( Environment* env )
   env->set_speed    = 0;
 }
 
+/** 
+ * @brief Update environemnts 
+ * 
+ * @param old_env The environment to be updated
+ * @param new_env The new environment
+ */
 void copy_updates( Environment* old_env, Environment* new_env )
 {
   new_env->skid        = old_env->skid;
@@ -272,6 +290,11 @@ void copy_updates( Environment* old_env, Environment* new_env )
   new_env->object      = old_env->object;
 }
 
+/**
+ * @brief Start the distance simulator
+ * 
+ * @param data the data to be used by this thread for distance simulation
+ */
 void *simulate_distance(void *data)
 {
   simulatorRequest_t *info = ( simulatorRequest_t* ) data;
@@ -323,6 +346,12 @@ void *simulate_distance(void *data)
   PRINT_ON_DEBUG("No car in front OR you have crashed\n"); // TODO: remove print statement
   return NULL;
 }
+
+/**
+ * @brief Start the skid-stop simulator
+ * 
+ * @param data the data to be used by this thread for skid-stop simulation
+ */
 void simulate_skid_stop( void * data)
 {
   simulatorRequest_t *info = ( simulatorRequest_t * ) data;
@@ -392,6 +421,5 @@ void simulate_skid_stop( void * data)
         PRINT_ON_DEBUG(">>>>>Skid simulator: skid = %d\n", info->env->skid); // TODO: remove print statement
     }
   }
-//  return NULL;
 }
 

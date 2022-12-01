@@ -16,6 +16,10 @@
 #include "../includes/commons.h"
 
 /**
+ * Dispatch environment information to the python ViewListener server
+ */
+
+/**
  * @brief Starts the dispatcher server
  *
  */
@@ -27,7 +31,7 @@ void start_dispatcher()
   int rcid;
   int client_socket;
   struct sockaddr_in server_address;
-  int status, bytes_rcv;
+  int bytes_rcv;
   socklen_t addr_size;
   char buffer[MAX_STRING_LEN];
 
@@ -46,8 +50,6 @@ void start_dispatcher()
   server_address.sin_addr.s_addr = inet_addr(VIEW_SERVER_ADDRESS);
   server_address.sin_port = htons(VIEW_SERVER_PORT);
 
-  // char* msg = "Message from COMM_DISPATCHER";
-  // sendto(client_socket, msg, strlen(msg), 0, (struct sockaddr *)&server_address, sizeof(server_address));
   // init view
   init_view();
 
@@ -68,9 +70,6 @@ void start_dispatcher()
       perror("COMM_DISPATCHER: Failed to receive message from Simulator");
     }
 
-    // print the returned value of MsgReceive
-    // PRINT_ON_DEBUG("COMM_DISPATCHER: MsgReceive() rcid = %d\n", rcid);
-
     // check if it was a pulse or a message
     if (rcid == 0)
     {
@@ -87,7 +86,6 @@ void start_dispatcher()
       else
       {
         Environment *env = (Environment *)pulse.value.sival_ptr;
-        // PRINT_ON_DEBUG("COMM_DISPATCHER: new Evironment received, updating View\n");
         set_environment(env);
 
         addr_size = sizeof(server_address);
@@ -117,10 +115,11 @@ void start_dispatcher()
     }
     else
     {
-      PRINT_ON_DEBUG("Message received, something's wrong\n");
+      PRINT_ON_ERROR("Message received, something's wrong\n");
     }
   }
 
+  // Cleanup
   name_detach(attach, 0);
   destroy_view();
   close(client_socket);
