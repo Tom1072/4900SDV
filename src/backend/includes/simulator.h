@@ -4,13 +4,19 @@
 //#include "../includes/car_structs.h"
 #include "../includes/commons.h"
 
-int init(void);
+typedef struct
+{
+  Environment *env;
+  int coid;
+} simulatorRequest_t;
 
 typedef union
 {
   struct _pulse pulse;
   char rmsg [MAX_STRING_LEN +1];
 } message_t;
+
+int init(void);
 
 //void init_env( Sensors* , OutsideObject*, Environment* );
 void init_env( Environment* );

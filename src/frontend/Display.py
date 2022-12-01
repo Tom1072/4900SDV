@@ -262,5 +262,6 @@ if __name__ == '__main__':
         Display(LISTENER_IP, DISPATCHER_IP).run()
     except ValueError:
         print("ERROR: listener or dispatcher IP address missing, or .env file missing")
-    except:
+    except Exception as e:
         print("Window exited")
+        print(e)

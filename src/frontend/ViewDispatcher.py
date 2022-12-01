@@ -1,15 +1,15 @@
 import socket
 
 BUFFER_SIZE = 1024
-UDP_PORT = 5003
+DISPATCHER_UDP_PORT = 8080
 
 
 class ViewDispatcher:
-  def __init__(self, udp_ip):
-    print("UDP target IP:", udp_ip)
-    print("UDP target port:", UDP_PORT)
-    self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP
+  def __init__(self, udp_ip, udp_port=DISPATCHER_UDP_PORT):
+    print(f"Starting ViewDispatcher on {udp_ip}:{udp_port}")
+    self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     self.udp_ip = udp_ip
+    self.udp_port = udp_port
 
   def __enter__(self):
     return self
@@ -18,7 +18,7 @@ class ViewDispatcher:
     self.sock.close()
 
   def send_message(self, message):
-    self.sock.sendto(bytes(message, "utf-8"), (self.udp_ip, UDP_PORT))
+    self.sock.sendto(bytes(message, "utf-8"), (self.udp_ip, self.udp_port))
 
   def receive_message(self):
     data, addr = self.sock.recvfrom(BUFFER_SIZE)

@@ -2,14 +2,15 @@ import socket
 import json
 import select
 
-UDP_PORT = 8080
+BUFFER_SIZE = 1024
+LISTENER_UDP_PORT = 8080
 
 class ViewListener:
-    def __init__(self, udp_ip):
-        print(f"Starting ViewListener on {udp_ip}:{UDP_PORT}")
+    def __init__(self, udp_ip, udp_port=LISTENER_UDP_PORT):
+        print(f"Starting ViewListener on {udp_ip}:{udp_port}")
         self.sock = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM, proto=socket.IPPROTO_UDP)
-        self.sock.bind((udp_ip, UDP_PORT))
+        self.sock.bind((udp_ip, udp_port))
 
     def __enter__(self):
         return self
@@ -19,7 +20,7 @@ class ViewListener:
 
     def start_loop(self):
         while True:
-            bytes_address_pair = self.sock.recvfrom(1024)
+            bytes_address_pair = self.sock.recvfrom(BUFFER_SIZE)
             message = bytes_address_pair[0]
             address = bytes_address_pair[1]
 

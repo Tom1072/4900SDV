@@ -55,7 +55,7 @@ void render_view()
 
     char *skid_str = environment->skid ? "SKID" : "NO SKID";
     char *obj = environment->object ? "TRUE" : "FALSE";
-    PRINT_ON_DEBUG("VIEW: throttle=%d, brake=(%d, %s), speed=%lf, distance=%lf, obj=(%s, %lf)\n", 
+    PRINT_ON_INFO("VIEW: throttle=%d, brake=(%d, %s), speed=%lf, distance=%lf, obj=(%s, %lf)\n", 
         environment->throttle_level,
         environment->brake_level, skid_str,
         environment->car_speed,

@@ -182,7 +182,7 @@ int init(void){
               manual->brake_level = 0;
               manual->throttle_level = data.throttle_level;
               // TODO: remove print statement
-			  PRINT_ON_DEBUG("***Simulator THROTTLE: Env vars: gas = %d, brake = %d\n", manual->throttle_level, manual->brake_level);
+              PRINT_ON_DEBUG("***Simulator THROTTLE: Env vars: gas = %d, brake = %d\n", manual->throttle_level, manual->brake_level);
               if( MsgSendPulsePtr(coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");

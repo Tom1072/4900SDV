@@ -44,7 +44,7 @@ void start_dispatcher()
   memset(&server_address, 0, sizeof(server_address));
   server_address.sin_family = AF_INET;
   server_address.sin_addr.s_addr = inet_addr(VIEW_SERVER_ADDRESS);
-  server_address.sin_port = htons(CLIENT_PORT);
+  server_address.sin_port = htons(VIEW_SERVER_PORT);
 
   // char* msg = "Message from COMM_DISPATCHER";
   // sendto(client_socket, msg, strlen(msg), 0, (struct sockaddr *)&server_address, sizeof(server_address));
