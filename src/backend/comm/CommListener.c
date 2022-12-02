@@ -45,7 +45,7 @@ void start_listener()
   server_addr.sin_addr.s_addr = inet_addr(COMM_SERVER_ADDRESS);
   server_addr.sin_port = htons(COMM_SERVER_PORT);
 
-  // Bind the server socketS
+  // Bind the server sockets
   PRINT_ON_DEBUG("Binding to port %d\n", COMM_SERVER_PORT);
   status = bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (status < 0)

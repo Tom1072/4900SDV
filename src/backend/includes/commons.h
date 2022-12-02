@@ -3,13 +3,6 @@
 #include <sys/dispatch.h>
 #include <pthread.h>
 
-// Socket configurations
-// #define SERVER_ADRESS "192.168.56.101"   // Tom's IP  
-// #define VIEW_SERVER_ADDRESS "192.168.56.1"   // Tom's IP  
- #define SERVER_ADRESS "192.168.2.226" // Kate's IP (VM)
- #define VIEW_SERVER_ADDRESS "192.168.2.245" // Kate's IP (Host)
-//#define SERVER_ADRESS "172.16.41.129" // Thang's IP
-//#define VIEW_SERVER_ADDRESS "172.16.41.1" // Thang's IP
 
 #define SERVER_PORT 5003
 #define CLIENT_PORT 8080
@@ -53,10 +46,10 @@
 //                        VIEW_SERVER_ADDRESS is the IP address of the ViewDispatcher server
 //#define COMM_SERVER_ADDRESS "192.168.56.101"      // Tom's IP
 //#define VIEW_SERVER_ADDRESS "192.168.56.1"        // Tom's IP
- #define COMM_SERVER_ADDRESS "192.168.2.226"             // Kate's IP
- #define VIEW_SERVER_ADDRESS "192.168.2.245"       // Kate's IP
-// #define COMM_SERVER_ADDRESS "172.16.41.129"             // Thang's IP
-// #define VIEW_SERVER_ADDRESS "172.16.41.1"         // Thang's IP
+ #define COMM_SERVER_ADDRESS "192.168.2.226"        // Kate's IP
+ #define VIEW_SERVER_ADDRESS "192.168.2.245"        // Kate's IP
+// #define COMM_SERVER_ADDRESS "172.16.41.129"      // Thang's IP
+// #define VIEW_SERVER_ADDRESS "172.16.41.1"        // Thang's IP
 
 #define COMM_SERVER_PORT 8080 // Port that the CommListener will listen to for ViewDispatcher messages
 #define VIEW_SERVER_PORT 8080 // Port that the ViewListener will listen to for CommDispatcher messages

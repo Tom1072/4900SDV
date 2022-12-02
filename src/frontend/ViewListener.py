@@ -1,7 +1,6 @@
 import socket
 import json
 import select
-import csv
 
 BUFFER_SIZE = 1024
 LISTENER_UDP_PORT = 8080
