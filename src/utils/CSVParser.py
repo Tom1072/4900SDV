@@ -39,6 +39,7 @@ class GraphController:
             sp.set_xlim(left=0, right=x_right_limit)
             sp.label_outer()
         fig.tight_layout(pad=2)
+        # fig.set_size_inches(20, 10)
         fig.show()
         plt.subplots_adjust(hspace=0.1)
 
@@ -109,10 +110,23 @@ if __name__ == "__main__":
     # csv_reader.add_graph("speed")
     # csv_reader.plot_data()
 
-    csv_reader = CSVParser("./csv_files/ABS_test2.csv")
-    csv_reader.add_graph("speed")
-    csv_reader.add_graph("skid")
+    # csv_reader = CSVParser("./csv_files/ABS_test2.csv")
+    # csv_reader.add_graph("speed")
+    # csv_reader.add_graph("skid")
+    # csv_reader.add_graph("brake")
+    # csv_reader.plot_data()
+
+    # csv_reader = CSVParser("./csv_files/ACC_Manual_preemption.csv")
+    # csv_reader.add_graph("gas")
+    # csv_reader.add_graph("brake")
+    # csv_reader.add_graph("speed")
+    # csv_reader.plot_data()
+
+    csv_reader = CSVParser("./csv_files/ObjectSpawn1.csv")
+    csv_reader.add_graph("gas")
     csv_reader.add_graph("brake")
+    csv_reader.add_graph("speed")
+    csv_reader.add_graph("distance")
     csv_reader.plot_data()
 
     plt.show()
