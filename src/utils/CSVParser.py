@@ -148,7 +148,7 @@ def plot_data(filename, data_names: list[str]):
 if __name__ == "__main__":
     # Put all graphs want to plot here
     # plot_data("csv_files/ACC_Manual_preemption.csv", ["gas", "brake", "speed"])
-    plot_data("csv_files/ACC_yield_driver.csv", ["gas", "brake", "speed"])
+    plot_data("csv_files/acc_obj.csv", ["gas", "speed"])
 
 
     plt.show() # Don't modify this and please do only one show
