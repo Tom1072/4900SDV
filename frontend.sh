@@ -22,18 +22,34 @@ while getopts ":hirc" option; do
          Help
          exit;;
       i) # install and build executable
-         python -m venv ./venv
-         source ./venv/Scripts/activate
-         pip install -r ./src/frontend/requirements.txt
-         cd src/frontend/
-         pyinstaller --onefile Display.py
-         cd ../../
-         deactivate 
+         case $OSTYPE in
+         "msys")
+            echo "Installing for Windows"
+            python -m venv ./venv
+            source ./venv/Scripts/activate
+            pip3 install -r ./src/frontend/requirements.txt
+            pushd src/frontend/
+            pyinstaller --onefile Display.py
+            popd
+            deactivate 
+            ;;
+         *)
+            echo "Installing for Linux/MacOS"
+            python3 -m venv ./venv
+            source ./venv/bin/activate
+            pip3 install -r ./src/frontend/requirements.txt
+            cd src/frontend/
+            pyinstaller --onefile Display.py
+            cd ../../
+            deactivate 
+            ;;
+         esac
          exit;;
       r) # run frontend
          ./src/frontend/dist/Display
          exit;;
       c) # clean up frontend build (including executables)
+         rm -rf venv
          cd src/frontend
          rm -rf Display.spec dist/ build/
          cd ../../
