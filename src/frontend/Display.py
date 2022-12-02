@@ -1,9 +1,14 @@
-from enum import Enum
+import os
+import time
 import PySimpleGUI as sg
+import multiprocessing as mp
+from enum import Enum
+# from Graph import GraphController
 from ViewDispatcher import ViewDispatcher
 from ViewListener import ViewListener
 from dotenv import load_dotenv
-import os
+from GraphController import GraphController
+from threading import Thread
 
 class Button(Enum):
     BRAKE = "Brake" 
@@ -53,6 +58,10 @@ BUTTON_FONT = ('Arial', 10, 'bold')
 CAR_FRONT_FLAG_KEY = "car_front_tbn"
 CONTROLLER_WIDTH = 650
 LEVEL_SLIDER_WIDTH = 45
+GRAPH_TITLES_MAP = {
+    "Speed": Detail.SPEED.value,
+    "Distance": Detail.DISTANCE.value,
+}
 
 class Display:
     def __init__(self, listener_ip, dispatcher_ip):
@@ -187,11 +196,16 @@ class Display:
             self.window[d.value].update(value=str(self.env[d.value]))
         
 
-    def run(self):
+    def run(self, process_pipe):
         """
         Starts the main event loop of the GUI
         """
+        global started
         prev_event = None
+        start_time = time.time()
+        # start_animation(graph_control)
+        # start_process(self.graph_control)
+        # graph_control.retain_window()
 
         while True:
             self.update_details()
@@ -209,12 +223,23 @@ class Display:
                 self.env[Detail.SKID.value] = data["skid"]
                 self.env["object"] = data["obj"]
                 self.server_connected = True 
+
+                time_change = time.time() - start_time
+
+                # started = True
+                data_list = []
+                for t in GRAPH_TITLES_MAP:
+                    data_list.append((t, time_change, self.env[GRAPH_TITLES_MAP[t]]))
+
+                # self.graph_control.enqueue(data_list)
+                process_pipe.send(data_list) 
             else:
                 if prev_event == "Exit":
                     break
 
             if event in (sg.WIN_CLOSED, "Exit"):
                 prev_event = "Exit"
+                # graph_processor.plot(finished=True)
                 self.udp_dispatcher.send_message("stop")
                 continue
             
@@ -250,7 +275,8 @@ class Display:
         # if user exits, then close the window
         self.window.close()
 
-if __name__ == '__main__':
+
+def start_display_process(process_pipe):
     try:
         load_dotenv()
         LISTENER_IP = os.getenv("LISTENER_IP")
@@ -259,8 +285,15 @@ if __name__ == '__main__':
         if not LISTENER_IP or not DISPATCHER_IP:
             raise ValueError
 
-        Display(LISTENER_IP, DISPATCHER_IP).run()
+        display = Display(LISTENER_IP, DISPATCHER_IP)
+        # mp.Process(target=display.run, daemon=True).start()
+        # return display.graph_control, Thread(target=display.run, daemon=True)
+        return mp.Process(target=display.run, args=(process_pipe,), daemon=True)
     except ValueError:
         print("ERROR: listener or dispatcher IP address missing, or .env file missing")
-    except:
-        print("Window exited")
+
+        
+if __name__ == '__main__':
+    # except:
+    #     print("Window exited")
+    pass
