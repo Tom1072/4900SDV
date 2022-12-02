@@ -10,10 +10,15 @@ class GraphController:
     def __init__(self):
         self.graphs = []
 
-        # for i in range(len(subplots)):
-        #     subplots[i] = my_subplots[i]
-
     def add_graph(self, x_type, y_type, data):
+        """
+        Add a graph that contains 2 data sets to print 
+        
+        Keyword arguments:
+        x_type -- the data name/type of the x axis
+        y_type -- the data name/type of the y axis
+        data   -- the full data set
+        """
         graph = Graph2D(x_type, y_type)
         xi, yi = col_names.index(x_type), col_names.index(y_type)
 
@@ -25,6 +30,13 @@ class GraphController:
 
 
     def display_graph(self, x_right_limit=None, grid=False):
+        """
+        Plot a graph to matplotlib figure
+        
+        Keyword arguments:
+        x_right_limit -- The right limit of the x axis on the plot
+        grid          -- Indicate whether to show grid
+        """
         fig, subplots = plt.subplots(len(self.graphs), sharex=True)
 
         if not isinstance(subplots, Iterable):
@@ -50,6 +62,14 @@ class Graph2D:
         self.x_axis, self.y_axis = [], []
 
     def add_data(self, x, y):
+        """
+        Add data to the graph
+        
+        Keyword arguments:
+        x -- the x coordinate of the data point
+        y -- the y coordinate of the data point
+        """
+        
         if y >= 9999:
             return
 
@@ -70,17 +90,23 @@ class CSVParser:
 
 
     def parse_csv(self):
+        """
+        Parse the CSV file specified in the class's filename variable
+        """
         try:
             with open(self.filename, 'r') as csv_file:
                 reader = csv.reader(csv_file)
                 for i, row in enumerate(reader):
-                    data_row = self.str_row_to_numbers([i * INTERVAL] + row)
+                    data_row = self.str_row_to_types([i * INTERVAL] + row)
                     self.data.append(data_row)
         except FileNotFoundError:
             print("Error: Input file doesn't exist")
     
 
-    def str_row_to_numbers(self, row):
+    def str_row_to_types(self, row):
+        """
+        Convert a parsed str array to corresponding types
+        """
         if len(row) > len(col_names):
             return []
 
@@ -105,6 +131,10 @@ class CSVParser:
 
     
 def plot_data(filename, data_names: list[str]):
+    """
+    Plot the data in the filename with a list of subplot data names
+    All names: ["interval", "gas", "brake","speed", "object", "object_speed","distance", "skid"]
+    """
     csv_reader = CSVParser(filename)
     if not csv_reader.data:
         return
@@ -116,6 +146,9 @@ def plot_data(filename, data_names: list[str]):
 
 
 if __name__ == "__main__":
-    # All names: ["interval", "gas", "brake","speed", "object", "object_speed","distance", "skid"]
-    plot_data("csv_files/ACC_Manual_preemption.csv", ["gas", "brake", "speed"])
-    plt.show()
+    # Put all graphs want to plot here
+    # plot_data("csv_files/ACC_Manual_preemption.csv", ["gas", "brake", "speed"])
+    plot_data("csv_files/ACC_yield_driver.csv", ["gas", "brake", "speed"])
+
+
+    plt.show() # Don't modify this and please do only one show
