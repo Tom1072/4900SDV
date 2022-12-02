@@ -6,10 +6,11 @@
 // Socket configurations
 // #define SERVER_ADRESS "192.168.56.101"   // Tom's IP  
 // #define VIEW_SERVER_ADDRESS "192.168.56.1"   // Tom's IP  
-// #define SERVER_ADRESS "192.168.2.226" // Kate's IP
-// #define VIEW_SERVER_ADDRESS "192.168.2.245" // Kate's IP
-#define SERVER_ADRESS "172.16.41.129" // Thang's IP
-#define VIEW_SERVER_ADDRESS "172.16.41.1" // Thang's IP
+ #define SERVER_ADRESS "192.168.2.226" // Kate's IP (VM)
+ #define VIEW_SERVER_ADDRESS "192.168.2.245" // Kate's IP (Host)
+//#define SERVER_ADRESS "172.16.41.129" // Thang's IP
+//#define VIEW_SERVER_ADDRESS "172.16.41.1" // Thang's IP
+
 #define SERVER_PORT 5003
 #define CLIENT_PORT 8080
 #define BUFFER_SIZE 1000
@@ -21,7 +22,7 @@
 #define NOK  -1
 
 #define MAX_STRING_LEN    512
-#define MAX_SPEED         100
+#define MAX_SPEED         250
 
 #define MANUAL_PRIO    12
 #define ACC_PRIO       11
@@ -48,6 +49,7 @@
 #define ACC_NAME        "ACC_attach_name"
 #define SIMULATOR_NAME  "simulator_attach_name"
 #define COMM_NAME       "comm_attach_name"
+#define FILENAME        "data_log.csv"
 
 #define CHECK_STATUS(status) \
     if (status != OK) \

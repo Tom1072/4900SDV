@@ -23,7 +23,7 @@ while getopts ":hirc" option; do
          exit;;
       i) # install and build executable
          python -m venv ./venv
-         source ./venv/bin/activate
+         source ./venv/Scripts/activate
          pip install -r ./src/frontend/requirements.txt
          cd src/frontend/
          pyinstaller --onefile Display.py
