@@ -72,3 +72,4 @@ Display.spec
 venv/
 .cproject
 dist/
+*.csv
