@@ -7,15 +7,30 @@
 #include "../includes/View.h"
 #include "../includes/commons.h"
 
+/**
+ * Display the current state of the SDV to stdout
+ * 
+ */
+
 Environment *prev_environment = NULL;
 Environment *environment = NULL;
 
+/**
+ * @brief Initialize the view
+ * This function must be called before any other view functions
+ * 
+ */
 void init_view()
 {
     prev_environment = (Environment *)malloc(sizeof(Environment));
     environment = (Environment *)malloc(sizeof(Environment));
 }
 
+/**
+ * @brief Destroy the view, free the memory
+ * This function must be called after the view is no longer needed
+ * 
+ */
 void destroy_view()
 {
     free(prev_environment);
@@ -24,6 +39,13 @@ void destroy_view()
     environment = NULL;
 }
 
+/**
+ * @brief Set the Environment object
+ * This will only set the attributes that are not NULL
+ * Ex: If env->skid is NULL, then the current environment->skid will not be changed
+ * 
+ * @param env The new environment data
+ */
 void set_environment(Environment *env)
 {
     if (env == NULL)
@@ -47,7 +69,7 @@ void set_environment(Environment *env)
 }
 
 /**
- * @brief Update the view
+ * @brief Print the current environment
  *
  */
 void render_view()
@@ -55,7 +77,7 @@ void render_view()
 
     char *skid_str = environment->skid ? "SKID" : "NO SKID";
     char *obj = environment->object ? "TRUE" : "FALSE";
-    PRINT_ON_DEBUG("VIEW: throttle=%d, brake=(%d, %s), speed=%lf, distance=%lf, obj=(%s, %lf)\n", 
+    PRINT_ON_INFO("VIEW: throttle=%d, brake=(%d, %s), speed=%lf, distance=%lf, obj=(%s, %lf)\n", 
         environment->throttle_level,
         environment->brake_level, skid_str,
         environment->car_speed,

@@ -19,6 +19,13 @@
 #include "../includes/actuators.h"
 #include "../includes/utils.h"
 
+/**
+ * Simulate the environment: other car moving closer, skidding, etc.
+ */
+
+/**
+ * @brief Starts the simulator
+*/
 int init(void){
 
   // Define variables
@@ -153,7 +160,7 @@ int init(void){
               Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );
               // fill the data
               copy_updates( &car_env, new_env_t );
-              // TODO: remove print statement
+
               PRINT_ON_DEBUG("***Simulator SPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
 
               // Send updates to display
@@ -176,7 +183,7 @@ int init(void){
               // fill the data
               copy_updates( &car_env, new_env_t );
 
-              // TODO: remove print statement
+
               PRINT_ON_DEBUG("***Simulator DESPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
               // Send updates to display
               if( MsgSendPulsePtr( coid_comm, SIMULATOR_PRIO, SIMULATOR, ( void * )new_env_t ) == -1 )
@@ -191,8 +198,8 @@ int init(void){
               ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
               manual->brake_level = 0;
               manual->throttle_level = data.throttle_level;
-              // TODO: remove print statement
-			  PRINT_ON_DEBUG("***Simulator THROTTLE: Env vars: gas = %d, brake = %d\n", manual->throttle_level, manual->brake_level);
+
+              PRINT_ON_DEBUG("***Simulator THROTTLE: Env vars: gas = %d, brake = %d\n", manual->throttle_level, manual->brake_level);
               if( MsgSendPulsePtr(coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -205,7 +212,7 @@ int init(void){
               ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
               manual->brake_level = data.brake_data.brake_level;
               manual->throttle_level = 0; // This one may be obsolete
-              // TODO: remove print statement
+
               PRINT_ON_DEBUG("***Simulator BRAKE: Env vars: skid = %d, brake = %d\n", data.brake_data.skid_on, manual->brake_level);
               if( MsgSendPulsePtr( coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
@@ -224,7 +231,7 @@ int init(void){
               acc_data->current_speed = car_env.car_speed;
               acc_data->desired_speed = data.acc_speed;
               acc_data->distance      = car_env.distance;
-              // TODO: remove print statement
+
               if( MsgSendPulsePtr( coid_acc, SIMULATOR_PRIO, SIMULATOR, (void *)acc_data ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -258,6 +265,11 @@ int init(void){
   return EXIT_SUCCESS;
 }
 
+/**
+ * @brief Initialize the simulator environement
+ * 
+ * @param env The environment to be initialized
+ */
 void init_env( Environment* env )
 {
   env->skid         = 0;
@@ -270,6 +282,12 @@ void init_env( Environment* env )
   env->set_speed    = 0;
 }
 
+/** 
+ * @brief Update environemnts 
+ * 
+ * @param old_env The environment to be updated
+ * @param new_env The new environment
+ */
 void copy_updates( Environment* old_env, Environment* new_env )
 {
   new_env->skid        = old_env->skid;
@@ -282,6 +300,11 @@ void copy_updates( Environment* old_env, Environment* new_env )
   new_env->object      = old_env->object;
 }
 
+/**
+ * @brief Start the distance simulator
+ * 
+ * @param data the data to be used by this thread for distance simulation
+ */
 void *simulate_distance(void *data)
 {
   simulatorRequest_t *info = ( simulatorRequest_t* ) data;
@@ -312,7 +335,7 @@ void *simulate_distance(void *data)
       {
         perror(">>>>>Distance simulator: MsgSendPulsePtr():");
       }
-    } // TODO: add the distance updates if no object to be distance_max
+    }
     else if( ( info->env->object == FALSE ))
     {
       // Send pulse to ACC
@@ -330,15 +353,19 @@ void *simulate_distance(void *data)
     // Sleep 100 ms
     usleep( t * 1000 );
   }
-  PRINT_ON_DEBUG("No car in front OR you have crashed\n"); // TODO: remove print statement
   return NULL;
 }
+
+/**
+ * @brief Start the skid-stop simulator
+ * 
+ * @param data the data to be used by this thread for skid-stop simulation
+ */
 void simulate_skid_stop( void * data)
 {
   simulatorRequest_t *info = ( simulatorRequest_t * ) data;
   int rand_int;
 
-  PRINT_ON_DEBUG(">>>>>Skid simulator: init skid = %d\n", info->env->skid); // TODO: remove print statement
   while(1)
   {
     srand( time(0) );
@@ -398,10 +425,7 @@ void simulate_skid_stop( void * data)
             perror(">>>>>Skid simulator: MsgSendPulsePtr():");
           }
         }
-
-        PRINT_ON_DEBUG(">>>>>Skid simulator: skid = %d\n", info->env->skid); // TODO: remove print statement
     }
   }
-//  return NULL;
 }
 

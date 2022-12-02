@@ -10,8 +10,9 @@
 #include "../includes/utils.h"
 
 /**
- * current controller
+ * Control the manual driver actuator
  */
+
 volatile extern int state;
 extern pthread_mutex_t mutex;
 extern pthread_cond_t cond;
@@ -25,7 +26,9 @@ volatile extern char acc_processing;
 volatile extern char manual_processing;;
 
 /**
- * Handler of the ManualDriver thread.
+ * @brief Start the ManualDriver actuator
+ * 
+ * @return void* 
  */
 void *ManualDriver()
 {
@@ -90,7 +93,10 @@ void *ManualDriver()
 }
 
 /**
- * Handler function for manual driver processor/sender that sends pulse to Simulator
+ * @brief Start the processor for ManualDriver request from Simulator
+ * 
+ * @param args 
+ * @return void* 
  */
 void *man_processor(void *args)
 {

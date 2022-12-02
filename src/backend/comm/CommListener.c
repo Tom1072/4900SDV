@@ -14,6 +14,13 @@
 #include "../includes/commons.h"
 #include "../includes/View.h"
 
+/**
+ * Receive new user commands from the python ViewDispatcher client
+ */
+
+/**
+ * @brief Initialize the communication listener to receiving data from ViewDispatcher python client
+ */
 void start_listener()
 {
   int server_socket, coid;
@@ -35,11 +42,11 @@ void start_listener()
   // Setup the server address
   memset(&server_addr, 0, sizeof(server_addr)); // zeros the struct serverAddr.sin_family = AF_INET;
   server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = inet_addr(SERVER_ADRESS);
-  server_addr.sin_port = htons(SERVER_PORT);
+  server_addr.sin_addr.s_addr = inet_addr(COMM_SERVER_ADDRESS);
+  server_addr.sin_port = htons(COMM_SERVER_PORT);
 
   // Bind the server socket
-  PRINT_ON_DEBUG("Binding to port %d\n", SERVER_PORT);
+  PRINT_ON_DEBUG("Binding to port %d\n", COMM_SERVER_PORT);
   status = bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
   if (status < 0)
   {
@@ -47,8 +54,8 @@ void start_listener()
     pthread_exit(NULL);
   }
 
-  sleep(1);
-  // establish a connection to the simulator's channel
+  // Establish a connection to the simulator's channel
+  sleep(1); // Wait for the simulator to start
   coid = name_open(SIMULATOR_NAME, 0);//_NTO_CHF_DISCONNECT);
 
   // Wait for clients now
@@ -80,7 +87,7 @@ void start_listener()
         buffer[bytes_received] = '\0';
         PRINT_ON_DEBUG("COMM_LISTENER: Received client request: %s\n", buffer);
       }
-      // If the client said to stop, then I'll stop myself
+      // If the client said to stop, then signal the simulator to stop
       if (strcmp(buffer, "stop") == 0)
       {
         // Respond with an "OK" message
@@ -195,7 +202,7 @@ void parse_message(char *message, CommListenerMessage **parsed_message)
             memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
             (*parsed_message)->command = BRAKE;
-            (*parsed_message)->data.brake_level = brake_level;
+            (*parsed_message)->data.brake_data.brake_level = brake_level;
             (*parsed_message)->data.brake_data.skid_on = TRUE;
           }
           else if (strcmp(token, "off") == 0)
@@ -204,7 +211,7 @@ void parse_message(char *message, CommListenerMessage **parsed_message)
             memset(*parsed_message, 0, sizeof(CommListenerMessage));
 
             (*parsed_message)->command = BRAKE;
-            (*parsed_message)->data.brake_level = brake_level;
+            (*parsed_message)->data.brake_data.brake_level = brake_level;
             (*parsed_message)->data.brake_data.skid_on = FALSE;
           }
         }

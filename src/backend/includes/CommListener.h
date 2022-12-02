@@ -1,59 +1,42 @@
 #pragma once
 #include "commons.h"
 
+/**
+ * Receive new user commands from the python ViewDispatcher client
+ */
 
-// Public types
-typedef enum
-{
-  SPAWN_CAR = 0,
-  DESPAWN_CAR,
-  THROTTLE,
-  BRAKE,
-  ACC_SPEED,
-  ACC_ENGAGE,
-  SKID // Deprecated, use BRAKE instead
-} CommandType;
-
-typedef struct
-{
-  double distance;
-  int obj_speed;
-} SpawnCarData;
-
-typedef struct
-{
-  int brake_level;
-  char skid_on;
-} BrakeData;
-
-typedef union
-{
-  SpawnCarData spawn_car_data; // used for SPAWN_CAR command
-  int throttle_level;          // 0-100 (%), used for GAS command
-  BrakeData brake_data;        // Used for BRAKE command
-  double acc_speed;               // 0-100 (km/h), used for ACC_SPEED command
-  char acc_engage;                    // TRUE to engage acc or FALSE to disengage acc, used for ACC command
-  int brake_level;             // Deprecated, use BrakeData instead
-  char skid_on;                // Deprecated, use BrakeData instead
-} CommandData;
-
-typedef struct
-{
-  CommandType command;
-  CommandData data;
-} CommListenerMessage;
-
-// Public API
+/** Public APIs */
 
 /**
- * @brief Starts the listener server
- *
+ * @brief Initialize the communication listener to receiving data from ViewDispatcher python client
  */
 void start_listener();
 
-// Private API
+/** Private APIs */
+
+/**
+ * @brief Parse the message received from the ViewDispatcher python client
+ * 
+ * @param message The message received from the ViewDispatcher python client
+ * @param parsed_message The parsed message to be sent to the Simulator
+ */
 void parse_message(char *message, CommListenerMessage **parsed_message);
 
+/**
+ * @brief Check if atoi() was successful
+ * 
+ * @param result the result of atoi()
+ * @param token the input to atoi() that produced the result
+ * @return char TRUE if atoi() was successful, FALSE otherwise
+ */
 char check_atoi(int result, char *token);
 
+/**
+ * @brief Check if the input is within the specified range
+ * 
+ * @param value 
+ * @param min 
+ * @param max 
+ * @return char 
+ */
 char in_range(int value, int min, int max);

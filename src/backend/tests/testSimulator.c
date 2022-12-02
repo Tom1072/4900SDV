@@ -26,23 +26,28 @@ void *distance_test();
 void *skid_test();
 void *test_comm_sim_actuators_sim_display();
 
+/**
+ * @brief Test the simulator module
+ * 
+ * @return char TRUE for success, FALSE for failure
+ */
 char test_simulator() {
   printf("Testing simulator...\n");
-  pthread_t      test_comm_sim_actuators_sim_display_thread,
-			           mocked_dist_thread, mocked_skid_thread;
-  pthread_attr_t test_comm_sim_actuators_sim_display_attr,
-				         mocked_dist_attr, mocked_skid_attr;
+  pthread_t      test_comm_sim_actuators_sim_display_thread;
+	// pthread_t 		 mocked_dist_thread, mocked_skid_thread;
+  pthread_attr_t test_comm_sim_actuators_sim_display_attr;
+	// pthread_attr_t mocked_dist_attr, mocked_skid_attr;
 
   create_thread(&test_comm_sim_actuators_sim_display_thread,
 		        &test_comm_sim_actuators_sim_display_attr,
 				1, NULL, test_comm_sim_actuators_sim_display);
-//  create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, NULL, distance_test);
-//  create_thread(&mocked_skid_thread, &mocked_skid_attr, 2, NULL, skid_test);
+  // create_thread(&mocked_dist_thread, &mocked_dist_attr, 2, NULL, distance_test);
+  // create_thread(&mocked_skid_thread, &mocked_skid_attr, 2, NULL, skid_test);
 
   pthread_join(test_comm_sim_actuators_sim_display_thread, NULL);
-//  pthread_join(mocked_dist_thread, NULL);
-//  pthread_join(mocked_skid_thread, NULL);
-//
+  //  pthread_join(mocked_dist_thread, NULL);
+  //  pthread_join(mocked_skid_thread, NULL);
+  //
   return TRUE;
 }
 

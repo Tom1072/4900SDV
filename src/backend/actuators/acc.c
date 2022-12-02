@@ -13,10 +13,18 @@
 #include "../includes/commons.h"
 #include "../includes/utils.h"
 
+/**
+ * Control the ACC actuator
+ */
+
+/**
+ * @brief ACC modes
+ * 
+ */
 typedef enum
 {
-  DISTANCE_CONTROL = 0,
-  SPEED_CONTROL
+  DISTANCE_CONTROL = 0, // Try to keep a good distance away from the car in front by matching its speed
+  SPEED_CONTROL         // Try to match the desired acc speed set by user
 } ACCMode;
 
 /**
@@ -34,21 +42,10 @@ volatile extern char abs_processing;
 volatile extern char acc_processing;
 volatile extern char manual_processing;
 
-// long long current_timestamp()
-// {
-//   struct timeval te;
-//   struct timeval te;
-//   struct timeval te;
-//   struct timeval te;
-//   struct timeval te;
-//   gettimeofday(&te, NULL);                                         // get current time
-//   long long milliseconds = te.tv_sec * 1000LL + te.tv_usec / 1000; // calculate milliseconds
-//   // PRINT_ON_DEBUG("milliseconds: %lld\n", milliseconds);
-//   return milliseconds;
-// }
-
 /**
- * Handler of the ACC thread.
+ * @brief Start the ACC actuator
+ * 
+ * @return void* 
  */
 void *ACC()
 {
