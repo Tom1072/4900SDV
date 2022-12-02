@@ -3,10 +3,9 @@
 #include <sys/dispatch.h>
 #include <pthread.h>
 
-
-#define SERVER_PORT 5003
-#define CLIENT_PORT 8080
-#define BUFFER_SIZE 1000
+/**
+ * Store all pre-processing constants, macros and public message structs
+ */
 
 // Constants
 #define TRUE  1
