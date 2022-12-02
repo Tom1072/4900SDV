@@ -103,30 +103,19 @@ class CSVParser:
         '''
         self.graph_controller.add_graph(x_type, y_type, self.data)
 
+    
+def plot_data(filename, data_names: list[str]):
+    csv_reader = CSVParser(filename)
+    if not csv_reader.data:
+        return
 
-if __name__ == "__main__":
-    # csv_reader = CSVParser("./csv_files/data_log.csv")
-    # csv_reader.add_graph("distance")
-    # csv_reader.add_graph("speed")
-    # csv_reader.plot_data()
+    for n in data_names:
+        csv_reader.add_graph(n)
 
-    # csv_reader = CSVParser("./csv_files/ABS_test2.csv")
-    # csv_reader.add_graph("speed")
-    # csv_reader.add_graph("skid")
-    # csv_reader.add_graph("brake")
-    # csv_reader.plot_data()
-
-    # csv_reader = CSVParser("./csv_files/ACC_Manual_preemption.csv")
-    # csv_reader.add_graph("gas")
-    # csv_reader.add_graph("brake")
-    # csv_reader.add_graph("speed")
-    # csv_reader.plot_data()
-
-    csv_reader = CSVParser("./csv_files/ObjectSpawn1.csv")
-    csv_reader.add_graph("gas")
-    csv_reader.add_graph("brake")
-    csv_reader.add_graph("speed")
-    csv_reader.add_graph("distance")
     csv_reader.plot_data()
 
+
+if __name__ == "__main__":
+    # All names: ["interval", "gas", "brake","speed", "object", "object_speed","distance", "skid"]
+    plot_data("csv_files/ACC_Manual_preemption.csv", ["gas", "brake", "speed"])
     plt.show()
