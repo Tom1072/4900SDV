@@ -151,7 +151,7 @@ int init(void){
               Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );
               // fill the data
               copy_updates( &car_env, new_env_t );
-              // TODO: remove print statement
+
               PRINT_ON_DEBUG("***Simulator SPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
               // Send updates to display
               if( MsgSendPulsePtr( coid_comm, SIMULATOR_PRIO, SIMULATOR, ( void * )new_env_t ) == -1 )
@@ -173,7 +173,7 @@ int init(void){
               // fill the data
               copy_updates( &car_env, new_env_t );
 
-              // TODO: remove print statement
+
               PRINT_ON_DEBUG("***Simulator DESPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
               // Send updates to display
               if( MsgSendPulsePtr( coid_comm, SIMULATOR_PRIO, SIMULATOR, ( void * )new_env_t ) == -1 )
@@ -188,7 +188,7 @@ int init(void){
               ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
               manual->brake_level = 0;
               manual->throttle_level = data.throttle_level;
-              // TODO: remove print statement
+
               PRINT_ON_DEBUG("***Simulator THROTTLE: Env vars: gas = %d, brake = %d\n", manual->throttle_level, manual->brake_level);
               if( MsgSendPulsePtr(coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
@@ -202,7 +202,7 @@ int init(void){
               ManMessageInput *manual = ( ManMessageInput * )malloc( sizeof(ManMessageInput) );
               manual->brake_level = data.brake_data.brake_level;
               manual->throttle_level = 0; // This one may be obsolete
-              // TODO: remove print statement
+
               PRINT_ON_DEBUG("***Simulator BRAKE: Env vars: skid = %d, brake = %d\n", data.brake_data.skid_on, manual->brake_level);
               if( MsgSendPulsePtr( coid_driver, SIMULATOR_PRIO, SIMULATOR, (void *)manual ) == -1 )
               {
@@ -221,7 +221,7 @@ int init(void){
               acc_data->current_speed = car_env.car_speed;
               acc_data->desired_speed = data.acc_speed;
               acc_data->distance      = car_env.distance;
-              // TODO: remove print statement
+
               if( MsgSendPulsePtr( coid_acc, SIMULATOR_PRIO, SIMULATOR, (void *)acc_data ) == -1 )
               {
                 perror("***Simulator: MsgSendPulsePtr()");
@@ -325,7 +325,7 @@ void *simulate_distance(void *data)
       {
         perror(">>>>>Distance simulator: MsgSendPulsePtr():");
       }
-    } // TODO: add the distance updates if no object to be distance_max
+    }
     else if( ( info->env->object == FALSE ))
     {
       // Send pulse to ACC
@@ -343,7 +343,6 @@ void *simulate_distance(void *data)
     // Sleep 100 ms
     usleep( t * 1000 );
   }
-  PRINT_ON_DEBUG("No car in front OR you have crashed\n"); // TODO: remove print statement
   return NULL;
 }
 
@@ -357,7 +356,6 @@ void simulate_skid_stop( void * data)
   simulatorRequest_t *info = ( simulatorRequest_t * ) data;
   int rand_int;
 
-  PRINT_ON_DEBUG(">>>>>Skid simulator: init skid = %d\n", info->env->skid); // TODO: remove print statement
   while(1)
   {
     srand( time(0) );
@@ -417,8 +415,6 @@ void simulate_skid_stop( void * data)
             perror(">>>>>Skid simulator: MsgSendPulsePtr():");
           }
         }
-
-        PRINT_ON_DEBUG(">>>>>Skid simulator: skid = %d\n", info->env->skid); // TODO: remove print statement
     }
   }
 }
