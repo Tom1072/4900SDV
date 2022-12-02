@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include "../includes/commons.h"
 #pragma once
 
 /**
@@ -14,3 +16,5 @@
  * @param handler Function to be executed by the thread
 */
 void create_thread(pthread_t *thread_ptr, pthread_attr_t *attr_ptr, int priority, void *args, void *(*handler)());
+
+void write_data(FILE *fn, Environment *env);

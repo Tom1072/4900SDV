@@ -3,8 +3,8 @@
 #include <sys/dispatch.h>
 #include <pthread.h>
 
-/** 
- * Store all pre-processing constants, macros and public message structs 
+/**
+ * Store all pre-processing constants, macros and public message structs
  */
 
 // Constants
@@ -43,12 +43,12 @@
 
 // Socket configurations: SERVER_ADDRESS is the IP address of the CommListener server
 //                        VIEW_SERVER_ADDRESS is the IP address of the ViewDispatcher server
-#define COMM_SERVER_ADDRESS "192.168.56.101"      // Tom's IP  
-#define VIEW_SERVER_ADDRESS "192.168.56.1"        // Tom's IP  
-// #define SERVER_ADRESS "192.168.2.226"             // Kate's IP
-// #define VIEW_SERVER_ADDRESS "192.168.2.245"       // Kate's IP
-// #define SERVER_ADRESS "172.16.41.129"             // Thang's IP
-// #define VIEW_SERVER_ADDRESS "172.16.41.1"         // Thang's IP
+//#define COMM_SERVER_ADDRESS "192.168.56.101"      // Tom's IP
+//#define VIEW_SERVER_ADDRESS "192.168.56.1"        // Tom's IP
+ #define COMM_SERVER_ADDRESS "192.168.2.226"        // Kate's IP
+ #define VIEW_SERVER_ADDRESS "192.168.2.245"        // Kate's IP
+// #define COMM_SERVER_ADDRESS "172.16.41.129"      // Thang's IP
+// #define VIEW_SERVER_ADDRESS "172.16.41.1"        // Thang's IP
 
 #define COMM_SERVER_PORT 8080 // Port that the CommListener will listen to for ViewDispatcher messages
 #define VIEW_SERVER_PORT 8080 // Port that the ViewListener will listen to for CommDispatcher messages
@@ -72,6 +72,7 @@
 #define ACC_NAME        "ACC_attach_name"
 #define SIMULATOR_NAME  "simulator_attach_name"
 #define COMM_NAME       "comm_attach_name"
+#define FILENAME        "data_log.csv"
 
 /** Pulse Code to indicate the pulse sender */
 typedef enum
