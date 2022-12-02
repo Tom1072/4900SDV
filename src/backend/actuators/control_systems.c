@@ -10,14 +10,15 @@
 #include "../includes/commons.h"
 #include "../includes/utils.h"
 
+/** 
+ * Actuator state machine and helper function
+ */
+
 #define SPEED_THRESHOLD_COEFFICIENT 0.6
 #define THROTTLE_DISENGAGED_COEFFICIENT 0.6
 #define FRICTION_COEFFICIENT 1.0
 #define BRAKE_COEFFICIENT 0.05
 
-/**
- * current controller
- */
 volatile int state = NOT_ACQUIRED;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
@@ -34,24 +35,20 @@ volatile char abs_processing = FALSE;
 volatile char acc_processing = FALSE;
 volatile char manual_processing = TRUE;
 
-// 100 km/h | a = -10 m/s^2 | -> -10m/s -> -36 km/h^2 => km/h
 /**
- * Assign brake and throttle so that the speed is changed to the new speed in 1s
- * @param desired_acceleration  (m/s^2)
+ * @brief Calculate and assign the throttle and brake level to achive 
+ * the given speed change in the duration of TIME_INTERVAL
+ * 
+ * @param desired_speed_changed (meter) The desired speed change in the duration of TIME_INTERVAL
  */
 void calculate_brake_and_throttle_levels(double acceleration) {
   double desired_speed_change_per_interval = acceleration * ((double)TIME_INTERVAL / 1000);
   double desired_speed_change = desired_speed_change_per_interval * 3.6; // km/h
-  // PRINT_ON_DEBUG("desired_speed_change_per_interval: %lf, desired_speed_change: %lf\n", desired_speed_change_per_interval, desired_speed_change);
-  // PRINT_ON_DEBUG("a: %lf, desired speed change: %lf\n", acceleration, desired_speed_change);
-  // 
   if (desired_speed_change == 0) return;
 
 
   double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
   if (desired_speed_change > 0) {
-    // PRINT_ON_DEBUG("SPEED MAINTAIN: %lf\n", speed_maintain_threshold);
-    // double speed_maintain_threshold = SPEED_THRESHOLD_COEFFICIENT * speed;
     throttle_level = round(desired_speed_change * 12 + speed_maintain_threshold);
     brake_level = 0;
   } else {
@@ -68,13 +65,7 @@ void calculate_brake_and_throttle_levels(double acceleration) {
       }
     }
     
-    /**
-      * max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12
-      * Delta S = max_speed_change * (1 + brake_level * BRAKE_COEFFICIENT)
-    */
-    // return max(0, speed - max_speed_change * (FRICTION_COEFFICIENT + brake_level * BRAKE_COEFFICIENT));
     double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12;
-    // brake_level = round((-desired_speed_change / max_speed_change - FRICTION_COEFFICIENT) / BRAKE_COEFFICIENT);
     brake_level = -round(((-desired_speed_change / max_speed_change) - FRICTION_COEFFICIENT) / BRAKE_COEFFICIENT);
     throttle_level = 0;
   }
@@ -82,8 +73,14 @@ void calculate_brake_and_throttle_levels(double acceleration) {
 }
 
 /**
- * Calculate speed based on brake_level or throttle_level
-*/
+ * @brief Calculate the car speed after the duration TIME_INTERVAL based on the given 
+ * brake and throttle level
+ * 
+ * @param speed The car speed to achive after duration TIME_INTERVAL
+ * @param brake_level The given brake level
+ * @param throttle_level The given throttle level
+ * @return double 
+ */
 double calculate_speed(double speed, int brake_level, int throttle_level) {
   if (brake_level > 0) {
     double max_speed_change = SPEED_THRESHOLD_COEFFICIENT * MAX_SPEED / 12; // MAX_SPEED with 0 throttle and 0 gas
@@ -103,11 +100,13 @@ double calculate_speed(double speed, int brake_level, int throttle_level) {
 }
 
 /**
- * Get the state with next highest priority which is waiting
-*/
+ * @brief Set the appropriate state for the actuator
+ * 
+ */
 void set_state()
 {
-  // There must be at exactly one state engaged because of the speed update loop that send back to the simulator
+  // There must be at exactly one state engaged because of the speed 
+  // update loop must run to send back to the simulator
   assert(abs_processing + acc_processing + manual_processing == 1);
 
   if (abs_processing)
@@ -138,40 +137,4 @@ void set_state()
   }
 
   PRINT_ON_DEBUG("CURRENT STATE: %s\n", state_name);
-}
-
-/**
- * Create a copy of Manual Driver input to avoid original being freed or changed
-*/
-void copy_man_input_payload(ManMessageInput *input, ManMessageInput *copied)
-{
-  copied->brake_level = input->brake_level;
-  copied->throttle_level = input->throttle_level;
-
-  brake_level = input->brake_level;
-  throttle_level = input->throttle_level;
-}
-
-/**
- * Create a copy of ACC input to avoid original being freed or changed
-*/
-void copy_acc_input_payload(AccMessageInput *input, AccMessageInput *copied)
-{
-  copied->brake_level = input->brake_level;
-  copied->throttle_level = input->throttle_level;
-  copied->distance = input->distance;
-  copied->desired_speed = input->desired_speed;
-  copied->current_speed = input->current_speed;
-
-  brake_level = input->brake_level;
-  throttle_level = input->brake_level;
-  speed = input->current_speed;
-}
-
-/**
- * Create a copy of ABS input to avoid original being freed or changed
-*/
-void copy_abs_input_payload(AbsMessageInput *input, AbsMessageInput *copied)
-{
-  copied->skid = input->skid;
 }

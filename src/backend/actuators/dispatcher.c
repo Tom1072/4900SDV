@@ -8,8 +8,12 @@
 #include "../includes/actuators.h"
 
 /**
- * Engage the actuators.
- * This function sends an ActuatorOutputPayload to Simulator
+ * @brief Send update to the Simulator
+ * 
+ * @param sim_coid The Simulator connection ID
+ * @param brake_level The updated brake level
+ * @param throttle_level The updated throttle level
+ * @param speed The updated car speed
  */
 void sendUpdates(int sim_coid, short brake_level, short throttle_level, double speed)
 {
@@ -18,5 +22,5 @@ void sendUpdates(int sim_coid, short brake_level, short throttle_level, double s
   msg->brake_level = brake_level;
   msg->throttle_level = throttle_level;
   msg->speed = speed;
-  MsgSendPulsePtr(sim_coid, -1, ACTUATORS, (void *)msg); // TODO: Enable this
+  MsgSendPulsePtr(sim_coid, -1, ACTUATORS, (void *)msg);
 }

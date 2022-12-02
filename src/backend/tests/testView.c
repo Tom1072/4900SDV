@@ -6,6 +6,11 @@
 #include "../includes/View.h"
 #include "../includes/commons.h"
 
+/**
+ * @brief Test the View module
+ * 
+ * @return char TRUE for success, FALSE for failure
+ */
 char test_view()
 {
 

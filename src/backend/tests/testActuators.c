@@ -14,6 +14,11 @@ static void mock_manual(int man_coid, float process_time, int throttle_level, in
 static void mock_acc(int acc_coid, float process_time, double distance, double desired_speed, double current_speed);
 static void mock_abs(int abs_coid, float process_time, char skidding);
 
+/**
+ * @brief Test the Actuators module
+ * 
+ * @return char TRUE for success, FALSE for failure
+ */
 char test_actuators()
 {
   printf("Testing actuators...\n");
@@ -47,7 +52,6 @@ static void *mocked_simulator()
 
 
   /** TEST */
-  /*
   printf("\n***\n");
   printf("ACC speed up -> Manual brake -> ABS -> Manual release -> ACC speed up\n");
 
@@ -72,10 +76,8 @@ static void *mocked_simulator()
   printf("Reseting\n");
   mock_manual(man_coid, 2, 0, 100);
   mock_manual(man_coid, 0, 0, 0);
-  */
 
   /** TEST */
-  /*
   printf("\n***\n");
   printf("ACC speed up x2 -> ACC slow down x2 -> ACC speed up x2 -> ACC slow down x2\n");
 
@@ -94,7 +96,6 @@ static void *mocked_simulator()
   printf("Reseting\n");
   mock_manual(man_coid, 2, 0, 100);
   mock_manual(man_coid, 0, 0, 0);
-  */
 
   /** TEST */
   printf("\n***\n");

@@ -14,6 +14,11 @@
 static void mocked_simulator_receiver();
 static void mocked_simulator_sender();
 
+/**
+ * @brief Test the Comm module
+ * 
+ * @return char TRUE for success, FALSE for failure
+ */
 char test_comm()
 {
   pthread_t dispatcher_thread;
@@ -56,6 +61,9 @@ char test_comm()
   return TRUE;
 }
 
+/** 
+ * @brief Mocked simulator for receiving pulses
+*/
 static void mocked_simulator_receiver()
 {
   // Declare variables
@@ -129,11 +137,6 @@ static void mocked_simulator_receiver()
           printf("MOCKED_SIMULATOR:   - data.brake_data.brake_level=%d\n", data.brake_data.brake_level);
           printf("MOCKED_SIMULATOR:   - data.brake_data.skid=%d\n", data.brake_data.skid_on);
           break;
-        case ACC_ENGAGE:
-          printf("MOCKED_SIMULATOR: Received a ACC_ENGAGE command\n");
-          printf("MOCKED_SIMULATOR:   - command=%d\n", command);
-          printf("MOCKED_SIMULATOR:   - data.acc_engage=%d\n", data.acc_engage);
-          break;
         case ACC_SPEED:
           printf("MOCKED_SIMULATOR: Received a ACC_SPEED command\n");
           printf("MOCKED_SIMULATOR:   - command=%d\n", command);
@@ -160,6 +163,9 @@ static void mocked_simulator_receiver()
   name_detach(attach, 0);
 }
 
+/** 
+ * @brief Mocked simulator for sending update pulses
+*/
 static void mocked_simulator_sender()
 {
   // Declare variables needed
