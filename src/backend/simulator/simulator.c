@@ -17,6 +17,7 @@
 #include "../includes/simulator.h"
 #include "../includes/CommListener.h"
 #include "../includes/actuators.h"
+#include "../includes/utils.h"
 
 /**
  * Simulate the environment: other car moving closer, skidding, etc.
@@ -36,6 +37,7 @@ int init(void){
   Environment             car_env;
   pthread_t               distance_simulator, skid_simulator;
   simulatorRequest_t      abs_request, acc_request;
+  FILE                    *log;
 
   // initialize the sensor information to 0
 
@@ -67,6 +69,9 @@ int init(void){
   pthread_create( &skid_simulator, NULL, (void *)simulate_skid_stop, (void *)&abs_request );
   //the server should keep receiving, processing and replying to messages
 
+  // open file
+  log = fopen(FILENAME, "w+");
+
   while(1)
   {
     //code to receive message or pulse from client
@@ -84,6 +89,7 @@ int init(void){
         case _PULSE_CODE_DISCONNECT:
         {
           PRINT_ON_DEBUG("****Simulator Client is gone\n");
+          fclose(log);
           ConnectDetach( message.scoid );
           // Kill the distance and skid simulators
           int abs_return, acc_return, man_return, com_return;
@@ -124,11 +130,14 @@ int init(void){
           Environment* new_env_t = ( Environment * ) malloc(sizeof(Environment) );
           // fill the data
           copy_updates( &car_env, new_env_t );
+
           // Send updates to display
           if( MsgSendPulsePtr( coid_comm, SIMULATOR_PRIO, SIMULATOR, ( void * )new_env_t ) == -1 )
           {
             perror("***Simulator: MsgSendPulsePtr()");
           }
+          // write to log file
+          write_data(log, &car_env);
           break;
         }
         case COMM:
@@ -153,6 +162,7 @@ int init(void){
               copy_updates( &car_env, new_env_t );
 
               PRINT_ON_DEBUG("***Simulator SPAWN: Env vars: dist = %.2f, obj = %d\n", car_env.distance, car_env.object);
+
               // Send updates to display
               if( MsgSendPulsePtr( coid_comm, SIMULATOR_PRIO, SIMULATOR, ( void * )new_env_t ) == -1 )
               {
