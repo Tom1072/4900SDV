@@ -24,8 +24,8 @@ while getopts ":hirc" option; do
       i) # install and build executable
          case $OSTYPE in
          "msys")
-            echo "It's Windows"
-            python3 -m venv ./venv
+            echo "Installing for Windows"
+            python -m venv ./venv
             source ./venv/Scripts/activate
             pip3 install -r ./src/frontend/requirements.txt
             pushd src/frontend/
@@ -34,7 +34,7 @@ while getopts ":hirc" option; do
             deactivate 
             ;;
          *)
-            echo "It's Linux/MacOS"
+            echo "Installing for Linux/MacOS"
             python3 -m venv ./venv
             source ./venv/bin/activate
             pip3 install -r ./src/frontend/requirements.txt
