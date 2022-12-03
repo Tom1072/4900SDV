@@ -2,7 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 from collections.abc import Iterable
 
-col_names = ["interval", "gas", "brake","speed", "object", "object_speed","distance", "skid"]
+col_names = ["time, ms", "gas", "brake","speed, km/h", "object", "object_speed, km/h","distance, m", "skid"]
 col_types = [int, int, int, float, lambda x: bool(int(x)), float, lambda d: float(d), lambda x: bool(int(x))]
 INTERVAL = 50
 
@@ -121,11 +121,11 @@ class CSVParser:
         self.graph_controller.display_graph(self.data[-1][0])
     
 
-    def add_graph(self, y_type: str, x_type="interval"):
+    def add_graph(self, y_type: str, x_type="time, ms"):
         '''
         Takes a pair of data type to add a graph on x and y axis.
         Default of x axis will be "interval".
-        E.g. y_axis = "gas" and x_axis = "interval" 
+        E.g. y_axis = "gas" and x_axis = "time, ms" 
         '''
         self.graph_controller.add_graph(x_type, y_type, self.data)
 
@@ -133,7 +133,7 @@ class CSVParser:
 def plot_data(filename, data_names: list[str]):
     """
     Plot the data in the filename with a list of subplot data names
-    All names: ["interval", "gas", "brake","speed", "object", "object_speed","distance", "skid"]
+    All names: ["time, ms", "gas", "brake","speed, km/h", "object", "object_speed, km/h","distance, m", "skid"]
     """
     csv_reader = CSVParser(filename)
     if not csv_reader.data:
@@ -148,7 +148,7 @@ def plot_data(filename, data_names: list[str]):
 if __name__ == "__main__":
     # Put all graphs want to plot here
     # plot_data("csv_files/ACC_Manual_preemption.csv", ["gas", "brake", "speed"])
-    plot_data("csv_files/acc_obj.csv", ["gas", "speed"])
+    plot_data("csv_files/data_log.csv", ["gas", "brake", "speed, km/h", "distance, m", "object_speed, km/h"])
 
 
     plt.show() # Don't modify this and please do only one show
