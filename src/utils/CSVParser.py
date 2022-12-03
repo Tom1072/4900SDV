@@ -133,7 +133,7 @@ class CSVParser:
 def plot_data(filename, data_names: list[str]):
     """
     Plot the data in the filename with a list of subplot data names
-    All names: ["time, ms", "gas", "brake","speed, km/h", "object", "object_speed","distance, m", "skid"]
+    All names: ["time, ms", "gas", "brake","speed, km/h", "object", "object_speed, km/h","distance, m", "skid"]
     """
     csv_reader = CSVParser(filename)
     if not csv_reader.data:
