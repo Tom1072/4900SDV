@@ -14,7 +14,7 @@
  * Actuator state machine and helper function
  */
 
-#define SPEED_THRESHOLD_COEFFICIENT 0.6
+#define SPEED_THRESHOLD_COEFFICIENT 0.3
 #define THROTTLE_DISENGAGED_COEFFICIENT 0.6
 #define FRICTION_COEFFICIENT 1.0
 #define BRAKE_COEFFICIENT 0.05
