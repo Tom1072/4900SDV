@@ -1,18 +1,24 @@
-# README
+# Software Defined Vehicle Safety System
 
 Please view through [README on Notion](https://tom107.notion.site/README-c230f6c08977413caaf63ca191d88f8c)  or `README.pdf` for better image formatting and syntax highlighting  
 
-# Demo Video
+## Demo Video
 
 [COMP4900 Project Team 12 SDV Demo](https://www.youtube.com/watch?v=Rbw_1RU8jmo)
 
-# Contributions of participants:
+## Participants
+
+- Kateryna Besida: keterynabesida@cmail.carleton.ca
+- Tom Lam: tomlam@cmail.carleton.ca
+- Minh Thang Cao: minhthangcao@cmail.carleton.ca
+
+## Contributions of participants:
 
 - **Code**: Participated equally in algorithm development (link to the repo)
 - **Report**: Equally contributed to description of algorithm, system design and results
 - **Demo**: Have equal share in creation of demo presentation
 
-# Directory structure
+## Directory structure
 
 ```
 ❯ tree --gitignore
@@ -66,9 +72,9 @@ Please view through [README on Notion](https://tom107.notion.site/README-c230f6c
 12 directories, 33 files
 ```
 
-# Setup instruction
+## Setup instruction
 
-Please contact us (tomlam@cmail.carleton.ca) for any problem with your setup
+Please contact us for any problem with your setup
 
 1. Prerequisites:
     - Linux / MacOS:
@@ -172,7 +178,7 @@ Please contact us (tomlam@cmail.carleton.ca) for any problem with your setup
     
     The GUI should pop up on your host computer like this. It will say “**Server NOT connected**” to reflect that our backend hasn’t run
     
-    ![Screenshot from 2022-12-03 18-57-41.png](README%20c230f6c08977413caaf63ca191d88f8c/Screenshot_from_2022-12-03_18-57-41.png)
+    ![Screenshot from 2022-12-03 18-57-41.png](Software%20Defined%20Vehicle%20Safety%20System%20c230f6c08977413caaf63ca191d88f8c/Screenshot_from_2022-12-03_18-57-41.png)
     
     - Tips: If the command failed and printed this error, try swapping the `LISTENER_IP` with `DISPATCHER_IP` and try again.
         
@@ -190,21 +196,24 @@ Please contact us (tomlam@cmail.carleton.ca) for any problem with your setup
         - Replace `VIEW_SERVER_ADRESS` with the ip from `LISTENER_IP`  from above
         - The resulting `src/backend/includes/commons.h`  should look something like this
             
-            ![Screenshot 2022-12-03 at 18.09.26.png](README%20c230f6c08977413caaf63ca191d88f8c/Screenshot_2022-12-03_at_18.09.26.png)
+            ![Screenshot 2022-12-03 at 18.09.26.png](Software%20Defined%20Vehicle%20Safety%20System%20c230f6c08977413caaf63ca191d88f8c/Screenshot_2022-12-03_at_18.09.26.png)
             
 6. Build and run the SDV from the Momentics IDE
     
     Click on the “Launch in ‘Run’ mode” green play icon
+    
+    ![Screenshot 2022-12-03 at 19.17.24.png](Software%20Defined%20Vehicle%20Safety%20System%20c230f6c08977413caaf63ca191d88f8c/Screenshot_2022-12-03_at_19.17.24.png)
+    
     Once the backend runs, the frontend should will show **Server connected**
     
-    ![Screenshot from 2022-12-03 19-12-07.png](README%20c230f6c08977413caaf63ca191d88f8c/Screenshot_from_2022-12-03_19-12-07.png)
+    ![Screenshot from 2022-12-03 19-12-07.png](Software%20Defined%20Vehicle%20Safety%20System%20c230f6c08977413caaf63ca191d88f8c/Screenshot_from_2022-12-03_19-12-07.png)
     
     If the frontend still show ******Server NOT connected******, try swapping the `COMM_SERVER_ADDRESS` ip with `VIEW_SERVER_ADDRESS` ip and try running backend again
     
 
-# Graphical User Interface user manual:
+## Graphical User Interface user manual:
 
-![Untitled](README%20c230f6c08977413caaf63ca191d88f8c/Untitled.png)
+![Untitled](Software%20Defined%20Vehicle%20Safety%20System%20c230f6c08977413caaf63ca191d88f8c/Untitled.png)
 
 - If **“Server NOT Connected”** - SVD is not running.
 - If **“Server Connected”** - SDV is running.
@@ -221,9 +230,9 @@ Please contact us (tomlam@cmail.carleton.ca) for any problem with your setup
 - To simulate the slippery road conditions, select the “Skid ON” radio button with brake bar value other than 0.
 - To disengage the slippery conditions, the radio button “Skid Off” must be selected and **“Brake”** button pressed.
 
-# Produce graphs from SDV output user manual
+## Produce graphs from SDV output user manual
 
-![Untitled](README%20c230f6c08977413caaf63ca191d88f8c/Untitled%201.png)
+![Untitled](Software%20Defined%20Vehicle%20Safety%20System%20c230f6c08977413caaf63ca191d88f8c/Untitled%201.png)
 
 To see the graph of the saved simulation:
 
@@ -245,10 +254,10 @@ To see the graph of the saved simulation:
 4. You will see the default graph.
 5. If you want to see the different graphs, open the CSVParser.py file and change desired graphs output on line 151 to the choice available from line 136.
     
-    ![Line 136](README%20c230f6c08977413caaf63ca191d88f8c/Screenshot_2022-12-06_at_13.15.20.png)
+    ![Line 136](Software%20Defined%20Vehicle%20Safety%20System%20c230f6c08977413caaf63ca191d88f8c/Screenshot_2022-12-06_at_13.15.20.png)
     
     Line 136
     
-    ![Line 151](README%20c230f6c08977413caaf63ca191d88f8c/Screenshot_2022-12-06_at_13.14.21.png)
+    ![Line 151](Software%20Defined%20Vehicle%20Safety%20System%20c230f6c08977413caaf63ca191d88f8c/Screenshot_2022-12-06_at_13.14.21.png)
     
     Line 151
